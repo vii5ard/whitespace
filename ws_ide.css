@@ -1,0 +1,99 @@
+body, input, textarea {
+  font-size: 12px;
+  font-family: monospace; 
+}
+.inputArea {
+  min-width: 600px;
+  min-height: 100px;
+  tab-size: 4;
+  padding: 0px 0px 0px 0px;
+  word-break: none;
+  white-space: pre;
+}
+
+.inputBox {
+  z-index: 100;
+  background: transparent;
+  outline: none;
+  border: none;
+}
+
+textarea.inputBox {
+  resize: none;
+}
+
+.inputOverlay {
+  position: relative;
+  top: -100px;
+  z-index: -100;
+  pointer-events: none;
+}
+
+.scrollable {
+  width: 600px;
+  height: 250px;
+  overflow-x: hidden;
+  border: 1px solid;
+}
+
+.inputCotainer {
+  owerflow: hidden;
+}
+.inputOverlay .spaces {
+  background-color: #ff9999;
+}
+
+.inputOverlay .tabs {
+  background-color: #9999ff;
+}
+
+.btn {
+  display: inline-block;
+}
+.btn a {
+  cursor: default;
+}
+
+.btn a {
+  color: black;
+  text-decoration: none;
+}
+
+.activeTab {
+  border-top: 1px solid;
+  border-left: 1px solid;
+  border-right: 1px solid;
+  border-bottom: none;
+}
+
+.outputArea {
+  overflow-y: scroll;
+  overflow-x: hidden;
+  border: 1px solid;
+  width: 600px;
+  height: 200px;
+}
+
+.outputText {
+  white-space: pre;
+  word-break: none;
+}
+.tabContent {
+  display: none;
+}
+.tabLabels {
+  margin-top: 10px;
+  position: relative;
+}
+.allTabs {
+  border: 1px solid;
+  display: inline-block;
+}
+
+.userInput {
+  border: none;
+  outline: none;
+  margin: 0px;
+  padding: 0px;
+  width: 100%;
+}
