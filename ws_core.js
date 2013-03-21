@@ -215,7 +215,7 @@ var debugToken = '';
     this.getAsm = asmWithValueParam;
   },
     
-  WsSwapTop: function(env) {
+  WsSwapTop: function() {
     this.mnemoCode = 'swap';
     this.run = function (env) {
       var last = env.register.SP - 1;
@@ -369,7 +369,7 @@ var debugToken = '';
     this.getAsm = asmWithNoParam;
   },
 
-  WsCall: function(env) {
+  WsCall: function() {
     this.mnemoCode = 'call';
     this.hasParam = true;
     this.run = function (env) {
@@ -429,7 +429,7 @@ var debugToken = '';
    this.getAsm = asmWithLabelParam;
   },
 
-  WsReturn: function(env) {
+  WsReturn: function() {
     this.mnemoCode = 'ret';
     this.run = function(env) {
       env.closeFrame();
