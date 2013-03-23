@@ -2,40 +2,46 @@
   {
     "name":"Hello World",
     "file":"example/hworld.ws",
-    "author": "",
-    "source": "http://compsoc.dur.ac.uk/whitespace/examples.php"
+    "author": "?",
+    "origin": "http://compsoc.dur.ac.uk/whitespace/examples.php"
+  },
+  {
+    "name":"Hello User",
+    "file":"example/name.ws",
+    "author": "?",
+    "origin": "http://compsoc.dur.ac.uk/whitespace/name.ws"
   },
   {
     "name":"Count",
     "file":"example/count.ws",
-    "author": "",
-    "source": "https://github.com/hostilefork/whitespacers/tree/master/examples/count.ws"
+    "author": "?",
+    "origin": "https://github.com/hostilefork/whitespacers/tree/master/examples/count.ws"
   },
   {
     "name":"Quine v1",
     "file":"example/quine.ws",
     "author": "Benjamin Lerman",
-    "source": "http://compsoc.dur.ac.uk/whitespace/contrib.php"
+    "origin": "http://compsoc.dur.ac.uk/whitespace/contrib.php"
   },
   {
     "name":"Fibonacci",
     "file":"example/fibonacci.ws",
-    "source":"https://github.com/hostilefork/whitespacers/blob/master/examples/fibonacci.ws"
+    "origin":"https://github.com/hostilefork/whitespacers/blob/master/examples/fibonacci.ws"
     
   },
   {
     "name":"Calculator",
     "file":"example/calc.ws",
-    "source":"https://github.com/hostilefork/whitespacers/blob/master/examples/calc.ws"
+    "origin":"https://github.com/hostilefork/whitespacers/blob/master/examples/calc.ws"
   },
   {
     "name":"Hanoi Towers",
     "file":"example/hanoi.ws",
-    "source": "https://github.com/hostilefork/whitespacers/blob/master/examples/hanoi.ws"
+    "origin": "https://github.com/hostilefork/whitespacers/blob/master/examples/hanoi.ws"
   },
   {
     "name":"Quine v2",
     "file":"example/quine-2.ws",
-    "source:":"http://compsoc.dur.ac.uk/whitespace/quine-2.ws"
+    "origin":"http://compsoc.dur.ac.uk/whitespace/quine-2.ws"
   }
 ]}

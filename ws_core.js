@@ -449,7 +449,9 @@ var debugToken = '';
   WsReadChar: function() {
     this.mnemoCode = 'readchar';
     this.run = function (env) {
-      env.readChar();
+      var ch = env.readChar();
+      var addr = env.stackPop();
+      env.heap[addr] = ch.charCodeAt(0);
       env.register.IP++;
     };
     this.getAsm = asmWithNoParam;

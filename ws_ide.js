@@ -44,11 +44,19 @@ ee.wsIde = (function () {
     output.html(output.html() + str);
     output.animate({scrollTop:output[0].scrollHeight},0);
   };
- 
+
+  var readChar = function() {
+    if (ee.wsIde.inputStreamPtr < ee.wsIde.inputStream.length) {
+      return ee.wsIde.inputStream[ee.wsIde.inputStreamPtr++];
+    } else {
+      throw "IOWait";
+    }
+  }
 
   var self = {
     examples: [],
     inputStream: '',
+    inputStreamPtr: 0,
     highlightSource: function(src) {
       return src.replace(/[^\t\n ]/g, '#')
                 .replace(/([ ]+)/g, '<span class="spaces">\$1</span>')
@@ -72,6 +80,8 @@ ee.wsIde = (function () {
     initEnv: function () {
       var env = ws.env();
       env.print = printOutput;
+      env.readChar = readChar;
+      ee.wsIde.env = env;
       return env;
     },
 
@@ -103,12 +113,21 @@ ee.wsIde = (function () {
     },
 
     runProgram: function() {
-      try {
-        var env = ee.wsIde.initEnv();
-        var src = programSource();
-        env.runProgram(ws.compile(src));
+      ee.wsIde.initEnv();
+      var src = programSource();
+      ee.wsIde.program = ws.compile(src);
+      ee.wsIde.continueRun();
+    },
+
+    continueRun: function() {
+     try {
+        ee.wsIde.env.runProgram(ee.wsIde.program);
       } catch (err) {
-        if (err != "Break") throw err;
+        if (err == "IOWait") {
+          setTimeout(ee.wsIde.continueRun, 100);
+        } else if (err != "Break") {
+          throw err;
+        }
       }
     },
 
