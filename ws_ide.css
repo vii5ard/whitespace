@@ -87,6 +87,12 @@ textarea.inputBox {
   white-space: pre;
   word-break: none;
 }
+
+.consoleText {
+  white-space: pre;
+  word-brake: none;
+}
+
 .tabContent {
   display: none;
 }

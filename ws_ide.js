@@ -2,8 +2,9 @@ var ee;
 ee = ee || {};
 var console = (function () {
   var writeTab = function (msg) {
-    var tab = $('#consoleArea');
-    tab.html(tab.html() + msg + '\n');
+    var consoleArea = $('#consoleArea');
+    consoleArea.html(consoleArea.html() + msg + '\n');
+    consoleArea.scrollTop(consoleArea[0].scrollHeight);
   };
   return {
     log: writeTab,
@@ -40,17 +41,18 @@ ee.wsIde = (function () {
   };
 
   var printOutput = function(str) {
-    var output = $('#printArea');
+    var printArea = $('#printArea');
     var arr = str.split('\n');
-    var last = output.find('span:last');
+    var last = printArea.find('span:last');
     for (var ln in arr) {
       if (ln != 0) {
         last.after('<br><span></span>');
-        last = output.find('span:last');
+        last = printArea.find('span:last');
       }
       last.html(last.html() + arr[ln]);
     }
-    output.animate({scrollTop:output[0].scrollHeight},0);
+    outputArea = printArea.closest('.outputArea');
+    outputArea.scrollTop(outputArea[0].scrollHeight);
   };
 
   var readChar = function() {
