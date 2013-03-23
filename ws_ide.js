@@ -41,7 +41,15 @@ ee.wsIde = (function () {
 
   var printOutput = function(str) {
     var output = $('#printArea');
-    output.html(output.html() + str);
+    var arr = str.split('\n');
+    var last = output.find('span:last');
+    for (var ln in arr) {
+      if (ln != 0) {
+        last.after('<br><span></span>');
+        last = output.find('span:last');
+      }
+      last.html(last.html() + arr[ln]);
+    }
     output.animate({scrollTop:output[0].scrollHeight},0);
   };
 

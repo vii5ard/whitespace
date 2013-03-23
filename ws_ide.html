@@ -40,10 +40,12 @@
     <div id="printTab" class="tabContent">
      <span class="btn"><a href="javascript:void(0);" onClick="$('#printArea').html(''); return false;" >[Clear]</a></span>
      <div class="outputArea" onClick="$(this).find('input[type=text]').focus();">
-      <div id="printArea" class="outputText"></div>
-      <form onsubmit="return ee.wsIde.handleUserInput('#userInput');">
-        <input type="text" id="userInput" class="userInput"></intput>
-      </form>
+      <div id="printArea" class="outputText">
+        <span></span>
+        <form onsubmit="return ee.wsIde.handleUserInput('#userInput');">
+          <input type="text" id="userInput" class="userInput"></intput>
+        </form>
+      </div>
      </div>
     </div>
     <div id="consoleTab" class="tabContent">

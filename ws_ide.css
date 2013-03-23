@@ -75,6 +75,15 @@ textarea.inputBox {
 }
 
 .outputText {
+  font-size: 0;
+}
+
+.outputText form {
+  display: inline-block;
+}
+
+.outputText span{
+  font-size: 12px;
   white-space: pre;
   word-break: none;
 }
