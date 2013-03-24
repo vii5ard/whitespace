@@ -243,7 +243,6 @@ var debugToken = '';
    */
 
   WsPush: function() {
-    this.mnemoCode = 'push';
     this.hasParam = true;
     this.run = function (env) {
       env.stackPush(this.param.value);
@@ -253,7 +252,6 @@ var debugToken = '';
   },
 
   WsDouble: function() {
-    this.mnemoCode = 'dup';
     this.run = function(env) {
       env.stackPush(env.stack[env.register.SP-1]);
       env.register.IP++;
@@ -262,7 +260,6 @@ var debugToken = '';
   },
 
   WsCopyNth: function() {
-    this.mnemoCode = 'copy';
     this.hasParam = true;
     this.run = function (env) {
       var actualPos = this.register.SP - this.param.value;
@@ -273,7 +270,6 @@ var debugToken = '';
   },
     
   WsSwapTop: function() {
-    this.mnemoCode = 'swap';
     this.run = function (env) {
       var last = env.register.SP - 1;
       var tmp = env.stack[last];
@@ -285,7 +281,6 @@ var debugToken = '';
   },
 
   WsDropTop: function() {
-    this.mnemoCode = 'discard';
     this.run = function (env) {
       env.register.SP--;
       env.register.IP++;
@@ -294,7 +289,6 @@ var debugToken = '';
   },
 
   WsSlide: function() {
-    this.mnemoCode = 'slide';
     this.hasParam = true;
     this.run = function(env) {
       var top = env.stackPop();
@@ -310,7 +304,6 @@ var debugToken = '';
    */
     
   WsAddition: function() {
-    this.mnemoCode = 'add';
     this.run = function(env) {
       var b = env.stackPop();
       var a = env.stackPop();
@@ -321,7 +314,6 @@ var debugToken = '';
   },
 
   WsSubtraction: function() {
-    this.mnemoCode = 'sub';
     this.run = function(env) {
       var b = env.stackPop();
       var a = env.stackPop();
@@ -332,7 +324,6 @@ var debugToken = '';
   },
 
   WsMultiplication: function() {
-    this.mnemoCode = 'mul';
     this.run = function(env) {
       var b = env.stackPop();
       var a = env.stackPop();
@@ -343,7 +334,6 @@ var debugToken = '';
   },
 
   WsIntDivision: function() {
-    this.mnemoCode = 'div';
     this.run = function (env) {
       var b = env.stackPop();
       var a = env.stackPop();
@@ -354,7 +344,6 @@ var debugToken = '';
   },
 
   WsModulo: function() {
-    this.mnemoCode = 'mod';
     this.run = function(env) {
      var b = env.stackPop();
      var a = env.stackPop();
@@ -368,7 +357,6 @@ var debugToken = '';
    * Heap operation object constructors
    */
   WsHeapStore: function() {
-    this.mnemoCode = 'store';
     this.run = function (env) {
       var value = env.stackPop();
       var addr = env.stackPop();
@@ -379,7 +367,6 @@ var debugToken = '';
   },
 
   WsHeapRetrieve: function() {
-    this.mnemoCode = 'retrieve';
     this.run = function(env) {
       var addr = env.stackPop();
       env.stackPush(env.heap[addr]);
@@ -399,7 +386,6 @@ var debugToken = '';
   },
 
   WsEndProgram: function() {
-    this.mnemoCode = 'exit';
     this.run = function(env) {
       throw "END";
     };
@@ -407,7 +393,6 @@ var debugToken = '';
   },
 
   WsPrintNum: function() {
-    this.mnemoCode = 'outnum';
     this.run = function(env) {
       var num = env.stackPop();
       env.print(num);
@@ -417,7 +402,6 @@ var debugToken = '';
   },
 
   WsPrintChar: function() {
-    this.mnemoCode = 'outchar';
     this.run = function(env) {
       var ch = env.stackPop();
       env.print(String.fromCharCode(ch));
@@ -427,7 +411,6 @@ var debugToken = '';
   },
 
   WsCall: function() {
-    this.mnemoCode = 'call';
     this.hasParam = true;
     this.run = function (env) {
       env.createFrame();
@@ -440,7 +423,6 @@ var debugToken = '';
   },
 
   WsJump: function() {
-    this.mnemoCode = 'jump';
     this.hasParam=true;
     this.run = function(env) {
       env.register.IP = this.nextI;
@@ -452,7 +434,6 @@ var debugToken = '';
   },
 
   WsJumpZ: function() {
-    this.mnemoCode = 'jz';
     this.hasParam=true;
     this.run = function(env) {
       var top = env.stackPop();
@@ -469,7 +450,6 @@ var debugToken = '';
   },
 
   WsJumpNeg: function() {
-    this.mnemoCode = 'jn';
     this.useParamToken = true;
     this.hasParam=true;
     this.run = function (env) {
@@ -487,7 +467,6 @@ var debugToken = '';
   },
 
   WsReturn: function() {
-    this.mnemoCode = 'ret';
     this.run = function(env) {
       env.closeFrame();
     }
@@ -495,7 +474,6 @@ var debugToken = '';
   },
 
   WsReadNum: function() {
-    this.mnemoCode = 'readnum';
     this.run = function (env) {
       env.readNum();
       env.register.IP++;
@@ -504,7 +482,6 @@ var debugToken = '';
   },
 
   WsReadChar: function() {
-    this.mnemoCode = 'readchar';
     this.run = function (env) {
       var ch = env.readChar();
       var addr = env.stackPop();
@@ -512,36 +489,34 @@ var debugToken = '';
       env.register.IP++;
     };
     this.getAsm = asmWithNoParam;
-  },
-  getKeywords: function() {
-    return {
-      '  ':       ws.WsPush,
-      ' \n ':     ws.WsDouble,
-      ' \t ':     ws.WsCopyNth,
-      ' \n\t':    ws.WsSwapTop,
-      ' \n\n':    ws.WsDropTop,
-      ' \t\n':    ws.WsSlide,
-      '\t   ':    ws.WsAddition,
-      '\t  \t':   ws.WsSubtraction,
-      '\t  \n':   ws.WsMultiplication,
-      '\t \t ':   ws.WsIntDivision,
-      '\t \t\t':  ws.WsModulo,
-      '\t\t ':    ws.WsHeapStore,
-      '\t\t\t':   ws.WsHeapRetrieve,
-      '\n  ':     ws.WsLabel,
-      '\n \t':    ws.WsCall,
-      '\n \n':    ws.WsJump,
-      '\n\t ':    ws.WsJumpZ,
-      '\n\t\t':   ws.WsJumpNeg,
-      '\n\t\n':   ws.WsReturn,
-      '\n\n\n':   ws.WsEndProgram,
-      '\t\n  ':   ws.WsPrintChar,
-      '\t\n \t':  ws.WsPrintNum,
-      '\t\n\t ':  ws.WsReadChar,
-      '\t\n\t\t': ws.WsReadNum
-    };
   }
 }
+ws.keywords = [
+    { ws: '  ',       mnemo: 'push',     constr: ws.WsPush           },
+    { ws: ' \n ',     mnemo: 'dup',      constr: ws.WsDouble         },
+    { ws: ' \t ',     mnemo: 'copy',     constr: ws.WsCopyNth        },
+    { ws: ' \n\t',    mnemo: 'swap',     constr: ws.WsSwapTop        },
+    { ws: ' \n\n',    mnemo: 'discard',  constr: ws.WsDropTop        },
+    { ws: ' \t\n',    mnemo: 'slide',    constr: ws.WsSlide          },
+    { ws: '\t   ',    mnemo: 'add',      constr: ws.WsAddition       },
+    { ws: '\t  \t',   mnemo: 'sub',      constr: ws.WsSubtraction    },
+    { ws: '\t  \n',   mnemo: 'mul',      constr: ws.WsMultiplication },
+    { ws: '\t \t ',   mnemo: 'div',      constr: ws.WsIntDivision    },
+    { ws: '\t \t\t',  mnemo: 'mod',      constr: ws.WsModulo         },
+    { ws: '\t\t ',    mnemo: 'store',    constr: ws.WsHeapStore      },
+    { ws: '\t\t\t',   mnemo: 'retrieve', constr: ws.WsHeapRetrieve   },
+    { ws: '\n  ',     mnemo: 'label',    constr: ws.WsLabel          },
+    { ws: '\n \t',    mnemo: 'call',     constr: ws.WsCall           },
+    { ws: '\n \n',    mnemo: 'jmp',      constr: ws.WsJump           },
+    { ws: '\n\t ',    mnemo: 'jz',       constr: ws.WsJumpZ          },
+    { ws: '\n\t\t',   mnemo: 'jn',       constr: ws.WsJumpNeg        },
+    { ws: '\n\t\n',   mnemo: 'ret',      constr: ws.WsReturn         },
+    { ws: '\n\n\n',   mnemo: 'end',      constr: ws.WsEndProgram     },
+    { ws: '\t\n  ',   mnemo: 'printc',   constr: ws.WsPrintChar      },
+    { ws: '\t\n \t',  mnemo: 'printi',   constr: ws.WsPrintNum       },
+    { ws: '\t\n\t ',  mnemo: 'readc',    constr: ws.WsReadChar       },
+    { ws: '\t\n\t\t', mnemo: 'readi',    constr: ws.WsReadNum        }
+  ];
 
   var InstParser = function() {
     this.instFn = null;
@@ -563,11 +538,11 @@ var debugToken = '';
  
   var instParser = new InstParser();
 
-  var keywords = ws.getKeywords();
-  for (keyword in keywords) {
-    instParser.addInstruction(keyword, keywords[keyword]);
+  for (var i in ws.keywords) {
+    var keyword = ws.keywords[i];
+    var constr = keyword.constr;
+    constr.prototype.mnemoCode = keyword.mnemo;
+    instParser.addInstruction(keyword.ws, constr);
   }
-
-
 
 })();
