@@ -73,6 +73,69 @@
   var asmWithNoParam = function () {
     return asmObject(this.labels, this.mnemoCode, null);
   }
+
+  var labelTransformer = function () {
+    return {
+      length: 0,
+      labels: {},
+      getLabel: function (wsLabel) {
+        if (wsLabel in this.labels) {
+          return this.labels[wsLabel];
+        } else {
+          var label = "label_" + this.length++;
+          this.labels[wsLabel] = label;
+          return label;
+        }
+      }
+    }
+  }
+
+  var programTree = function (fullSource) {
+    return {
+      source: fullSource,
+      parser: instParser,
+      tokenizer: SourceTokenizer(fullSource),
+      programStack: [],
+      labels: [],
+      getAsm: function () {
+        var asm = [];
+        for (var i in this.programStack) {
+          var inst = this.programStack[i];
+          asm.push(inst.getAsm());
+        }
+        return asm;
+      },
+      getAsmSrc: function () {
+        var src = "";
+        var asm = this.getAsm();
+        var labler = labelTransformer();
+        var maxLabelLen = 0;
+        for (var i in asm) {
+          var ln = asm[i];
+          for (l in ln.labels) {
+            var wsLabel = ln.labels[l];
+            var label = labler.getLabel(wsLabel);
+            src += label + ":\n";
+            maxLabelLen = Math.max(maxLabelLen, label.length);
+          }
+          src += "\t" + ln.mnemo;
+          if (ln.param.label != null) {
+            src += " " + labler.getLabel(ln.param.label);
+          }
+          if (ln.param.val != null) {
+            src += " " + ln.param.val;
+          }
+          src += "\n";
+        }
+        var tabStr = "";
+        if (maxLabelLen) {
+          while (maxLabelLen + 1 >= tabStr.length) tabStr += " ";
+        }
+       
+        return src.replace(/\t/g, tabStr);
+      }
+    };
+  }
  
    /*
    * Public interface
@@ -131,13 +194,7 @@ ws = {
   },
 
   compile: function (fullSource) {
-    var compiler = {
-      source: fullSource,
-      parser: instParser,
-      tokenizer: SourceTokenizer(fullSource),
-      programStack: [],
-      labels: []
-    };
+    var compiler = programTree(fullSource);
 
 var debugToken = '';
     while (compiler.tokenizer.hasMore()) {
