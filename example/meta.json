@@ -6,6 +6,12 @@
     "origin": "http://compsoc.dur.ac.uk/whitespace/examples.php"
   },
   {
+    "name":"Hello Nerd",
+    "file":"example/nerd.ws",
+    "author":"Vii5ard",
+    "origin":"example/nerd.ws"
+  },
+  {
     "name":"Hello User",
     "file":"example/name.ws",
     "author": "?",

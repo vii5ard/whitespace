@@ -63,10 +63,7 @@
   }
 
   var createLabel = function(number) {
-    var label = ws_util.getWsUnsignedNumber(number);
-
-    label += '\n';
-    return label;
+    return ws_util.getWsUnsignedNumber(number);
   }
 
   var getOptimalLabels = function(labelCounter) {
@@ -81,7 +78,7 @@
 
     var optimalLabels = [];
     for (var i in labelData) {
-      optimalLabels[labelData[i].label] = createLabel(i+1);
+      optimalLabels[labelData[i].label] = createLabel(i);
     }
 
     return optimalLabels;
@@ -313,7 +310,7 @@
     });
 
     for (var i in instSet) {
-      instSet[i].labels.push(createLabel(i+1));
+      instSet[i].labels.push(createLabel(i));
     }
   }
 

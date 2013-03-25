@@ -74,22 +74,6 @@
     return asmObject(this.labels, this.mnemoCode, null);
   }
 
-  var labelTransformer = function () {
-    return {
-      length: 0,
-      labels: {},
-      getLabel: function (wsLabel) {
-        if (wsLabel in this.labels) {
-          return this.labels[wsLabel];
-        } else {
-          var label = "label_" + this.length++;
-          this.labels[wsLabel] = label;
-          return label;
-        }
-      }
-    }
-  }
-
   /*
    * Public interface
    */
@@ -187,7 +171,6 @@ ws = {
   programBuilder: function (fullSource) {
     return {
       source: fullSource,
-      labler: labelTransformer(),
       programStack: [],
       labels: [],
       getAsm: function () {
@@ -220,17 +203,18 @@ ws = {
         var src = "";
         var asm = this.getAsm();
         var maxLabelLen = 0;
+        var labler = new ws_util.labelTransformer(function (n) { return "label_" + n; } );
         for (var i in asm) {
           var ln = asm[i];
           for (l in ln.labels) {
             var wsLabel = ln.labels[l];
-            var label = this.labler.getLabel(wsLabel);
+            var label = labler.getLabel(wsLabel);
             src += label + ":\n";
             maxLabelLen = Math.max(maxLabelLen, label.length);
           }
           src += "\t" + ln.mnemo;
           if (ln.param.label != null) {
-            src += " " + this.labler.getLabel(ln.param.label);
+            src += " " + labler.getLabel(ln.param.label);
           }
           if (ln.param.val != null) {
             src += " " + ln.param.val;
