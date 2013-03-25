@@ -90,54 +90,7 @@
     }
   }
 
-  var programTree = function (fullSource) {
-    return {
-      source: fullSource,
-      parser: instParser,
-      tokenizer: SourceTokenizer(fullSource),
-      programStack: [],
-      labels: [],
-      getAsm: function () {
-        var asm = [];
-        for (var i in this.programStack) {
-          var inst = this.programStack[i];
-          asm.push(inst.getAsm());
-        }
-        return asm;
-      },
-      getAsmSrc: function () {
-        var src = "";
-        var asm = this.getAsm();
-        var labler = labelTransformer();
-        var maxLabelLen = 0;
-        for (var i in asm) {
-          var ln = asm[i];
-          for (l in ln.labels) {
-            var wsLabel = ln.labels[l];
-            var label = labler.getLabel(wsLabel);
-            src += label + ":\n";
-            maxLabelLen = Math.max(maxLabelLen, label.length);
-          }
-          src += "\t" + ln.mnemo;
-          if (ln.param.label != null) {
-            src += " " + labler.getLabel(ln.param.label);
-          }
-          if (ln.param.val != null) {
-            src += " " + ln.param.val;
-          }
-          src += "\n";
-        }
-        var tabStr = "";
-        if (maxLabelLen) {
-          while (maxLabelLen + 1 >= tabStr.length) tabStr += " ";
-        }
-       
-        return src.replace(/\t/g, tabStr);
-      }
-    };
-  }
- 
-   /*
+  /*
    * Public interface
    */
 ws = {
@@ -194,41 +147,34 @@ ws = {
   },
 
   compile: function (fullSource) {
-    var compiler = programTree(fullSource);
-
-var debugToken = '';
-    while (compiler.tokenizer.hasMore()) {
-      var token = compiler.tokenizer.getNext();
+    var compiler = ws.programBuilder(fullSource);
+    var parser = instParser;
+    var tokenizer = SourceTokenizer(fullSource);
+ 
+    var debugToken = '';
+    while (tokenizer.hasMore()) {
+      var token = tokenizer.getNext();
       if (!sourceTokens[token]) {
         continue;
       }
       debugToken += {' ': 's', '\t':'t', '\n':'n'}[token]
-      compiler.parser = compiler.parser.cont[token];
-      if (!compiler.parser) {
-        throw 'Unexpected token @' + compiler.tokenizer.ptr + ':' + debugToken;
+      parser = parser.cont[token];
+      if (!parser) {
+        throw 'Unexpected token @' + tokenizer.ptr + ':' + debugToken;
       }
-      if (compiler.parser.instFn) {
-        var instruction = new compiler.parser.instFn();
+      if (parser.instFn) {
+        var instruction = new parser.instFn();
         if (instruction.paramType != null) {
-          instruction.param = parseParam(compiler.tokenizer);
+          instruction.param = parseParam(tokenizer);
         }
-        if (instruction.apply) {
-          instruction.apply(compiler);
-        } else {
-          instruction.address = compiler.programStack.length;
-          compiler.programStack.push(instruction);
-        }
-        // Reset parser
-        compiler.parser = instParser;
+        compiler.pushInstruction(instruction);
+       // Reset parser
+        parser = instParser;
         debugToken='';
       }
     }
 
-    for (var i in compiler.programStack) {
-      if (compiler.programStack[i].postProcess) {
-        compiler.programStack[i].postProcess(compiler);
-      }
-    }
+    compiler.postProcess();
 
     for (label in compiler.labels) {
       var inst = compiler.programStack[compiler.labels[label]];
@@ -238,6 +184,85 @@ var debugToken = '';
     return compiler;
   },
 
+  programBuilder: function (fullSource) {
+    return {
+      source: fullSource,
+      labler: labelTransformer(),
+      programStack: [],
+      labels: [],
+      getAsm: function () {
+        var asm = [];
+        for (var i in this.programStack) {
+          var inst = this.programStack[i];
+          asm.push(inst.getAsm());
+        }
+        return asm;
+      },
+
+      pushInstruction: function (instruction) {
+        if (instruction.apply) {
+          instruction.apply(this);
+        } else {
+          instruction.address = this.programStack.length;
+          this.programStack.push(instruction);
+        }
+      },
+
+      postProcess: function () {
+        for (var i in this.programStack) {
+          if (this.programStack[i].postProcess) {
+            this.programStack[i].postProcess(this);
+          }
+        }
+      },
+
+      getAsmSrc: function () {
+        var src = "";
+        var asm = this.getAsm();
+        var maxLabelLen = 0;
+        for (var i in asm) {
+          var ln = asm[i];
+          for (l in ln.labels) {
+            var wsLabel = ln.labels[l];
+            var label = this.labler.getLabel(wsLabel);
+            src += label + ":\n";
+            maxLabelLen = Math.max(maxLabelLen, label.length);
+          }
+          src += "\t" + ln.mnemo;
+          if (ln.param.label != null) {
+            src += " " + this.labler.getLabel(ln.param.label);
+          }
+          if (ln.param.val != null) {
+            src += " " + ln.param.val;
+          }
+          src += "\n";
+        }
+        var tabStr = "";
+        if (maxLabelLen) {
+          while (maxLabelLen + 1 >= tabStr.length) tabStr += " ";
+        }
+       
+        return src.replace(/\t/g, tabStr);
+      },
+      getWsSrc: function () {
+        var src = '';
+        for (var i in this.programStack) {
+          var inst = this.programStack[i];
+          for (l in inst.labels) {
+            src += '\n  ' + inst.labels[l];
+          }
+          src += inst.wsToken;
+          var par = inst.param;
+          if (par) {
+            src += par.token;
+          }   
+        }   
+        return src;
+      }
+    };
+  },
+ 
+ 
   /* 
    * Stack manipulation object constructors
    */
@@ -487,7 +512,7 @@ ws.keywords = [
     { ws: ' \n ',     mnemo: 'dup',      constr: ws.WsDouble,         param: null },
     { ws: ' \t ',     mnemo: 'copy',     constr: ws.WsCopyNth,        param: "NUMBER" },
     { ws: ' \n\t',    mnemo: 'swap',     constr: ws.WsSwapTop,        param: null },
-    { ws: ' \n\n',    mnemo: 'discard',  constr: ws.WsDropTop,        param: null },
+    { ws: ' \n\n',    mnemo: 'drop',     constr: ws.WsDropTop,        param: null },
     { ws: ' \t\n',    mnemo: 'slide',    constr: ws.WsSlide,          param: "NUMBER" },
     { ws: '\t   ',    mnemo: 'add',      constr: ws.WsAddition,       param: null },
     { ws: '\t  \t',   mnemo: 'sub',      constr: ws.WsSubtraction,    param: null },

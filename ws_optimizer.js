@@ -2,27 +2,11 @@
   /*
    * Private interface
    */
-  var genSource = function(program) {
-    var src = '';
-    for (var i in program.programStack) {
-      var inst = program.programStack[i];
-      for (l in inst.labels) {
-        src += '\n  ' + inst.labels[l];
-      }
-      src += inst.wsToken;
-      var par = inst.param;
-      if (par) {
-        src += par.token;
-      }
-    }
-    return src;
-  }
-
   var genProgram = function(tree) {
     var done = [];
     var todo = [tree];
-    var programStack = [];
-    var labels = [];
+
+    var builder = ws.programBuilder();
 
     while (todo.length > 0) {
       var inst = todo.shift();
@@ -36,9 +20,11 @@
           inst.param.token=inst.next.labels[0];
         }
 
-        var sp = programStack.push(inst);
+        builder.pushInstruction(inst);
+
+        var sp = builder.programStack.length;
         for (var l in inst.labels) {
-          labels[inst.labels[l]] = sp;
+          builder.labels[inst.labels[l]] = sp;
         }
 
         if (inst.branch) {
@@ -49,7 +35,7 @@
       }
     }
 
-    return {programStack:programStack, labels:labels};
+    return builder;
   }
 
   var markReachable = function(program, initSp) {
@@ -345,7 +331,7 @@
     tree = reduceJump(tree);
     reduceLabels(tree);
     var newProgram = genProgram(tree);
-    var newSource = genSource(newProgram);
+    var newSource = newProgram.getWsSrc();
      console.log('Reduced ' + program.source.length + ' bytes to ' + newSource.length + ' bytes (' + 
       Math.round(((program.source.length - newSource.length) / program.source.length) * 100) + 
       '%)');
