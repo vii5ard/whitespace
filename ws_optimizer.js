@@ -63,12 +63,7 @@
   }
 
   var createLabel = function(number) {
-    var label = '';
-
-    while (number > 0) {
-      label += number % 2 ? ' ' : '\t';
-      number >>= 1;
-    }
+    var label = ws_util.getWsUnsignedNumber(number);
 
     label += '\n';
     return label;
