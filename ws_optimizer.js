@@ -352,16 +352,4 @@
     return newSource;
     
   }
-
-  ws.reduceProgram1 = function(program) {
-    removeUnreachable(program);
-    reduceLabels(program);
-
-    var newSource = genSource(program);
-
-    console.log('Reduced ' + program.source.length + ' bytes to ' + newSource.length + ' bytes (' + 
-      Math.round(((program.source.length - newSource.length) / program.source.length) * 100) + 
-      '%)');
-    return newSource;
-  }
 })();
