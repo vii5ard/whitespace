@@ -41,6 +41,9 @@ ee.wsIde = (function () {
   };
 
   var printOutput = function(str) {
+    if (typeof str != "string") {
+      str = "" + str;
+    }
     var printArea = $('#printArea');
     var arr = str.split('\n');
     var last = printArea.find('span:last');
