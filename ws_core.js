@@ -209,7 +209,7 @@ var debugToken = '';
       }
       if (compiler.parser.instFn) {
         var instruction = new compiler.parser.instFn();
-        if (instruction.hasParam) {
+        if (instruction.paramType != null) {
           instruction.param = parseParam(compiler.tokenizer);
         }
         if (instruction.apply) {
@@ -243,7 +243,6 @@ var debugToken = '';
    */
 
   WsPush: function() {
-    this.hasParam = true;
     this.run = function (env) {
       env.stackPush(this.param.value);
       env.register.IP++;
@@ -260,7 +259,6 @@ var debugToken = '';
   },
 
   WsCopyNth: function() {
-    this.hasParam = true;
     this.run = function (env) {
       var actualPos = this.register.SP - this.param.value;
       env.stackPush(env.stack[actualPos]);
@@ -289,7 +287,6 @@ var debugToken = '';
   },
 
   WsSlide: function() {
-    this.hasParam = true;
     this.run = function(env) {
       var top = env.stackPop();
       env.register.SP -= this.param.value;
@@ -379,7 +376,6 @@ var debugToken = '';
    * Flowcontrol
    */
   WsLabel: function() {
-    this.hasParam = true;
     this.apply = function(compiler) {
       compiler.labels[this.param.token] = compiler.programStack.length;
     };
@@ -411,7 +407,6 @@ var debugToken = '';
   },
 
   WsCall: function() {
-    this.hasParam = true;
     this.run = function (env) {
       env.createFrame();
       env.register.IP = this.callableI;
@@ -423,7 +418,6 @@ var debugToken = '';
   },
 
   WsJump: function() {
-    this.hasParam=true;
     this.run = function(env) {
       env.register.IP = this.nextI;
     };
@@ -434,7 +428,6 @@ var debugToken = '';
   },
 
   WsJumpZ: function() {
-    this.hasParam=true;
     this.run = function(env) {
       var top = env.stackPop();
       if (top == 0) {
@@ -450,8 +443,6 @@ var debugToken = '';
   },
 
   WsJumpNeg: function() {
-    this.useParamToken = true;
-    this.hasParam=true;
     this.run = function (env) {
       var top = env.stackPop();
       if (top < 0) {
@@ -492,31 +483,40 @@ var debugToken = '';
   }
 }
 ws.keywords = [
-    { ws: '  ',       mnemo: 'push',     constr: ws.WsPush           },
-    { ws: ' \n ',     mnemo: 'dup',      constr: ws.WsDouble         },
-    { ws: ' \t ',     mnemo: 'copy',     constr: ws.WsCopyNth        },
-    { ws: ' \n\t',    mnemo: 'swap',     constr: ws.WsSwapTop        },
-    { ws: ' \n\n',    mnemo: 'discard',  constr: ws.WsDropTop        },
-    { ws: ' \t\n',    mnemo: 'slide',    constr: ws.WsSlide          },
-    { ws: '\t   ',    mnemo: 'add',      constr: ws.WsAddition       },
-    { ws: '\t  \t',   mnemo: 'sub',      constr: ws.WsSubtraction    },
-    { ws: '\t  \n',   mnemo: 'mul',      constr: ws.WsMultiplication },
-    { ws: '\t \t ',   mnemo: 'div',      constr: ws.WsIntDivision    },
-    { ws: '\t \t\t',  mnemo: 'mod',      constr: ws.WsModulo         },
-    { ws: '\t\t ',    mnemo: 'store',    constr: ws.WsHeapStore      },
-    { ws: '\t\t\t',   mnemo: 'retrieve', constr: ws.WsHeapRetrieve   },
-    { ws: '\n  ',     mnemo: 'label',    constr: ws.WsLabel          },
-    { ws: '\n \t',    mnemo: 'call',     constr: ws.WsCall           },
-    { ws: '\n \n',    mnemo: 'jmp',      constr: ws.WsJump           },
-    { ws: '\n\t ',    mnemo: 'jz',       constr: ws.WsJumpZ          },
-    { ws: '\n\t\t',   mnemo: 'jn',       constr: ws.WsJumpNeg        },
-    { ws: '\n\t\n',   mnemo: 'ret',      constr: ws.WsReturn         },
-    { ws: '\n\n\n',   mnemo: 'end',      constr: ws.WsEndProgram     },
-    { ws: '\t\n  ',   mnemo: 'printc',   constr: ws.WsPrintChar      },
-    { ws: '\t\n \t',  mnemo: 'printi',   constr: ws.WsPrintNum       },
-    { ws: '\t\n\t ',  mnemo: 'readc',    constr: ws.WsReadChar       },
-    { ws: '\t\n\t\t', mnemo: 'readi',    constr: ws.WsReadNum        }
+    { ws: '  ',       mnemo: 'push',     constr: ws.WsPush,           param: "NUMBER" },
+    { ws: ' \n ',     mnemo: 'dup',      constr: ws.WsDouble,         param: null },
+    { ws: ' \t ',     mnemo: 'copy',     constr: ws.WsCopyNth,        param: "NUMBER" },
+    { ws: ' \n\t',    mnemo: 'swap',     constr: ws.WsSwapTop,        param: null },
+    { ws: ' \n\n',    mnemo: 'discard',  constr: ws.WsDropTop,        param: null },
+    { ws: ' \t\n',    mnemo: 'slide',    constr: ws.WsSlide,          param: "NUMBER" },
+    { ws: '\t   ',    mnemo: 'add',      constr: ws.WsAddition,       param: null },
+    { ws: '\t  \t',   mnemo: 'sub',      constr: ws.WsSubtraction,    param: null },
+    { ws: '\t  \n',   mnemo: 'mul',      constr: ws.WsMultiplication, param: null },
+    { ws: '\t \t ',   mnemo: 'div',      constr: ws.WsIntDivision,    param: null },
+    { ws: '\t \t\t',  mnemo: 'mod',      constr: ws.WsModulo,         param: null },
+    { ws: '\t\t ',    mnemo: 'store',    constr: ws.WsHeapStore,      param: null },
+    { ws: '\t\t\t',   mnemo: 'retrieve', constr: ws.WsHeapRetrieve,   param: null },
+    { ws: '\n  ',     mnemo: 'label',    constr: ws.WsLabel,          param: "LABEL" },
+    { ws: '\n \t',    mnemo: 'call',     constr: ws.WsCall,           param: "LABEL" },
+    { ws: '\n \n',    mnemo: 'jmp',      constr: ws.WsJump,           param: "LABEL" },
+    { ws: '\n\t ',    mnemo: 'jz',       constr: ws.WsJumpZ,          param: "LABEL" },
+    { ws: '\n\t\t',   mnemo: 'jn',       constr: ws.WsJumpNeg,        param: "LABEL" },
+    { ws: '\n\t\n',   mnemo: 'ret',      constr: ws.WsReturn,         param: null },
+    { ws: '\n\n\n',   mnemo: 'end',      constr: ws.WsEndProgram,     param: null },
+    { ws: '\t\n  ',   mnemo: 'printc',   constr: ws.WsPrintChar,      param: null },
+    { ws: '\t\n \t',  mnemo: 'printi',   constr: ws.WsPrintNum,       param: null },
+    { ws: '\t\n\t ',  mnemo: 'readc',    constr: ws.WsReadChar,       param: null },
+    { ws: '\t\n\t\t', mnemo: 'readi',    constr: ws.WsReadNum,        param: null }
   ];
+
+  for (var i in ws.keywords) {
+    var keyword = ws.keywords[i];
+    var constr = keyword.constr;
+    constr.prototype.mnemoCode = keyword.mnemo;
+    constr.prototype.paramType = keyword.param;
+  }
+
+
 
   var InstParser = function() {
     this.instFn = null;
@@ -541,7 +541,6 @@ ws.keywords = [
   for (var i in ws.keywords) {
     var keyword = ws.keywords[i];
     var constr = keyword.constr;
-    constr.prototype.mnemoCode = keyword.mnemo;
     instParser.addInstruction(keyword.ws, constr);
   }
 
