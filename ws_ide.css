@@ -59,6 +59,11 @@ textarea.inputBox {
   text-decoration: none;
 }
 
+.btn a:hover {
+  color: white;
+  background-color: black;
+}
+
 .activeTab {
   border-top: 1px solid;
   border-left: 1px solid;
@@ -97,7 +102,7 @@ textarea.inputBox {
   display: none;
 }
 .tabLabels {
-  margin-top: 10px;
+  margin-top: 16px;
   position: relative;
 }
 .allTabs {
@@ -111,4 +116,18 @@ textarea.inputBox {
   margin: 0px;
   padding: 0px;
   width: 100%;
+}
+
+#panelMiddle {
+  vertical-align: top;
+  display: inline-block;
+}
+
+#panelRight {
+  vertical-align: top;
+  display: inline-block;
+  border: 1px solid;
+  min-width: 100px;
+  height: 500px;
+  white-space:pre;
 }

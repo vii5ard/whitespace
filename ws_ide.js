@@ -75,6 +75,7 @@ ee.wsIde = (function () {
                 .replace(/([ ]+)/g, '<span class="spaces">\$1</span>')
                 .replace(/(\t+)/g, '<span class="tabs">\$1</span>')
                 .replace(/#/g,' ');
+    
     },
     
     init: function() {
@@ -129,6 +130,15 @@ ee.wsIde = (function () {
       ee.wsIde.initEnv();
       var src = programSource();
       ee.wsIde.program = ws.compile(src);
+      // TODO! Should be somewhere else
+      var panel = $('#panelRight');
+      panel.html(ee.wsIde.program.getAsmSrc());
+      if (panel[0].scrollHeight > panel.height()) {
+        panel.css('overflow-y', 'scroll');
+      } else {
+        panel.css('overflow-y', 'hidden');
+      }
+      
       ee.wsIde.continueRun();
     },
 

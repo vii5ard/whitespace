@@ -10,6 +10,7 @@
 <script type="text/javascript" src="ws_core.js"></script>
 <script type="text/javascript" src="ws_optimizer.js"></script>
 
+<div id="buttonDiv">
 <select id="example" onChange="ee.wsIde.loadExample();">
 </select>
 
@@ -20,7 +21,9 @@
 <span class="btn">
   <a href="javascript:void(0);" onClick="ee.wsIde.optimizeProgram();">[Optimize]</a>
 </span>
-
+</div>
+<div id="panels">
+<div id="panelMiddle">
 <div class="scrollable">
   <div id="inputContainer" class="inputContainer">
     <textarea id="srcInput" class="inputArea inputBox">You really need to enable javascript or sth!</textarea>
@@ -54,6 +57,10 @@
       <div id="consoleArea" class="outputArea consoleText"></div>
     </div>
   </div>
+</div>
+</div>
+<div id="panelRight">
+</div>
 </div>
 </html>
 
