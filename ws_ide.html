@@ -39,7 +39,7 @@
   </div>
   <div class="allTabs">
     <div id="printTab" class="tabContent">
-     <span class="btn"><a href="javascript:void(0);" onClick="$('#printArea').html(''); return false;" >[Clear]</a></span>
+     <span class="btn"><a href="javascript:void(0);" onClick="return ee.wsIde.clearPrintArea('#printArea');" >[Clear]</a></span>
      <div class="outputArea" onClick="$(this).find('input[type=text]').focus();">
       <div id="printArea" class="outputText">
         <span></span>
@@ -50,7 +50,7 @@
      </div>
     </div>
     <div id="consoleTab" class="tabContent">
-      <span class="btn"><a href="javascript:void(0);" onClick="$('#consoleArea').html(''); return false;" >[Clear]</a></span>
+      <span class="btn"><a href="javascript:void(0);" onClick="return ee.wsIde.clearPrintArea('#consoleArea');" >[Clear]</a></span>
       <div id="consoleArea" class="outputArea consoleText"></div>
     </div>
   </div>

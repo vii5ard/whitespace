@@ -169,6 +169,15 @@ ee.wsIde = (function () {
       printOutput(val);
       input.val('');
       return false;
+    },
+    clearPrintArea: function (selector) {
+      var area = $(selector);
+      if (area.find('span').length > 0) {
+        area.find('span:not(:last)').remove();
+        area.find('span').html('');
+      } else {
+        area.html('');
+      }
     }
   };
   $(self.init);
