@@ -32,8 +32,8 @@
   {
     "name":"Fibonacci",
     "file":"example/fibonacci.ws",
+    "author": "?",
     "origin":"https://github.com/hostilefork/whitespacers/blob/master/examples/fibonacci.ws"
-    
   },
   {
     "name":"Calculator",
