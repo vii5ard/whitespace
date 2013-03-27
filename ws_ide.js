@@ -86,8 +86,23 @@ ee.wsIde = (function () {
     if (ee.wsIde.inputStreamPtr < ee.wsIde.inputStream.length) {
       return ee.wsIde.inputStream[ee.wsIde.inputStreamPtr++];
     } else {
+      ee.wsIde.focusUserInput('#userInput');
       throw "IOWait";
     }
+  }
+
+  var readNum = function() {
+    var numStr = "";
+    while (true) {
+      var ch = readChar();
+      if (ch == '\n') break;
+      numStr += ch; 
+    }
+    var num = parseInt(numStr);
+    if (typeof num == "NaN") {
+      throw "Illegal number entered!";
+    }
+    return num;
   }
 
   var self = {
@@ -119,6 +134,7 @@ ee.wsIde = (function () {
       var env = ws.env();
       env.print = printOutput;
       env.readChar = readChar;
+      env.readNum = readNum;
       ee.wsIde.env = env;
       return env;
     },
@@ -165,6 +181,7 @@ ee.wsIde = (function () {
       try {
         ee.wsIde.initEnv();
         compileProgram();
+        ee.wsIde.env.running = true;
         ee.wsIde.continueRun();
       } catch (err) {
         console.error("Compile Error: " + err);
@@ -172,14 +189,17 @@ ee.wsIde = (function () {
     },
 
     continueRun: function() {
+     if (!ee.wsIde.env.running) return;
      try {
         ee.wsIde.env.runProgram(ee.wsIde.program);
       } catch (err) {
         if (err == "IOWait") {
-          setTimeout(ee.wsIde.continueRun, 100);
+          // Do nothing - wait for IO
+          return;
         } else if (err != "Break") {
           console.error("Runtime Error: " + err);
         }
+        ee.wsIde.env.running = false;
       }
     },
 
@@ -207,7 +227,13 @@ ee.wsIde = (function () {
       ee.wsIde.inputStream += val;
       printOutput(val);
       input.val('');
+      this.continueRun();
       return false;
+    },
+
+    focusUserInput: function (selector) {
+      var input = $(selector);
+      input.focus();
     },
 
     clearPrintArea: function (selector) {

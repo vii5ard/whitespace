@@ -469,7 +469,9 @@ ws = {
 
   WsReadNum: function() {
     this.run = function (env) {
-      env.readNum();
+      var num = env.readNum();
+      var addr = env.stackPop();
+      env.heap[addr] = num;
       env.register.IP++;
     }
     this.getAsm = asmWithNoParam;
