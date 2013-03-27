@@ -1,124 +1,117 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-
 <html>
-<head>
-  <meta name="generator" content=
-  "HTML Tidy for Linux/x86 (vers 25 March 2009), see www.w3.org">
-  <style type="text/css">
+  <head>
+    <meta name="generator"
+          content="HTML Tidy for Linux/x86 (vers 25 March 2009), see www.w3.org">
+    <style type="text/css">
 @import "ws_ide.css";
-  </style>
-  <script type="text/javascript" src="jquery.js">
+    </style>
+    <script type="text/javascript"
+          src="jquery.js">
 </script>
-  <script type="text/javascript" src="interceptTabs.js">
+    <script type="text/javascript"
+          src="interceptTabs.js">
 </script>
-  <script type="text/javascript" src="ws_util.js">
+    <script type="text/javascript"
+          src="ws_util.js">
 </script>
-  <script type="text/javascript" src="ws_ide.js">
+    <script type="text/javascript"
+          src="ws_ide.js">
 </script>
-  <script type="text/javascript" src="ws_core.js">
+    <script type="text/javascript"
+          src="ws_core.js">
 </script>
-  <script type="text/javascript" src="ws_optimizer.js">
+    <script type="text/javascript"
+          src="ws_optimizer.js">
 </script>
-
-  <title></title>
-</head>
-
-<body>
-  <div id="buttonDiv">
-    <select id="example" onchange="ee.wsIde.loadExample();">
-      </select> <span class="btn"><a href="javascript:void(0);"
-      onclick="ee.wsIde.runProgram();">[Run]</a></span> <span class=
-      "btn"><a href="javascript:void(0);" onclick=
-      "ee.wsIde.optimizeProgram();">[Optimize]</a></span>
-      <span class="btn" id="btnEnableHighlight" style=
-      "display:none"><a href="javascript:void(0);" onclick=
-      "ee.wsIde.setHighlight(true);">[ ]Highlight</a></span>
-      <span class="btn" id="btnDisableHighlight" style=
-      "display: none;"><a href="javascript:void(0);" onclick=
-      "ee.wsIde.setHighlight(false);">[X]Highlight</a></span>
-  </div>
-
-  <div id="panels">
-    <span class="btn" id="btnDisableHighlight" style=
-    "display: none;"></span>
-
-    <div id="panelLeft" class="panel">
-      <span class="btn" id="btnDisableHighlight" style=
-      "display: none;"></span>
-
-      <div id="panelLeftLabel" class="label">
-        <span class="btn" id="btnDisableHighlight" style=
-        "display: none;"><span>Files</span></span>
-      </div>
-
-      <div class="content"></div>
+    <title></title>
+  </head>
+  <body>
+    <div id="buttonDiv">
+      <select id="example"
+           onchange="ee.wsIde.loadExample();">
+        </select> <span class="btn"><a href="javascript:void(0);"
+         onclick="ee.wsIde.runProgram();">[Run]</a></span> <span class="btn"><a href="javascript:void(0);"
+         onclick="ee.wsIde.optimizeProgram();">[Optimize]</a></span> <span class="btn"
+           id="btnEnableHighlight"
+           style="display:none"><a href="javascript:void(0);"
+         onclick="ee.wsIde.setHighlight(true);">[ ]Highlight</a></span> <span class="btn"
+           id="btnDisableHighlight"
+           style="display: none;"><a href="javascript:void(0);"
+         onclick="ee.wsIde.setHighlight(false);">[X]Highlight</a></span>
     </div>
-
-    <div id="panelMiddle" class="panel">
-      <div class="scrollable">
-        <div id="inputContainer" class="inputContainer">
-          <textarea id="srcInput" class="inputArea inputBox">
+    <div id="panels">
+      <div id="panelLeft"
+           class="panel">
+        <div id="panelLeftLabel"
+             class="label">
+          <span class="btn"
+               style="display: none;"><span>Files</span></span>
+        </div>
+        <div class="content"></div>
+      </div>
+      <div id="panelMiddle"
+           class="panel">
+        <div class="scrollable">
+          <div id="inputContainer"
+               class="inputContainer">
+            <textarea id="srcInput"
+                 class="inputArea inputBox">
 You really need to enable javascript or sth!
 </textarea>
-
-          <div id="srcOverlay" class="inputArea inputOverlay">
+            <div id="srcOverlay"
+                 class="inputArea inputOverlay"></div>
           </div>
         </div>
-      </div>
-
-      <div id="srcHiddenDiv" class="inputArea" style=
-      "display: none;"></div>
-
-      <div class="outputTabs">
-        <div class="tabLabels">
-          <div class="btn">
-            <a href="#printTab" onclick=
-            "return ee.wsIde.switchTab(this);">Output</a>
+        <div id="srcHiddenDiv"
+             class="inputArea"
+             style="display: none;"></div>
+        <div class="outputTabs">
+          <div class="tabLabels">
+            <div class="btn">
+              <a href="#printTab"
+                   onclick="return ee.wsIde.switchTab(this);">Output</a>
+            </div>
+            <div class="btn">
+              <a href="#consoleTab"
+                   onclick="return ee.wsIde.switchTab(this);">Console</a>
+            </div>
           </div>
-
-          <div class="btn">
-            <a href="#consoleTab" onclick=
-            "return ee.wsIde.switchTab(this);">Console</a>
-          </div>
-        </div>
-
-        <div class="allTabs">
-          <div id="printTab" class="tabContent">
-            <span class="btn"><a href="javascript:void(0);"
-            onclick="return ee.wsIde.clearPrintArea('#printArea');">
-            [Clear]</a></span>
-
-            <div class="outputArea" onclick=
-            "$(this).find('input[type=text]').focus();">
-              <div id="printArea" class="outputText">
-                <form onsubmit=
-                "return ee.wsIde.handleUserInput('#userInput');">
-                  <input type="text" id="userInput" class=
-                  "userInput">
-                </form>
+          <div class="allTabs">
+            <div id="printTab"
+                 class="tabContent">
+              <span class="btn"><a href="javascript:void(0);"
+                 onclick="return ee.wsIde.clearPrintArea('#printArea');">[Clear]</a></span>
+              <div class="outputArea"
+                   onclick="$(this).find('input[type=text]').focus();">
+                <div id="printArea"
+                     class="outputText">
+                  <form onsubmit="return ee.wsIde.handleUserInput('#userInput');">
+                    <input type="text"
+                          id="userInput"
+                          class="userInput">
+                  </form>
+                </div>
               </div>
             </div>
-          </div>
-
-          <div id="consoleTab" class="tabContent">
-            <span class="btn"><a href="javascript:void(0);"
-            onclick="return ee.wsIde.clearPrintArea('#consoleArea');">
-            [Clear]</a></span>
-
-            <div id="consoleArea" class="outputArea consoleText">
+            <div id="consoleTab"
+                 class="tabContent">
+              <span class="btn"><a href="javascript:void(0);"
+                 onclick="return ee.wsIde.clearPrintArea('#consoleArea');">[Clear]</a></span>
+              <div id="consoleArea"
+                   class="outputArea consoleText"></div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-
-    <div id="panelRight" class="panel">
-      <div id="panelLeftLabel" class="label">
-        <span>Disasm</span>
+      <div id="panelRight"
+           class="panel">
+        <div id="panelRightLabel"
+             class="label">
+          <span>Disasm</span>
+        </div>
+        <div class="content"></div>
       </div>
-
-      <div class="content"></div>
     </div>
-  </div>
-</body>
+  </body>
 </html>
