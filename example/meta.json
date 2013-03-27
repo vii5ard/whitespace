@@ -49,5 +49,11 @@
     "name":"Quine v2",
     "file":"example/quine-2.ws",
     "origin":"http://compsoc.dur.ac.uk/whitespace/quine-2.ws"
+  },
+  {
+    "name": "Brainfuck (ASM)",
+    "file": "example/bf.wsa",
+    "origin": "example/bf.wsa",
+    "autohor": "Vii5ard"
   }
 ]}

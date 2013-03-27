@@ -202,7 +202,6 @@ ws = {
       getAsmSrc: function () {
         var src = "";
         var asm = this.getAsm();
-        var maxLabelLen = 0;
         var labler = new ws_util.labelTransformer(function (n) { return "label_" + n; } );
         for (var i in asm) {
           var ln = asm[i];
@@ -210,7 +209,6 @@ ws = {
             var wsLabel = ln.labels[l];
             var label = labler.getLabel(wsLabel);
             src += label + ":\n";
-            maxLabelLen = Math.max(maxLabelLen, label.length);
           }
           src += "\t" + ln.mnemo;
           if (ln.param.label != null) {
@@ -221,12 +219,8 @@ ws = {
           }
           src += "\n";
         }
-        var tabStr = "";
-        if (maxLabelLen) {
-          while (maxLabelLen + 1 >= tabStr.length) tabStr += " ";
-        }
        
-        return src.replace(/\t/g, tabStr);
+        return src;
       },
       getWsSrc: function () {
         var src = '';

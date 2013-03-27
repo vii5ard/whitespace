@@ -3,8 +3,9 @@ ee = ee || {};
 var console = (function () {
   var writeTab = function (msg) {
     var consoleArea = $('#consoleArea');
-    consoleArea.html(consoleArea.html() + msg + '\n');
+    consoleArea.append('<div>' + msg + '<div>');
     consoleArea.scrollTop(consoleArea[0].scrollHeight);
+    ws_util.handleOverflow(consoleArea);
   };
   return {
     log: writeTab,
@@ -33,12 +34,32 @@ ee.wsIde = (function () {
     $('#inputContainer').height(srcInput.height()); 
   };
 
+  var compileProgram = function() {
+    var src = programSource();
+    ee.wsIde.program = ws.compile(src);
+    var panel = $('#panelRight .content');
+    panel.html(ee.wsIde.program.getAsmSrc());
+    ws_util.handleOverflow(panel);
+  };
+
+  var updateEditor = function() {
+    updateOverlay();
+    ws_util.handleOverflow("#scrollableSource");
+    try {
+      compileProgram();
+    } catch (err) {
+      // Ignore it at the moment
+    }
+  }
+
   var programSource = function (src) {
     var srcInput = $('#srcInput');
     if (typeof src == "undefined") {
       return srcInput.val();
     } else {
-     return ee.wsIde.loadSource(src);
+     var ret = ee.wsIde.loadSource(src);
+     updateEditor();
+     return ret;
     }
   };
 
@@ -57,6 +78,7 @@ ee.wsIde = (function () {
       last.html(last.html() + arr[ln]);
     }
     outputArea = printArea.closest('.outputArea');
+    ws_util.handleOverflow(outputArea);
     outputArea.scrollTop(outputArea[0].scrollHeight);
   };
 
@@ -81,11 +103,11 @@ ee.wsIde = (function () {
     },
     
     init: function() {
-      $('#srcInput').keyup(updateOverlay);
-      $('#srcInput').change(updateOverlay);
+      $('#srcInput').keyup(updateEditor);
+      $('#srcInput').change(updateEditor);
       $('#srcInput').keydown(function(e){
         var ret=interceptTabs(e, this);
-        updateOverlay();
+        updateEditor();
         return ret;
       });
       ee.wsIde.initExamples();
@@ -102,13 +124,11 @@ ee.wsIde = (function () {
     },
 
     loadSource: function(src) {
-      var ret = $('#srcInput').val(src);
-      updateOverlay();
+      return $('#srcInput').val(src);
     },
 
-    loadExample: function() {
-      var idx = $('#example').val();
-      if (!idx || !ee.wsIde.examples[idx]) return;
+    loadExample: function(idx) {
+      if (!ee.wsIde.examples[idx]) return;
       var url = ee.wsIde.examples[idx].file;
       if (url.match(/\.ws$/)) {
         this.setHighlight(true);
@@ -117,36 +137,38 @@ ee.wsIde = (function () {
       } 
       $.get(url, function(src) {
         ee.wsIde.loadSource(src);
+        updateEditor();
+        $('#panelMiddleLabel span').html(url);
       });
     },
 
     initExamples: function () {
       $.getJSON('example/meta.json', function(result) {
         ee.wsIde.examples = result.examples;
-        var select = $('#example');
+        var fileList = $('#fileList');
         for(var i=0; i<ee.wsIde.examples.length; i++) {
           var ex = ee.wsIde.examples[i];
-          var option = new Option(ex.name, i);
-          select[0].options[i] = option;
+          var line = $('<div></div>');
+          line.addClass('fileEntry');
+          line.addClass('fileTypeAsm');
+          var link = $('<a href="javascript: void(0);" onClick="ee.wsIde.loadExample(' + i + ');"></a>')
+          link.html(ex.name);
+          link.appendTo(line);
+          line.appendTo(fileList);
         }
-        ee.wsIde.loadExample();
+        ee.wsIde.loadExample(0);
       });
+
     },
 
     runProgram: function() {
-      ee.wsIde.initEnv();
-      var src = programSource();
-      ee.wsIde.program = ws.compile(src);
-      // TODO! Should be somewhere else
-      var panel = $('#panelRight');
-      panel.html(ee.wsIde.program.getAsmSrc());
-      if (panel[0].scrollHeight > panel.height()) {
-        panel.css('overflow-y', 'scroll');
-      } else {
-        panel.css('overflow-y', 'hidden');
+      try {
+        ee.wsIde.initEnv();
+        compileProgram();
+        ee.wsIde.continueRun();
+      } catch (err) {
+        console.error("Compile Error: " + err);
       }
-      
-      ee.wsIde.continueRun();
     },
 
     continueRun: function() {
@@ -156,7 +178,7 @@ ee.wsIde = (function () {
         if (err == "IOWait") {
           setTimeout(ee.wsIde.continueRun, 100);
         } else if (err != "Break") {
-          throw err;
+          console.error("Runtime Error: " + err);
         }
       }
     },
@@ -187,15 +209,19 @@ ee.wsIde = (function () {
       input.val('');
       return false;
     },
+
     clearPrintArea: function (selector) {
       var area = $(selector);
       if (area.find('span').length > 0) {
         area.find('span:not(:last)').remove();
         area.find('span').html('');
+        ws_util.handleOverflow(area.parent());
       } else {
         area.html('');
+        ws_util.handleOverflow(area);
       }
     },
+
     setHighlight: function (enable) {
       if (ee.wsIde.highlightEnabled === enable) {
         return;
@@ -210,7 +236,6 @@ ee.wsIde = (function () {
       }
       updateOverlay();
     }
-
   };
   $(self.init);
 

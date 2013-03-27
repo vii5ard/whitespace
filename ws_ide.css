@@ -32,7 +32,7 @@ textarea.inputBox {
 .scrollable {
   width: 600px;
   height: 250px;
-  overflow-x: hidden;
+  overflow: hidden;
   border: 1px solid;
 }
 
@@ -72,9 +72,7 @@ textarea.inputBox {
 }
 
 .outputArea {
-  overflow-y: scroll;
-  overflow-x: hidden;
-  border: 1px solid;
+  overflow: hidden;
   width: 600px;
   height: 200px;
 }
@@ -118,9 +116,10 @@ textarea.inputBox {
   width: 100%;
 }
 
-#panelMiddle {
-  vertical-align: top;
-  display: inline-block;
+#panelMiddle .content {
+  padding-left: .5em;
+  padding-right: .5em;
+  padding-bottom: .5em;
 }
 
 #panelRight .content {
@@ -151,3 +150,25 @@ div.panel div.label span {
   padding-right: .5em;
   background-color: white;
 }
+
+.fileEntry a {
+  color: black;
+  margin-left: 1.5em;
+  text-decoration: none;
+}
+
+.fileEntry a:hover {
+  background-color: black;
+  color: white;
+}
+
+.fileTypeWs {
+  background: transparent url('img/icoset.png') 0 0 no-repeat;
+  background-position: 0 0
+}
+
+.fileTypeAsm {
+  background: url('img/icoset.png') no-repeat;
+  background-position: -15px 0
+}
+
