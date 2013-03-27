@@ -123,11 +123,31 @@ textarea.inputBox {
   display: inline-block;
 }
 
-#panelRight {
-  vertical-align: top;
-  display: inline-block;
-  border: 1px solid;
-  min-width: 100px;
+#panelRight .content {
+  width: 150px;
   height: 500px;
-  white-space:pre;
+  white-space: pre;
+}
+
+#panelLeft .content {
+  height: 500px;
+  width: 150px;
+}
+
+div.panel {
+  border: 4px double;
+  margin-top: 5px;
+  display: inline-block;
+  vertical-align: top;
+}
+
+div.panel div.label {
+  text-align: center;
+  position: relative;
+  top: -.75em;
+}
+div.panel div.label span {
+  padding-left: .5em;
+  padding-right: .5em;
+  background-color: white;
 }
