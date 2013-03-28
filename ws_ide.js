@@ -6,6 +6,11 @@ var console = (function () {
     consoleArea.append('<div>' + msg + '<div>');
     consoleArea.scrollTop(consoleArea[0].scrollHeight);
     ws_util.handleOverflow(consoleArea);
+ 
+   var tabLabel = $('#tabLabelConsole');
+    if (!tabLabel.is('.activeTab')) {
+      tabLabel.addClass('emph');
+    }
   };
   return {
     log: writeTab,
@@ -80,6 +85,12 @@ ee.wsIde = (function () {
     outputArea = printArea.closest('.outputArea');
     ws_util.handleOverflow(outputArea);
     outputArea.scrollTop(outputArea[0].scrollHeight);
+
+    var tabLabel = $('#tabLabelPrint');
+    if (!tabLabel.is('.activeTab')) {
+      tabLabel.addClass('emph');
+    }
+
   };
 
   var readChar = function() {
@@ -103,7 +114,22 @@ ee.wsIde = (function () {
       throw "Illegal number entered!";
     }
     return num;
+  };
+
+  var updateMemoryTab = function (env) {
+    $('#stackSpan').html('[' + env.stack.slice(0,env.register.SP).join(', ') + ']');
+    var heapArr = [];
+    for (i in env.heap) {
+      heapArr.push(i + ':' + env.heap[i]);
+    }
+    $('#heapSpan').html('{\t' + heapArr.join(',\t') + '}');
   }
+ 
+  var afterInstructionRun = function(env) {
+    if (env.debug) {
+      updateMemoryTab(env);
+    }
+  };
 
   var self = {
     examples: [],
@@ -135,7 +161,7 @@ ee.wsIde = (function () {
       env.print = printOutput;
       env.readChar = readChar;
       env.readNum = readNum;
-      env.afterInstructionRun = this.updateMemoryTab;
+      env.afterInstructionRun = afterInstructionRun;
       ee.wsIde.env = env;
       return env;
     },
@@ -196,12 +222,12 @@ ee.wsIde = (function () {
       } catch (err) {
         if (err == "IOWait") {
           // Do nothing - wait for IO
-          return;
         } else if (err != "Break") {
           console.error("Runtime Error: " + err);
+          ee.wsIde.env.running = false;
         }
-        ee.wsIde.env.running = false;
       }
+      updateMemoryTab(ee.wsIde.env);
     },
 
     optimizeProgram: function() {
@@ -212,10 +238,11 @@ ee.wsIde = (function () {
     
     switchTab: function(selector) {
       var link = $(selector);
+
       var tabSelector = $(link).attr("href");
       var tab = $(tabSelector);
       link.closest(".outputTabs").find(".btn").removeClass("activeTab");
-      link.closest(".btn").addClass("activeTab");
+      link.closest(".btn").addClass("activeTab").removeClass("emph");
 
       tab.closest(".allTabs").find(".tabContent:visible").not(tabSelector).hide();
       tab.show(); 
@@ -264,14 +291,6 @@ ee.wsIde = (function () {
       updateOverlay();
     },
 
-    updateMemoryTab: function (env) {
-      $('#stackSpan').html('[' + env.stack.slice(0,env.register.SP).join(', ') + ']');
-      var heapArr = [];
-      for (i in env.heap) {
-        heapArr.push(i + ':' + env.heap[i]);
-      }
-      $('#heapSpan').html('{\t' + heapArr.join(',\t') + '}');
-    }
   };
   $(self.init);
 

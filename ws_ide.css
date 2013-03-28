@@ -182,3 +182,7 @@ div.panel div.label span {
 #heapSpan {
   white-space: pre-wrap;
 }
+
+.emph {
+  font-weight: bold;
+}
