@@ -22,9 +22,14 @@
     return {
       store: function (addr, val) {
         heapSpace[addr] = val;
+        return val;
       },
       retrieve: function (addr) {
-        return heapSpace[addr] || 0;
+        var val = heapSpace[addr];
+        if (typeof val == "undefined") {
+          return this.store(addr, 0);
+        }
+        return val;
       },
       toArray: function() {
         return heapSpace;
