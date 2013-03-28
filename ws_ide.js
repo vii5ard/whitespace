@@ -135,6 +135,7 @@ ee.wsIde = (function () {
       env.print = printOutput;
       env.readChar = readChar;
       env.readNum = readNum;
+      env.afterInstructionRun = this.updateMemoryTab;
       ee.wsIde.env = env;
       return env;
     },
@@ -263,11 +264,11 @@ ee.wsIde = (function () {
       updateOverlay();
     },
 
-    updateMemoryTab: function () {
-      $('#stackSpan').html('[' + this.env.stack.slice(0,this.env.register.SP).join(', ') + ']');
+    updateMemoryTab: function (env) {
+      $('#stackSpan').html('[' + env.stack.slice(0,env.register.SP).join(', ') + ']');
       var heapArr = [];
-      for (i in this.env.heap) {
-        heapArr.push(i + ':' + this.env.heap[i]);
+      for (i in env.heap) {
+        heapArr.push(i + ':' + env.heap[i]);
       }
       $('#heapSpan').html('{\t' + heapArr.join(',\t') + '}');
     }

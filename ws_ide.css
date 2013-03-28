@@ -178,3 +178,7 @@ div.panel div.label span {
 .buttonBar {
   height:14px;
 }
+
+#heapSpan {
+  white-space: pre-wrap;
+}
