@@ -172,17 +172,26 @@ ee.wsIde = (function () {
 
     loadExample: function(idx) {
       if (!ee.wsIde.examples[idx]) return;
-      var url = ee.wsIde.examples[idx].file;
-      if (url.match(/\.ws$/)) {
+      var ex = ee.wsIde.examples[idx];
+      var load = function(src) {
+        if (!ex.src) ex.src = src;
+        ee.wsIde.loadSource(src);
+        updateEditor();
+        $('#panelMiddleLabel span').html(ex.file);
+      }
+      if (ex.lang == 'WS' || ex.file.match(/\.ws$/i)) {
         this.setHighlight(true);
       } else {
         this.setHighlight(false);
-      } 
-      $.get(url, function(src) {
-        ee.wsIde.loadSource(src);
-        updateEditor();
-        $('#panelMiddleLabel span').html(url);
-      });
+      }
+
+      if (ex.src) {
+        load(ex.src);
+      } else {
+        $.get(ex.file, load);
+      }
+
+      ee.wsIde.openFile = ex;
     },
 
     initExamples: function () {
