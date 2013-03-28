@@ -104,6 +104,8 @@ textarea.inputBox {
   position: relative;
 }
 .allTabs {
+  width: 600px;
+  height: 230px;
   border: 1px solid;
   display: inline-block;
 }
@@ -124,16 +126,17 @@ textarea.inputBox {
 
 #panelRight .content {
   width: 150px;
-  height: 500px;
+  height: 530px;
   white-space: pre;
 }
 
 #panelLeft .content {
-  height: 500px;
+  height: 530px;
   width: 150px;
 }
 
 div.panel {
+  height: 550px;
   border: 4px double;
   margin-top: 5px;
   display: inline-block;
@@ -172,3 +175,6 @@ div.panel div.label span {
   background-position: -15px 0
 }
 
+.buttonBar {
+  height:14px;
+}

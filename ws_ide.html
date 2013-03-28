@@ -80,12 +80,18 @@ You really need to enable javascript or sth!
                 <a href="#consoleTab"
                      onclick="return ee.wsIde.switchTab(this);">Console</a>
               </div>
+              <div class="btn">
+                <a href="#memoryTab"
+                     onclick="return ee.wsIde.switchTab(this);">Memory</a>
+              </div>
             </div>
             <div class="allTabs">
               <div id="printTab"
                    class="tabContent">
-                <span class="btn"><a href="javascript:void(0);"
-                   onclick="return ee.wsIde.clearPrintArea('#printArea');">[Clear]</a></span>
+                <div class="buttonBar">
+                  <span class="btn"><a href="javascript:void(0);"
+                     onclick="return ee.wsIde.clearPrintArea('#printArea');">[Clear]</a></span>
+                </div>
                 <div class="outputArea"
                      onclick="ee.wsIde.focusUserInput('#userInput')">
                   <div id="printArea"
@@ -101,10 +107,27 @@ You really need to enable javascript or sth!
               </div>
               <div id="consoleTab"
                    class="tabContent">
-                <span class="btn"><a href="javascript:void(0);"
-                   onclick="return ee.wsIde.clearPrintArea('#consoleArea');">[Clear]</a></span>
+                <div class="buttonBar">
+                  <span class="btn"><a href="javascript:void(0);"
+                     onclick="return ee.wsIde.clearPrintArea('#consoleArea');">[Clear]</a></span>
+                </div>
                 <div id="consoleArea"
                      class="outputArea consoleText"></div>
+              </div>
+              <div id="memoryTab"
+                   class="tabContent">
+                <div class="buttonBar">
+                </div>
+                <div id="memoryArea">
+                  <div>
+                    <span>Stack: </span>
+                    <span id="stackSpan"></span>
+                  </div>
+                  <div>
+                    <span>Heap: </span>
+                    <span id="heapSpan"></span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

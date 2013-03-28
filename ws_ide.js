@@ -261,6 +261,15 @@ ee.wsIde = (function () {
         $('#btnEnableHighlight').show();
       }
       updateOverlay();
+    },
+
+    updateMemoryTab: function () {
+      $('#stackSpan').html('[' + this.env.stack.slice(0,this.env.register.SP).join(', ') + ']');
+      var heapArr = [];
+      for (i in this.env.heap) {
+        heapArr.push(i + ':' + this.env.heap[i]);
+      }
+      $('#heapSpan').html('{\t' + heapArr.join(',\t') + '}');
     }
   };
   $(self.init);
