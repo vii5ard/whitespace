@@ -1,4 +1,4 @@
-var  asm  = (function() {
+var  ws_asm  = (function() {
   var mnemo = (function () {
     var mnemo = {};
      for (var i in ws.keywords) {
@@ -171,18 +171,9 @@ var  asm  = (function() {
 
   };
 
-  $(function () {
-    // asm.parseInput();
-  });
-
-  var stopCount = 100;
-
   var getTokens = function(strArr) {
     var tokens = [];
     while (strArr.hasNext()) {
-      if (!stopCount--) {
-         break;
-      }
       if (parseWhitespace(strArr).token) {
         continue;
       }
@@ -206,11 +197,9 @@ var  asm  = (function() {
       token.meta = meta;
 
       if (token.type == "STRING") {
-        console.log("String: " + getStringArray(token.token));
         token.data = getStringArray(token.token);
       }
       if (token.type != "COMMENT") {
-        console.log("Token: [" + token.type + ":'" + token.token + "']");
         tokens.push(token);
       }
     }
@@ -227,61 +216,57 @@ var  asm  = (function() {
 
   return {
     compile: function (str) {
-       var strArr = new StrArr(str);
-       var tokens = getTokens(strArr);
-       var builder = ws.programBuilder(str);
-       var tokenNr = 0;
-       var labeler = new ws_util.labelTransformer(ws_util.getWsUnsignedNumber);
-       while (tokenNr < tokens.length) {
-          var token = tokens[tokenNr++];
-          var meta = token.meta;
-          if (token.type == "LABEL") {
-            builder.labels[labeler.getLabel(token.token)] = builder.programStack.length;
-          } else if (token.type == "KEYWORD") {
-             var op = token.op;
-             var instruction = new op.constr();
-             if (op.param) {
-               var param = tokens[tokenNr++];
-               if (!param) {
-                 throw "Parameter expected at line + " + token.line + ".";
-               }
-               if (op.param == "NUMBER") {
-                 if (param.type == "NUMBER") {
-                   pushInstruction(builder, op.constr, param.data);
-                 } else if (param.type == "STRING") {
-                   for (var i = param.data.length -1 ; i >= 0; i--) {
-                     pushInstruction(builder, op.constr, param.data[i]);
-                   }
-                 }
-               } else if (op.param == "LABEL") {
-                 var instruction = new op.constr();
-                 instruction.param = {token: labeler.getLabel(param.token), value: null };
-                 builder.pushInstruction(instruction); 
-               } else {
-                 throw "Unsupported parameter type " + op.param + " (should never happen).";
-               }
-             } else {
-               pushInstruction(builder, op.constr);
-             }
+      var strArr = new StrArr(str);
+      var tokens = getTokens(strArr);
+      var builder = ws.programBuilder(str);
+      var tokenNr = 0;
+      var labeler = new ws_util.labelTransformer(ws_util.getWsUnsignedNumber);
+      while (tokenNr < tokens.length) {
+         var token = tokens[tokenNr++];
+         var meta = token.meta;
+         if (token.type == "LABEL") {
+           builder.labels[labeler.getLabel(token.token)] = builder.programStack.length;
+         } else if (token.type == "KEYWORD") {
+            var op = token.op;
+            var instruction = new op.constr();
+            if (op.param) {
+              var param = tokens[tokenNr++];
+              if (!param) {
+                throw "Parameter expected at line + " + token.line + ".";
+              }
+              if (op.param == "NUMBER") {
+                if (param.type == "NUMBER") {
+                  pushInstruction(builder, op.constr, param.data);
+                } else if (param.type == "STRING") {
+                  for (var i = param.data.length -1 ; i >= 0; i--) {
+                    pushInstruction(builder, op.constr, param.data[i]);
+                  }
+                }
+              } else if (op.param == "LABEL") {
+                var instruction = new op.constr();
+                instruction.param = {token: labeler.getLabel(param.token), value: null };
+                builder.pushInstruction(instruction); 
+              } else {
+                throw "Unsupported parameter type " + op.param + " (should never happen).";
+              }
+            } else {
+              pushInstruction(builder, op.constr);
+            }
           } else {
              throw "Unexpected token at line " + meta.line + ":" + meta.col + ".";
           }
        }
        builder.postProcess();
 
-    for (label in builder.labels) {
-      var inst = builder.programStack[builder.labels[label]];
-      if (!inst.labels) inst.labels = [];
-      inst.labels.push(label);
-    }
+       for (label in builder.labels) {
+         var inst = builder.programStack[builder.labels[label]];
+         if (!inst.labels) {
+           inst.labels = [];
+         }
+         inst.labels.push(label);
+      }
 
-
-       console.log(builder.getAsmSrc());
-       return builder;
-    },
-    parseInput: function () {
-      var src = $('#asmArea').val();
-      return asm.compile(src);
+      return builder;
     }
   };
 

@@ -40,9 +40,16 @@ ee.wsIde = (function () {
   };
 
   var compileProgram = function() {
-    var src = programSource();
-    ee.wsIde.program = ws.compile(src);
     var panel = $('#panelRight .content');
+    panel.html('');
+
+    var openFile = ee.wsIde.openFile;
+    var src = programSource(); 
+    if (openFile.lang == "WS") {
+      ee.wsIde.program = ws.compile(src);
+    } else {
+      ee.wsIde.program = ws_asm.compile(src);
+    }
     panel.html(ee.wsIde.program.getAsmSrc());
     ws_util.handleOverflow(panel);
   };
@@ -119,8 +126,9 @@ ee.wsIde = (function () {
   var updateMemoryTab = function (env) {
     $('#stackSpan').html('[' + env.stack.slice(0,env.register.SP).join(', ') + ']');
     var heapArr = [];
-    for (i in env.heap) {
-      heapArr.push(i + ':' + env.heap[i]);
+    var heap = env.heap.toArray();
+    for (i in heap) {
+      heapArr.push(i + ':' + heap[i]);
     }
     $('#heapSpan').html('{\t' + heapArr.join(',\t') + '}');
   }

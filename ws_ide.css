@@ -186,3 +186,25 @@ div.panel div.label span {
 .emph {
   font-weight: bold;
 }
+
+.modalFog {
+  z-index: 1000;
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  height: 562px;
+  width: 950;
+  background-color: rgba(255, 255, 255,0.75);
+  display: table-cell;
+  vertical-align: middle;
+}
+
+#modal {
+  margin-left:auto;
+  margin-right:auto;
+
+  width: 100px;
+  height: 100px;
+  border: 4px double;
+  
+}

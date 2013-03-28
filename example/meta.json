@@ -3,57 +3,69 @@
     "name":"Hello World",
     "file":"example/hworld.ws",
     "author": "?",
-    "origin": "http://compsoc.dur.ac.uk/whitespace/examples.php"
+    "origin": "http://compsoc.dur.ac.uk/whitespace/examples.php",
+    "lang": "WS"
   },
   {
     "name":"Hello Nerd",
     "file":"example/nerd.ws",
     "author":"Vii5ard",
-    "origin":"example/nerd.ws"
+    "origin":"example/nerd.ws",
+    "lang": "WS"
   },
   {
     "name":"Hello User",
     "file":"example/name.ws",
     "author": "?",
-    "origin": "http://compsoc.dur.ac.uk/whitespace/name.ws"
+    "origin": "http://compsoc.dur.ac.uk/whitespace/name.ws",
+    "lang": "WS"
   },
   {
     "name":"Count",
     "file":"example/count.ws",
     "author": "?",
-    "origin": "https://github.com/hostilefork/whitespacers/tree/master/examples/count.ws"
+    "origin": "https://github.com/hostilefork/whitespacers/tree/master/examples/count.ws",
+    "lang": "WS"
   },
   {
     "name":"Quine v1",
     "file":"example/quine.ws",
     "author": "Benjamin Lerman",
-    "origin": "http://compsoc.dur.ac.uk/whitespace/contrib.php"
+    "origin": "http://compsoc.dur.ac.uk/whitespace/contrib.php",
+    "lang": "WS"
   },
   {
     "name":"Fibonacci",
     "file":"example/fibonacci.ws",
     "author": "?",
-    "origin":"https://github.com/hostilefork/whitespacers/blob/master/examples/fibonacci.ws"
+    "origin":"https://github.com/hostilefork/whitespacers/blob/master/examples/fibonacci.ws",
+    "lang": "WS"
   },
   {
     "name":"Calculator",
     "file":"example/calc.ws",
-    "origin":"https://github.com/hostilefork/whitespacers/blob/master/examples/calc.ws"
+    "author": "?",
+    "origin":"https://github.com/hostilefork/whitespacers/blob/master/examples/calc.ws",
+    "lang": "WS"
   },
   {
     "name":"Hanoi Towers",
     "file":"example/hanoi.ws",
-    "origin": "https://github.com/hostilefork/whitespacers/blob/master/examples/hanoi.ws"
+    "author": "?",
+    "origin": "https://github.com/hostilefork/whitespacers/blob/master/examples/hanoi.ws",
+    "lang": "WS"
   },
   {
     "name":"Quine v2",
     "file":"example/quine-2.ws",
-    "origin":"http://compsoc.dur.ac.uk/whitespace/quine-2.ws"
+    "origin":"http://compsoc.dur.ac.uk/whitespace/quine-2.ws",
+    "lang": "WS"
   },
   {
     "name": "Brainfuck (ASM)",
     "file": "example/bf.wsa",
     "origin": "example/bf.wsa",
-    "autohor": "Vii5ard"
+    "autohor": "Vii5ard",
+    "lang": "WSA"
   }
 ]}

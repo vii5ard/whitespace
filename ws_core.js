@@ -17,6 +17,21 @@
     return self;
   };
 
+  var Heap = function () {
+    var heapSpace = {};
+    return {
+      store: function (addr, val) {
+        heapSpace[addr] = val;
+      },
+      retrieve: function (addr) {
+        return heapSpace[addr] || 0;
+      },
+      toArray: function() {
+        return heapSpace;
+      }
+    }
+  }
+
   var sourceTokens = {' ':true, '\n': true, '\t':true};
 
   var isSource = function(token) {
@@ -82,7 +97,7 @@ ws = {
     var self = {
       register: {IP:0, SP:0 },
       stack: [],
-      heap: [],
+      heap: new Heap(),
       callStack: [],
       running: false,
       paused: true,
@@ -360,7 +375,7 @@ ws = {
     this.run = function (env) {
       var value = env.stackPop();
       var addr = env.stackPop();
-      env.heap[addr] = value;
+      env.heap.store(addr, value);
       env.register.IP++;
     };
     this.getAsm = asmWithNoParam;
@@ -369,7 +384,7 @@ ws = {
   WsHeapRetrieve: function() {
     this.run = function(env) {
       var addr = env.stackPop();
-      env.stackPush(env.heap[addr]);
+      env.stackPush(env.heap.retrieve(addr));
       env.register.IP++;
     };
     this.getAsm = asmWithNoParam;
@@ -471,7 +486,7 @@ ws = {
     this.run = function (env) {
       var num = env.readNum();
       var addr = env.stackPop();
-      env.heap[addr] = num;
+      env.heap.store(addr, num);
       env.register.IP++;
     }
     this.getAsm = asmWithNoParam;
@@ -481,7 +496,7 @@ ws = {
     this.run = function (env) {
       var ch = env.readChar();
       var addr = env.stackPop();
-      env.heap[addr] = ch.charCodeAt(0);
+      env.heap.store(addr, ch.charCodeAt(0));
       env.register.IP++;
     };
     this.getAsm = asmWithNoParam;
