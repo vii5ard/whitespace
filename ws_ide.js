@@ -25,8 +25,8 @@ ee.wsIde = (function () {
     var srcOverlay = $('#srcOverlay');
     var src = srcInput.val();
     var overlay = '';
-    if (ee.wsIde.highlightEnabled) {
-      overlay = ee.wsIde.highlightSource(src);
+    if (ee.wsIde.highlightEnabled && ee.wsIde.openFile) {
+      overlay = ee.wsIde.highlightSourceWs(src);
     }
     srcOverlay.html(overlay);
 
@@ -35,7 +35,6 @@ ee.wsIde = (function () {
   
     srcInput.width(pre.width() + 30 );
     srcInput.height(pre.height() + 30);
-    srcOverlay.css('top', -srcInput.height());
     $('#inputContainer').height(srcInput.height()); 
   };
 
@@ -54,7 +53,7 @@ ee.wsIde = (function () {
     ws_util.handleOverflow(panel);
   };
 
-  var updateEditor = function() {
+  var updateEditor = function(evt) {
     updateOverlay();
     ws_util.handleOverflow("#scrollableSource");
     try {
@@ -143,7 +142,7 @@ ee.wsIde = (function () {
     examples: [],
     inputStream: '',
     inputStreamPtr: 0,
-    highlightSource: function(src) {
+    highlightSourceWs: function(src) {
       return src.replace(/[^\t\n ]/g, '#')
                 .replace(/([ ]+)/g, '<span class="spaces">\$1</span>')
                 .replace(/(\t+)/g, '<span class="tabs">\$1</span>')
@@ -153,10 +152,8 @@ ee.wsIde = (function () {
     
     init: function() {
       $('#srcInput').keyup(updateEditor);
-      $('#srcInput').change(updateEditor);
       $('#srcInput').keydown(function(e){
         var ret=interceptTabs(e, this);
-        updateEditor();
         return ret;
       });
       ee.wsIde.initExamples();

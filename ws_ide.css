@@ -9,10 +9,13 @@ body, input, textarea {
   padding: 0px 0px 0px 0px;
   word-break: none;
   white-space: pre;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 .inputBox {
-  z-index: 100;
+  z-index: 0;
   background: transparent;
   outline: none;
   border: none;
@@ -27,6 +30,9 @@ textarea.inputBox {
   top: -100px;
   z-index: -100;
   pointer-events: none;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 .scrollable {
@@ -36,8 +42,9 @@ textarea.inputBox {
   border: 1px solid;
 }
 
-.inputCotainer {
+.inputContainer {
   owerflow: hidden;
+  position: relative;
 }
 .inputOverlay .spaces {
   background-color: #ff9999;
