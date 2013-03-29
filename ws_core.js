@@ -21,6 +21,9 @@
     var heapSpace = {};
     return {
       store: function (addr, val) {
+        if (typeof addr == "undefined" || typeof val == "undefined") {
+          throw "Heap store invoked with undefined address or value";
+        }
         heapSpace[addr] = val;
         return val;
       },
@@ -283,7 +286,7 @@ ws = {
 
   WsCopyNth: function() {
     this.run = function (env) {
-      var actualPos = this.register.SP - this.param.value;
+      var actualPos = env.register.SP - this.param.value;
       env.stackPush(env.stack[actualPos]);
       env.register.IP++;
     }
