@@ -67,5 +67,12 @@
     "origin": "example/bf.wsa",
     "autohor": "Vii5ard",
     "lang": "WSA"
+  },
+  {
+    "name": "Brainfuck",
+    "file": "example/bf.ws",
+    "origin": "example/bf.ws",
+    "author": "Vii5ard",
+    "lang": "WS"
   }
 ]}
