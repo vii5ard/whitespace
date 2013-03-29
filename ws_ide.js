@@ -223,6 +223,8 @@ ee.wsIde = (function () {
 
     runProgram: function() {
       try {
+        this.inputStream = '';
+        this.inputStreamPtr = 0;
         ee.wsIde.initEnv();
         compileProgram();
         ee.wsIde.env.running = true;
