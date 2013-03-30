@@ -125,6 +125,11 @@ textarea.inputBox {
   width: 100%;
 }
 
+#panels {
+  width: 960px;
+  display: inline-block;
+}
+
 #panelMiddle .content {
   padding-left: .5em;
   padding-right: .5em;
