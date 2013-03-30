@@ -172,13 +172,16 @@ ee.wsIde = (function () {
     },
 
     loadSource: function(src) {
-      return $('#srcInput').val(src);
+      var ret = $('#srcInput').val(src);
+      updateEditor();
+      return ret;
     },
 
     loadExample: function(idx) {
       if (!ee.wsIde.examples[idx]) return;
       var ex = ee.wsIde.examples[idx];
       var load = function(src) {
+        ee.wsIde.openFile = ex;
         if (!ex.src) ex.src = src;
         ee.wsIde.loadSource(src);
         updateEditor();
@@ -196,7 +199,6 @@ ee.wsIde = (function () {
         $.get(ex.file, load);
       }
 
-      ee.wsIde.openFile = ex;
     },
 
     initExamples: function () {
@@ -207,9 +209,13 @@ ee.wsIde = (function () {
           var ex = ee.wsIde.examples[i];
           var line = $('<div></div>');
           line.addClass('fileEntry');
-          line.addClass('fileTypeAsm');
+          if (ex.lang == "WSA") {
+            line.addClass('fileTypeAsm');
+          } else {
+            line.addClass('fileTypeWs');
+          }
           var link = $('<a href="javascript: void(0);" onClick="ee.wsIde.loadExample(' + i + ');"></a>')
-          link.html(ex.name);
+          link.html('<div class="ico"></div>' + ex.name);
           link.appendTo(line);
           line.appendTo(fileList);
         }

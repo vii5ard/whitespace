@@ -14,6 +14,13 @@
     "lang": "WS"
   },
   {
+    "name":"Hello Nerd (ASM)",
+    "file":"example/nerd.wsa",
+    "author":"Vii5ard",
+    "origin":"example/nerd.wsa",
+    "lang": "WSA"
+  },
+  {
     "name":"Hello User",
     "file":"example/name.ws",
     "author": "?",

@@ -163,7 +163,6 @@ div.panel div.label span {
 
 .fileEntry a {
   color: black;
-  margin-left: 1.5em;
   text-decoration: none;
 }
 
@@ -172,12 +171,21 @@ div.panel div.label span {
   color: white;
 }
 
-.fileTypeWs {
-  background: transparent url('img/icoset.png') 0 0 no-repeat;
+.ico {
+  margin-left: 2px;
+  margin-right: 2px;
+  vertical-align: top;
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+}
+
+.fileTypeWs .ico {
+  background: url('img/icoset.png') 0 0 no-repeat;
   background-position: 0 0
 }
 
-.fileTypeAsm {
+.fileTypeAsm .ico {
   background: url('img/icoset.png') no-repeat;
   background-position: -15px 0
 }
