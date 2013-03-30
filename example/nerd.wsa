@@ -1,0 +1,17 @@
+; Push the zero-terminated string
+; onto stack in reverse order.
+
+	push "Hello Nerd!\n"
+
+; Loop while top of stack is non-zero.
+
+print:
+	dup
+	jz end
+	printc
+	jmp print
+
+; Graceful end
+end:
+	end
+
