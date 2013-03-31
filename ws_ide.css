@@ -187,6 +187,16 @@ div.panel div.label span {
   color: white;
 }
 
+.fileEntry input {
+  width:120px; 
+  background-color: transparet;
+}
+
+.fileEntry form {
+  display: inline-block; 
+  margin: 0;
+}
+
 .ico {
   margin-left: 2px;
   margin-right: 2px;

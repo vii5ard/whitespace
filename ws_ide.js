@@ -171,8 +171,8 @@ var ws_ide = (function () {
         link.appendTo(line);
       } else {
         var link = $('<div onclick="ws_ide.loadFile(\'' + file.fileKey + '\'); $(this).find(\'input\').focus().select();"><div class="ico"></div></div>');
-        var form = $('<form style="display: inline-block; margin: 0;" onsubmit="return false;"></form>');
-        var inp = $('<input type="text" style="width:120px; background-color: transparet;" class="userInput" onChange="ws_ide.handleFileRename(\'' + file.fileKey +'\');"></input>');
+        var form = $('<form onsubmit="return false;"></form>');
+        var inp = $('<input type="text" class="userInput" onChange="ws_ide.handleFileRename(\'' + file.fileKey +'\');"></input>');
         inp.val(file.name);
         inp.appendTo(form);
         form.appendTo(link);
