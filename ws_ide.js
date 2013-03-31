@@ -153,7 +153,7 @@ var ws_ide = (function () {
 
 
     sortedFiles.sort(function (a,b) {
-      return a.name < b.name ? -1 : 1;
+      return a.name.toLowerCase() < b.name.toLowerCase ? -1 : 1;
     })
  
     for (var i in sortedFiles) {
@@ -165,10 +165,21 @@ var ws_ide = (function () {
       } else {
         line.addClass('fileTypeWs');
       }
-      var link = $('<a href="javascript: void(0);" onClick="ws_ide.loadFile(\'' + file.fileKey + '\');"></a>')
-      link.html('<div class="ico"></div>' + $('<span></span>').text(file.name).html());
-      link.appendTo(line);
+      if (!file.localStorage) {
+        var link = $('<a href="javascript: void(0);" onClick="ws_ide.loadFile(\'' + file.fileKey + '\');"></a>')
+        link.html('<div class="ico"></div>' + $('<span></span>').text(file.name).html());
+        link.appendTo(line);
+      } else {
+        var link = $('<div onclick="ws_ide.loadFile(\'' + file.fileKey + '\'); $(this).find(\'input\').focus().select();"><div class="ico"></div></div>');
+        var form = $('<form style="display: inline-block; margin: 0;" onsubmit="return false;"></form>');
+        var inp = $('<input type="text" style="width:120px; background-color: transparet;" class="userInput" onChange="ws_ide.handleFileRename(\'' + file.fileKey +'\');"></input>');
+        inp.val(file.name);
+        inp.appendTo(form);
+        form.appendTo(link);
+        link.appendTo(line);
+      }
       line.appendTo(fileList);
+      
     }
     ws_util.handleOverflow(fileList.parent());
   };
@@ -446,6 +457,16 @@ var ws_ide = (function () {
 
       localFiles.files[file.fileKey] = file;
       localStorage.files = JSON.stringify(localFiles);
+    },
+
+    handleFileRename: function (fileKey) {
+      var input$ = $('#' + fileKey + ' input');
+      if (!input$.length) return;
+      ws_ide.files[ws_ide.openFile.fileKey].name = input$.val();
+      
+      this.saveFile();
+      updateFileList();
+      this.loadFile(ws_ide.openFile.fileKey);
     }
   };
   $(self.init);

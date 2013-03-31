@@ -172,7 +172,17 @@ div.panel div.label span {
   text-decoration: none;
 }
 
-.fileEntry a:hover {
+.fileEntry:hover {
+  background-color: black;
+  color: white;
+}
+
+.fileEntry:hover input {
+  background-color: black;
+  color: white;
+}
+
+.fileEntry:hover a {
   background-color: black;
   color: white;
 }
@@ -206,6 +216,10 @@ div.panel div.label span {
 }
 
 .emph {
+  font-weight: bold;
+}
+
+.emph input {
   font-weight: bold;
 }
 
