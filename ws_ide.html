@@ -44,11 +44,11 @@
         </div>
         <div class="buttonBar">
           <span class="btn"><a href="javascript:void(0);"
-               onclick="return ee.wsIde.newFile();">[New]</a></span>
+               onclick="return ws_ide.newFile();">[New]</a></span>
            <span class="btn localStorageButton"><a href="javascript:void(0);"
-               onclick="return ee.wsIde.deleteFile();">[Delete]</a></span>
+               onclick="return ws_ide.deleteFile();">[Delete]</a></span>
             <span class="btn localStorageButton"><a href="javascript:void(0);"
-               onclick="return ee.wsIde.saveFile();">[Save]</a></span>
+               onclick="return ws_ide.saveFile();">[Save]</a></span>
         </div>
         <div class="content">
           <div id="fileList">
@@ -64,14 +64,14 @@
         <div class="content">
           <div id="buttonDiv">
              <span class="btn"><a href="javascript:void(0);"
-               onclick="ee.wsIde.runProgram();">[Run]</a></span> <span class="btn"><a href="javascript:void(0);"
-               onclick="ee.wsIde.optimizeProgram();">[Optimize]</a></span> <span class="btn"
+               onclick="ws_ide.runProgram();">[Run]</a></span> <span class="btn"><a href="javascript:void(0);"
+               onclick="ws_ide.optimizeProgram();">[Optimize]</a></span> <span class="btn"
                  id="btnEnableHighlight"
                  style="display:none"><a href="javascript:void(0);"
-               onclick="ee.wsIde.setHighlight(true);">[ ]Highlight</a></span> <span class="btn"
+               onclick="ws_ide.setHighlight(true);">[ ]Highlight</a></span> <span class="btn"
                  id="btnDisableHighlight"
                  style="display: none;"><a href="javascript:void(0);"
-               onclick="ee.wsIde.setHighlight(false);">[X]Highlight</a></span>
+               onclick="ws_ide.setHighlight(false);">[X]Highlight</a></span>
           </div>
           <div id="scrollableSource" class="scrollable">
             <div id="inputContainer"
@@ -91,15 +91,15 @@ You really need to enable javascript or sth!
             <div class="tabLabels">
               <div id="tabLabelPrint" class="btn">
                 <a href="#printTab"
-                     onclick="return ee.wsIde.switchTab(this);">Output</a>
+                     onclick="return ws_ide.switchTab(this);">Output</a>
               </div>
               <div id="tabLabelConsole" class="btn">
                 <a href="#consoleTab"
-                     onclick="return ee.wsIde.switchTab(this);">Console</a>
+                     onclick="return ws_ide.switchTab(this);">Console</a>
               </div>
               <div class="btn">
                 <a href="#memoryTab"
-                     onclick="return ee.wsIde.switchTab(this);">Memory</a>
+                     onclick="return ws_ide.switchTab(this);">Memory</a>
               </div>
             </div>
             <div class="allTabs">
@@ -107,14 +107,14 @@ You really need to enable javascript or sth!
                    class="tabContent">
                 <div class="buttonBar">
                   <span class="btn"><a href="javascript:void(0);"
-                     onclick="return ee.wsIde.clearPrintArea('#printArea');">[Clear]</a></span>
+                     onclick="return ws_ide.clearPrintArea('#printArea');">[Clear]</a></span>
                 </div>
                 <div class="outputArea"
-                     onclick="ee.wsIde.focusUserInput('#userInput')">
+                     onclick="ws_ide.focusUserInput('#userInput')">
                   <div id="printArea"
                        class="outputText">
                     <span></span>
-                    <form onsubmit="return ee.wsIde.handleUserInput('#userInput');">
+                    <form onsubmit="return ws_ide.handleUserInput('#userInput');">
                       <input type="text"
                             id="userInput"
                             class="userInput">
@@ -126,7 +126,7 @@ You really need to enable javascript or sth!
                    class="tabContent">
                 <div class="buttonBar">
                   <span class="btn"><a href="javascript:void(0);"
-                     onclick="return ee.wsIde.clearPrintArea('#consoleArea');">[Clear]</a></span>
+                     onclick="return ws_ide.clearPrintArea('#consoleArea');">[Clear]</a></span>
                 </div>
                 <div id="consoleArea"
                      class="outputArea consoleText"></div>

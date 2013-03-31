@@ -1,5 +1,3 @@
-var ee;
-ee = ee || {};
 var console = (function () {
   var writeTab = function (msg) {
     var consoleArea = $('#consoleArea');
@@ -19,14 +17,14 @@ var console = (function () {
   };
 })();
 
-ee.wsIde = (function () {
+var ws_ide = (function () {
   var updateOverlay = function() {
     var srcInput = $('#srcInput');
     var srcOverlay = $('#srcOverlay');
     var src = srcInput.val();
     var overlay = '';
-    if (ee.wsIde.highlightEnabled && ee.wsIde.openFile) {
-      overlay = ee.wsIde.highlightSourceWs(src);
+    if (ws_ide.highlightEnabled && ws_ide.openFile) {
+      overlay = ws_ide.highlightSourceWs(src);
     }
     srcOverlay.html(overlay);
 
@@ -42,14 +40,14 @@ ee.wsIde = (function () {
     var panel = $('#panelRight .content');
     panel.html('');
 
-    var openFile = ee.wsIde.openFile;
+    var openFile = ws_ide.openFile;
     var src = programSource(); 
     if (openFile.lang == "WS") {
-      ee.wsIde.program = ws.compile(src);
+      ws_ide.program = ws.compile(src);
     } else {
-      ee.wsIde.program = ws_asm.compile(src);
+      ws_ide.program = ws_asm.compile(src);
     }
-    panel.html(ee.wsIde.program.getAsmSrc());
+    panel.html(ws_ide.program.getAsmSrc());
     ws_util.handleOverflow(panel);
   };
 
@@ -69,7 +67,7 @@ ee.wsIde = (function () {
     if (typeof src == "undefined") {
       return srcInput.val();
     } else {
-     var ret = ee.wsIde.loadSource(src);
+     var ret = ws_ide.loadSource(src);
      updateEditor();
      return ret;
     }
@@ -101,10 +99,10 @@ ee.wsIde = (function () {
   };
 
   var readChar = function() {
-    if (ee.wsIde.inputStreamPtr < ee.wsIde.inputStream.length) {
-      return ee.wsIde.inputStream[ee.wsIde.inputStreamPtr++];
+    if (ws_ide.inputStreamPtr < ws_ide.inputStream.length) {
+      return ws_ide.inputStream[ws_ide.inputStreamPtr++];
     } else {
-      ee.wsIde.focusUserInput('#userInput');
+      ws_ide.focusUserInput('#userInput');
       throw "IOWait";
     }
   }
@@ -149,8 +147,8 @@ ee.wsIde = (function () {
 
 
     var sortedFiles = [];
-    for (var fileKey in ee.wsIde.files) {
-      sortedFiles.push(ee.wsIde.files[fileKey]);
+    for (var fileKey in ws_ide.files) {
+      sortedFiles.push(ws_ide.files[fileKey]);
     }
 
 
@@ -167,7 +165,7 @@ ee.wsIde = (function () {
       } else {
         line.addClass('fileTypeWs');
       }
-      var link = $('<a href="javascript: void(0);" onClick="ee.wsIde.loadFile(\'' + file.fileKey + '\');"></a>')
+      var link = $('<a href="javascript: void(0);" onClick="ws_ide.loadFile(\'' + file.fileKey + '\');"></a>')
       link.html('<div class="ico"></div>' + $('<span></span>').text(file.name).html());
       link.appendTo(line);
       line.appendTo(fileList);
@@ -181,17 +179,17 @@ ee.wsIde = (function () {
       for(var i=0; i < result.examples.length; i++) {
         var ex = result.examples[i];
         var fileKey = stupidHash(ex.file);
-        if (!ee.wsIde.defaultFile.length) {
-          ee.wsIde.defaultFile.push(fileKey);
+        if (!ws_ide.defaultFile.length) {
+          ws_ide.defaultFile.push(fileKey);
         } 
         ex.fileKey = fileKey;
-        ee.wsIde.files[fileKey] = ex;
+        ws_ide.files[fileKey] = ex;
       }
 
       updateFileList();
 
-      if (ee.wsIde.defaultFile[0]) {
-        ee.wsIde.loadFile(ee.wsIde.defaultFile[0]);
+      if (ws_ide.defaultFile[0]) {
+        ws_ide.loadFile(ws_ide.defaultFile[0]);
       }
     });
   };
@@ -203,16 +201,16 @@ ee.wsIde = (function () {
     if (!localFiles.files) return;
 
     for (var fileKey in localFiles.files) {
-      if (ee.wsIde.files[fileKey]) return;
+      if (ws_ide.files[fileKey]) return;
       var file = localFiles.files[fileKey];
-      ee.wsIde.files[fileKey] = file;
+      ws_ide.files[fileKey] = file;
     }
 
     updateFileList();
   };
 
   var storeSource = function () {
-    var file = ee.wsIde.openFile;
+    var file = ws_ide.openFile;
     if (!file) return;
     file.src = programSource();
   }
@@ -241,8 +239,8 @@ ee.wsIde = (function () {
       loadLocalFiles();
       updateFileList();
 
-      ee.wsIde.initEnv();
-      ee.wsIde.switchTab('a[href=#printTab]');
+      ws_ide.initEnv();
+      ws_ide.switchTab('a[href=#printTab]');
     },
 
     initEnv: function () {
@@ -251,7 +249,7 @@ ee.wsIde = (function () {
       env.readChar = readChar;
       env.readNum = readNum;
       env.afterInstructionRun = afterInstructionRun;
-      ee.wsIde.env = env;
+      ws_ide.env = env;
       return env;
     },
 
@@ -265,18 +263,18 @@ ee.wsIde = (function () {
       storeSource();
       $('#fileList:not(#file_' + idx + ') .fileEntry.emph').removeClass('emph');
       $('#fileList #file_' + idx).addClass('emph');
-      var ex = ee.wsIde.files[idx];
+      var ex = ws_ide.files[idx];
       if (!ex) return;
 
-      if (ee.wsIde.openFile) {
-        if (ee.wsIde.defaultFile[ee.wsIde.defaultFile.length -1] != ee.wsIde.openFile.fileKey) {
-          ee.wsIde.defaultFile.push(ee.wsIde.openFile.fileKey);
+      if (ws_ide.openFile) {
+        if (ws_ide.defaultFile[ws_ide.defaultFile.length -1] != ws_ide.openFile.fileKey) {
+          ws_ide.defaultFile.push(ws_ide.openFile.fileKey);
         }
       }
       var load = function(src) {
-        ee.wsIde.openFile = ex;
+        ws_ide.openFile = ex;
         if (!ex.src) ex.src = src;
-        ee.wsIde.loadSource(src);
+        ws_ide.loadSource(src);
         updateEditor();
         $('#panelMiddleLabel span').text(ex.file);
       }
@@ -303,28 +301,28 @@ ee.wsIde = (function () {
       try {
         this.inputStream = '';
         this.inputStreamPtr = 0;
-        ee.wsIde.initEnv();
+        ws_ide.initEnv();
         compileProgram();
-        ee.wsIde.env.running = true;
-        ee.wsIde.continueRun();
+        ws_ide.env.running = true;
+        ws_ide.continueRun();
       } catch (err) {
         console.error("Compile Error: " + err);
       }
     },
 
     continueRun: function() {
-     if (!ee.wsIde.env.running) return;
+     if (!ws_ide.env.running) return;
      try {
-        ee.wsIde.env.runProgram(ee.wsIde.program);
+        ws_ide.env.runProgram(ws_ide.program);
       } catch (err) {
         if (err == "IOWait") {
           // Do nothing - wait for IO
         } else if (err != "Break") {
           console.error("Runtime Error: " + err);
-          ee.wsIde.env.running = false;
+          ws_ide.env.running = false;
         }
       }
-      updateMemoryTab(ee.wsIde.env);
+      updateMemoryTab(ws_ide.env);
     },
 
     optimizeProgram: function() {
@@ -349,7 +347,7 @@ ee.wsIde = (function () {
     handleUserInput: function (selector) {
       var input = $(selector);
       var val = input.val() + '\n';
-      ee.wsIde.inputStream += val;
+      ws_ide.inputStream += val;
       printOutput(val);
       input.val('');
       this.continueRun();
@@ -374,10 +372,10 @@ ee.wsIde = (function () {
     },
 
     setHighlight: function (enable) {
-      if (ee.wsIde.highlightEnabled === enable) {
+      if (ws_ide.highlightEnabled === enable) {
         return;
       }
-      ee.wsIde.highlightEnabled = enable;
+      ws_ide.highlightEnabled = enable;
       if (enable) {
         $('#btnDisableHighlight').show();
         $('#btnEnableHighlight').hide();
@@ -394,7 +392,7 @@ ee.wsIde = (function () {
       var fileKey = '';
       while (true) {
         fileKey = stupidHash(fileName + count);
-        if (!ee.wsIde.files[fileKey]) {
+        if (!ws_ide.files[fileKey]) {
           fileName = fileName + count;
           break;
         }
@@ -410,33 +408,33 @@ ee.wsIde = (function () {
         lang: "WS",
         localStorage: true
       }
-      ee.wsIde.files[fileKey] = file;
+      ws_ide.files[fileKey] = file;
       updateFileList();
-      ee.wsIde.loadFile(fileKey);
+      ws_ide.loadFile(fileKey);
     },
     deleteFile: function () {
-      var fileKey = ee.wsIde.openFile.fileKey;
-      if (!ee.wsIde.files[fileKey] || 
-          !ee.wsIde.files[fileKey].localStorage) {
+      var fileKey = ws_ide.openFile.fileKey;
+      if (!ws_ide.files[fileKey] || 
+          !ws_ide.files[fileKey].localStorage) {
         return;
       }
-      delete ee.wsIde.files[fileKey];
+      delete ws_ide.files[fileKey];
       updateFileList();
       while (true) {
-        if (!ee.wsIde.defaultFile.length) break;
-        var fileKey = ee.wsIde.defaultFile[ee.wsIde.defaultFile.length - 1];
-        if (ee.wsIde.files[fileKey]) {
-          ee.wsIde.loadFile(fileKey);
+        if (!ws_ide.defaultFile.length) break;
+        var fileKey = ws_ide.defaultFile[ws_ide.defaultFile.length - 1];
+        if (ws_ide.files[fileKey]) {
+          ws_ide.loadFile(fileKey);
           break;
         } else {
-          ee.wsIde.defaultFile.pop();
+          ws_ide.defaultFile.pop();
         }
       }
     },
     saveFile: function () {
       storeSource();
 
-      var file = ee.wsIde.openFile;
+      var file = ws_ide.openFile;
 
       if (!file || !file.localStorage) return;
 
