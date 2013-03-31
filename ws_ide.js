@@ -138,8 +138,12 @@ ee.wsIde = (function () {
     }
   };
 
+  var stupidHash = function (str) {
+    return btoa(str).replace(/[^a-zA-Z0-9]/g, '_'); 
+  }
+
   var self = {
-    examples: [],
+    files: {},
     inputStream: '',
     inputStreamPtr: 0,
     highlightSourceWs: function(src) {
@@ -177,9 +181,11 @@ ee.wsIde = (function () {
       return ret;
     },
 
-    loadExample: function(idx) {
-      if (!ee.wsIde.examples[idx]) return;
-      var ex = ee.wsIde.examples[idx];
+    loadFile: function(idx) {
+      $('#fileList:not(#file_' + idx + ') .fileEntry.emph').removeClass('emph');
+      $('#fileList #file_' + idx).addClass('emph');
+      var ex = ee.wsIde.files[idx];
+      if (!ex) return;
       var load = function(src) {
         ee.wsIde.openFile = ex;
         if (!ex.src) ex.src = src;
@@ -203,23 +209,30 @@ ee.wsIde = (function () {
 
     initExamples: function () {
       $.getJSON('example/meta.json', function(result) {
-        ee.wsIde.examples = result.examples;
         var fileList = $('#fileList');
-        for(var i=0; i<ee.wsIde.examples.length; i++) {
-          var ex = ee.wsIde.examples[i];
-          var line = $('<div></div>');
+        var loadFirst = '';
+        for(var i=0; i < result.examples.length; i++) {
+          var ex = result.examples[i];
+          
+          var fileKey = stupidHash(ex.file);
+          loadFirst = loadFirst || fileKey;
+          ee.wsIde.files[fileKey] = ex;
+
+          var line = $('<div id="file_' + fileKey + '"></div>');
           line.addClass('fileEntry');
           if (ex.lang == "WSA") {
             line.addClass('fileTypeAsm');
           } else {
             line.addClass('fileTypeWs');
           }
-          var link = $('<a href="javascript: void(0);" onClick="ee.wsIde.loadExample(' + i + ');"></a>')
+          var link = $('<a href="javascript: void(0);" onClick="ee.wsIde.loadFile(\'' + fileKey + '\');"></a>')
           link.html('<div class="ico"></div>' + ex.name);
           link.appendTo(line);
           line.appendTo(fileList);
         }
-        ee.wsIde.loadExample(0);
+        if (loadFirst) {
+          ee.wsIde.loadFile(loadFirst);
+        }
       });
 
     },
