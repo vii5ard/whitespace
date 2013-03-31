@@ -140,7 +140,28 @@ ee.wsIde = (function () {
 
   var stupidHash = function (str) {
     return btoa(str).replace(/[^a-zA-Z0-9]/g, '_'); 
-  }
+  };
+
+  var updateFileList = function () {
+    var fileList = $('#fileList');
+    fileList.find('.fileEntry').remove();
+ 
+    for (var fileKey in ee.wsIde.files) {
+      var file = ee.wsIde.files[fileKey];
+      var line = $('<div id="file_'+ fileKey + '"></div>');
+      line.addClass('fileEntry');
+      if (file.lang == "WSA") {
+        line.addClass('fileTypeAsm');
+      } else {
+        line.addClass('fileTypeWs');
+      }
+      var link = $('<a href="javascript: void(0);" onClick="ee.wsIde.loadFile(\'' + fileKey + '\');"></a>')
+      link.html('<div class="ico"></div>' + file.name);
+      link.appendTo(line);
+      line.appendTo(fileList);
+    }
+    ws_util.handleOverflow(fileList.parent());
+  };
 
   var self = {
     files: {},
@@ -186,6 +207,10 @@ ee.wsIde = (function () {
       $('#fileList #file_' + idx).addClass('emph');
       var ex = ee.wsIde.files[idx];
       if (!ex) return;
+
+      if (ee.wsIde.openFile) {
+        ee.wsIde.defaultFile = ee.wsIde.openFile.fileKey;
+      }
       var load = function(src) {
         ee.wsIde.openFile = ex;
         if (!ex.src) ex.src = src;
@@ -199,8 +224,13 @@ ee.wsIde = (function () {
         this.setHighlight(false);
       }
 
-      if (ex.src) {
+      $('#deleteFile').hide();
+
+      if (typeof ex.src != "undefined") {
         load(ex.src);
+        if (ex.localStorage) {
+          $('#deleteFile').show();
+        }
       } else {
         $.get(ex.file, load);
       }
@@ -209,29 +239,20 @@ ee.wsIde = (function () {
 
     initExamples: function () {
       $.getJSON('example/meta.json', function(result) {
-        var fileList = $('#fileList');
         var loadFirst = '';
         for(var i=0; i < result.examples.length; i++) {
           var ex = result.examples[i];
-          
           var fileKey = stupidHash(ex.file);
-          loadFirst = loadFirst || fileKey;
+          ee.wsIde.defaultFile = ee.wsIde.defaultFile || fileKey;
+          
+          ex.fileKey = fileKey;
           ee.wsIde.files[fileKey] = ex;
+       }
 
-          var line = $('<div id="file_' + fileKey + '"></div>');
-          line.addClass('fileEntry');
-          if (ex.lang == "WSA") {
-            line.addClass('fileTypeAsm');
-          } else {
-            line.addClass('fileTypeWs');
-          }
-          var link = $('<a href="javascript: void(0);" onClick="ee.wsIde.loadFile(\'' + fileKey + '\');"></a>')
-          link.html('<div class="ico"></div>' + ex.name);
-          link.appendTo(line);
-          line.appendTo(fileList);
-        }
-        if (loadFirst) {
-          ee.wsIde.loadFile(loadFirst);
+        updateFileList();
+
+        if (ee.wsIde.defaultFile) {
+          ee.wsIde.loadFile(ee.wsIde.defaultFile);
         }
       });
 
@@ -325,6 +346,40 @@ ee.wsIde = (function () {
       }
       updateOverlay();
     },
+    
+    newFile: function () {
+      var fileName = 'New file ';
+      var count = 1;
+      var fileKey = '';
+      while (true) {
+        fileKey = stupidHash(fileName + count);
+        if (!ee.wsIde.files[fileKey]) {
+          fileName = fileName + count;
+          break;
+        }
+        count++;
+      }
+      var file = {
+        fileKey: fileKey,
+        name: fileName,
+	file: "<no file>",
+        autohor: "",
+        origin: "",
+        src: "",
+        lang: "WS",
+        localStorage: true
+      }
+      ee.wsIde.files[fileKey] = file;
+      updateFileList();
+      ee.wsIde.loadFile(fileKey);
+    },
+    deleteFile: function () {
+      var fileKey = ee.wsIde.openFile.fileKey;
+      if (!ee.wsIde.files[fileKey]) return;
+      delete ee.wsIde.files[fileKey];
+      updateFileList();
+      ee.wsIde.loadFile(ee.wsIde.defaultFile);
+    }
 
   };
   $(self.init);

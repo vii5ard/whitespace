@@ -42,8 +42,15 @@
              class="label">
           <span>Files</span>
         </div>
+        <div class="buttonBar">
+          <span class="btn"><a href="javascript:void(0);"
+               onclick="return ee.wsIde.newFile();">[New]</a></span>
+           <span id="deleteFile" class="btn"><a href="javascript:void(0);"
+               onclick="return ee.wsIde.deleteFile();">[Delete]</a></span>
+        </div>
         <div class="content">
-          <div id="fileList"></div>
+          <div id="fileList">
+         </div>
         </div>
       </div>
       <div id="panelMiddle"
