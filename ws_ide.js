@@ -56,6 +56,7 @@ ee.wsIde = (function () {
   var updateEditor = function(evt) {
     updateOverlay();
     ws_util.handleOverflow("#scrollableSource");
+
     try {
       compileProgram();
     } catch (err) {
@@ -145,28 +146,82 @@ ee.wsIde = (function () {
   var updateFileList = function () {
     var fileList = $('#fileList');
     fileList.find('.fileEntry').remove();
- 
+
+
+    var sortedFiles = [];
     for (var fileKey in ee.wsIde.files) {
-      var file = ee.wsIde.files[fileKey];
-      var line = $('<div id="file_'+ fileKey + '"></div>');
+      sortedFiles.push(ee.wsIde.files[fileKey]);
+    }
+
+
+    sortedFiles.sort(function (a,b) {
+      return a.name < b.name ? -1 : 1;
+    })
+ 
+    for (var i in sortedFiles) {
+      var file = sortedFiles[i];
+      var line = $('<div id="file_'+ file.fileKey + '"></div>');
       line.addClass('fileEntry');
       if (file.lang == "WSA") {
         line.addClass('fileTypeAsm');
       } else {
         line.addClass('fileTypeWs');
       }
-      var link = $('<a href="javascript: void(0);" onClick="ee.wsIde.loadFile(\'' + fileKey + '\');"></a>')
-      link.html('<div class="ico"></div>' + file.name);
+      var link = $('<a href="javascript: void(0);" onClick="ee.wsIde.loadFile(\'' + file.fileKey + '\');"></a>')
+      link.html('<div class="ico"></div>' + $('<span></span>').text(file.name).html());
       link.appendTo(line);
       line.appendTo(fileList);
     }
     ws_util.handleOverflow(fileList.parent());
   };
 
+  loadExampleFiles = function () {
+    $.getJSON('example/meta.json', function(result) {
+      var loadFirst = '';
+      for(var i=0; i < result.examples.length; i++) {
+        var ex = result.examples[i];
+        var fileKey = stupidHash(ex.file);
+        if (!ee.wsIde.defaultFile.length) {
+          ee.wsIde.defaultFile.push(fileKey);
+        } 
+        ex.fileKey = fileKey;
+        ee.wsIde.files[fileKey] = ex;
+      }
+
+      updateFileList();
+
+      if (ee.wsIde.defaultFile[0]) {
+        ee.wsIde.loadFile(ee.wsIde.defaultFile[0]);
+      }
+    });
+  };
+
+
+  var loadLocalFiles = function () {
+    if (typeof localStorage == "undefined") return;
+    var localFiles = JSON.parse(localStorage.files || "{}");
+    if (!localFiles.files) return;
+
+    for (var fileKey in localFiles.files) {
+      if (ee.wsIde.files[fileKey]) return;
+      var file = localFiles.files[fileKey];
+      ee.wsIde.files[fileKey] = file;
+    }
+
+    updateFileList();
+  };
+
+  var storeSource = function () {
+    var file = ee.wsIde.openFile;
+    if (!file) return;
+    file.src = programSource();
+  }
+
   var self = {
     files: {},
     inputStream: '',
     inputStreamPtr: 0,
+    defaultFile: [],
     highlightSourceWs: function(src) {
       return src.replace(/[^\t\n ]/g, '#')
                 .replace(/([ ]+)/g, '<span class="spaces">\$1</span>')
@@ -181,7 +236,11 @@ ee.wsIde = (function () {
         var ret=interceptTabs(e, this);
         return ret;
       });
-      ee.wsIde.initExamples();
+
+      loadExampleFiles();
+      loadLocalFiles();
+      updateFileList();
+
       ee.wsIde.initEnv();
       ee.wsIde.switchTab('a[href=#printTab]');
     },
@@ -203,20 +262,23 @@ ee.wsIde = (function () {
     },
 
     loadFile: function(idx) {
+      storeSource();
       $('#fileList:not(#file_' + idx + ') .fileEntry.emph').removeClass('emph');
       $('#fileList #file_' + idx).addClass('emph');
       var ex = ee.wsIde.files[idx];
       if (!ex) return;
 
       if (ee.wsIde.openFile) {
-        ee.wsIde.defaultFile = ee.wsIde.openFile.fileKey;
+        if (ee.wsIde.defaultFile[ee.wsIde.defaultFile.length -1] != ee.wsIde.openFile.fileKey) {
+          ee.wsIde.defaultFile.push(ee.wsIde.openFile.fileKey);
+        }
       }
       var load = function(src) {
         ee.wsIde.openFile = ex;
         if (!ex.src) ex.src = src;
         ee.wsIde.loadSource(src);
         updateEditor();
-        $('#panelMiddleLabel span').html(ex.file);
+        $('#panelMiddleLabel span').text(ex.file);
       }
       if (ex.lang == 'WS' || ex.file.match(/\.ws$/i)) {
         this.setHighlight(true);
@@ -224,37 +286,16 @@ ee.wsIde = (function () {
         this.setHighlight(false);
       }
 
-      $('#deleteFile').hide();
+      $('.localStorageButton').hide();
 
       if (typeof ex.src != "undefined") {
         load(ex.src);
         if (ex.localStorage) {
-          $('#deleteFile').show();
+          $('.localStorageButton').show();
         }
       } else {
         $.get(ex.file, load);
       }
-
-    },
-
-    initExamples: function () {
-      $.getJSON('example/meta.json', function(result) {
-        var loadFirst = '';
-        for(var i=0; i < result.examples.length; i++) {
-          var ex = result.examples[i];
-          var fileKey = stupidHash(ex.file);
-          ee.wsIde.defaultFile = ee.wsIde.defaultFile || fileKey;
-          
-          ex.fileKey = fileKey;
-          ee.wsIde.files[fileKey] = ex;
-       }
-
-        updateFileList();
-
-        if (ee.wsIde.defaultFile) {
-          ee.wsIde.loadFile(ee.wsIde.defaultFile);
-        }
-      });
 
     },
 
@@ -375,12 +416,39 @@ ee.wsIde = (function () {
     },
     deleteFile: function () {
       var fileKey = ee.wsIde.openFile.fileKey;
-      if (!ee.wsIde.files[fileKey]) return;
+      if (!ee.wsIde.files[fileKey] || 
+          !ee.wsIde.files[fileKey].localStorage) {
+        return;
+      }
       delete ee.wsIde.files[fileKey];
       updateFileList();
-      ee.wsIde.loadFile(ee.wsIde.defaultFile);
-    }
+      while (true) {
+        if (!ee.wsIde.defaultFile.length) break;
+        var fileKey = ee.wsIde.defaultFile[ee.wsIde.defaultFile.length - 1];
+        if (ee.wsIde.files[fileKey]) {
+          ee.wsIde.loadFile(fileKey);
+          break;
+        } else {
+          ee.wsIde.defaultFile.pop();
+        }
+      }
+    },
+    saveFile: function () {
+      storeSource();
 
+      var file = ee.wsIde.openFile;
+
+      if (!file || !file.localStorage) return;
+
+      if (typeof localStorage == "undefined") return;
+
+      var localFilesJSON = localStorage.files || "{}";
+      var localFiles = JSON.parse(localFilesJSON);
+      if (!localFiles.files) localFiles.files = {};
+
+      localFiles.files[file.fileKey] = file;
+      localStorage.files = JSON.stringify(localFiles);
+    }
   };
   $(self.init);
 
