@@ -252,6 +252,8 @@ var ws_ide = (function () {
 
       ws_ide.initEnv();
       ws_ide.switchTab('a[href=#printTab]');
+
+      ws_ide.displayModal('#splashScreenModal');
     },
 
     initEnv: function () {
@@ -412,7 +414,7 @@ var ws_ide = (function () {
       var file = {
         fileKey: fileKey,
         name: fileName,
-	file: "<no file>",
+	file: "<localStorage>",
         autohor: "",
         origin: "",
         src: "",
@@ -467,6 +469,22 @@ var ws_ide = (function () {
       this.saveFile();
       updateFileList();
       this.loadFile(ws_ide.openFile.fileKey);
+    },
+    displayModal: function(selector) {
+      var selector$ = $(selector);
+      var modal = $('#modal');
+      var fog = $('#fog');
+      fog.click(ws_ide.hideModal);
+      modal.html(selector$.html());
+
+      $('#fog').show();
+
+      modal.css('left', (fog.width() / 2 - modal.width() / 2) + "px");
+      modal.css('top', (fog.height() / 2 - modal.height() / 2) + "px");
+    },
+    hideModal: function() {
+      $('#fog').hide();
+      $('#modal').html('');
     }
   };
   $(self.init);
