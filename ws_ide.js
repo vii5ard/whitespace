@@ -212,7 +212,7 @@ var ws_ide = (function () {
       line.appendTo(fileList);
       
     }
-    ws_util.handleOverflow(fileList.parent());
+    ws_util.handleOverflow(fileList.closest('.content'));
   };
 
   loadExampleFiles = function () {
