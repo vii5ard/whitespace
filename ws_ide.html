@@ -27,6 +27,9 @@
     <script type="text/javascript"
           src="ws_optimizer.js">
 </script>
+    <script type="text/javascript"
+          src="BigInt.js">
+</script>
     <title>Whitelips the Whitespace IDE</title>
   </head>
   <body>
@@ -156,7 +159,14 @@ You really need to enable javascript or sth!
              class="label">
           <span>Disasm</span>
         </div>
-        <div class="content"></div>
+        <div class="buttonBar">
+          <span class="btn"><a href="javascript:void(0);"
+            onclick="ws_ide.debugProgram();">[Debug]</a></span>
+        </div>
+        <div class="content">
+          <div id="disasm">
+          </div>
+        </div>
       </div>
     </div>
     <div style="display: none">

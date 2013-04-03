@@ -139,8 +139,7 @@ textarea.inputBox {
 
 #panelRight .content {
   width: 150px;
-  height: 530px;
-  white-space: pre;
+  height: 510px;
 }
 
 #panelLeft .content {
@@ -170,6 +169,7 @@ div.panel div.label span {
 .fileEntry a {
   color: black;
   text-decoration: none;
+  cursor: default;
 }
 
 .fileEntry:hover {
@@ -190,6 +190,7 @@ div.panel div.label span {
 .fileEntry input {
   width:120px; 
   background-color: transparet;
+  cursor: default;
 }
 
 .fileEntry form {
@@ -271,4 +272,13 @@ div.panel div.label span {
   margin-left:140px;
   margin-top: 90px;
   white-space: pre;
+}
+
+.asmLine.running {
+  background-color: blue;
+  color: white;
+}
+
+.asmLine.asmInstr {
+  padding-left: 12px;
 }

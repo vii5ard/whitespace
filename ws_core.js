@@ -223,24 +223,28 @@ ws = {
       },
 
       getAsmSrc: function () {
-        var src = "";
+        var src = [];
         var asm = this.getAsm();
         var labler = new ws_util.labelTransformer(function (n) { return "label_" + n; } );
         for (var i in asm) {
           var ln = asm[i];
+          var labels = "";
           for (l in ln.labels) {
             var wsLabel = ln.labels[l];
             var label = labler.getLabel(wsLabel);
-            src += label + ":\n";
+            labels += (labels ? "\n": "") + label + ":";
           }
-          src += "\t" + ln.mnemo;
+          if (labels) {
+            src.push({IP: null, str: labels});
+          }
+          var instrStr = ln.mnemo;
           if (ln.param.label != null) {
-            src += " " + labler.getLabel(ln.param.label);
+            instrStr += " " + labler.getLabel(ln.param.label);
           }
           if (ln.param.val != null) {
-            src += " " + ln.param.val;
+            instrStr += " " + ln.param.val;
           }
-          src += "\n";
+          src.push({IP:i, str: instrStr});
         }
        
         return src;

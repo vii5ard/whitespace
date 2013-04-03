@@ -37,8 +37,8 @@ var ws_ide = (function () {
   };
 
   var compileProgram = function() {
-    var panel = $('#panelRight .content');
-    panel.html('');
+    var disasm = $('#disasm');
+    disasm.html('');
 
     var openFile = ws_ide.openFile;
     var src = programSource(); 
@@ -47,8 +47,25 @@ var ws_ide = (function () {
     } else {
       ws_ide.program = ws_asm.compile(src);
     }
-    panel.html(ws_ide.program.getAsmSrc());
-    ws_util.handleOverflow(panel);
+    var disasmSrc = ws_ide.program.getAsmSrc();
+    for (var i in disasmSrc) {
+      var ln = disasmSrc[i];
+      var div = $('<div class="asmLine"></div>');
+      div.text(ln.str);
+
+      if (ln.IP != null) {
+        div.addClass('asmInstr');
+        div.attr('id', 'instr_' + ln.IP);
+
+        if (ws_ide.openFile.breakPoints && ln.IP in ws_ide.openFile.breakPoints) {
+          div.addClass('breakpoint');
+        }
+      } else {
+        div.addClass('asmLabel');
+      }
+      div.appendTo(disasm);
+    }
+    ws_util.handleOverflow(disasm.parent());
   };
 
   var updateEditor = function(evt) {
@@ -170,11 +187,25 @@ var ws_ide = (function () {
         link.html('<div class="ico"></div>' + $('<span></span>').text(file.name).html());
         link.appendTo(line);
       } else {
-        var link = $('<div onclick="ws_ide.loadFile(\'' + file.fileKey + '\'); $(this).find(\'input\').focus().select();"><div class="ico"></div></div>');
+        var link = $('<div><div class="ico"></div></div>');
+        link.click((function(fileKey) {
+          return function() {
+            ws_ide.loadFile(fileKey);
+            $(this).find('input').focus().select();
+          }
+        })(file.fileKey));
         var form = $('<form onsubmit="return false;"></form>');
-        var inp = $('<input type="text" class="userInput" onChange="ws_ide.handleFileRename(\'' + file.fileKey +'\');"></input>');
+        var inp = $('<input type="text" class="userInput"></input>');
+        var nameChange = (function (fileKey) {
+          return function () {
+            ws_ide.handleFileRename(fileKey);
+          };
+        })(file.fileKey);
+        inp.blur(nameChange);
+        inp.change(nameChange);
         inp.val(file.name);
         inp.appendTo(form);
+
         form.appendTo(link);
         link.appendTo(line);
       }
@@ -310,10 +341,34 @@ var ws_ide = (function () {
 
     },
 
+    debugProgram: function() {
+      try {
+        ws_ide.inputStream = '';
+        ws_ide.inputStreamPtr = 0;
+        ws_ide.initEnv();
+        
+        ws_ide.env.debug = true;
+        ws_ide.openFile.breakPoints = ws_ide.openFile.breakPoints || {}
+        ws_ide.env.beforeInstructionRun = function(env) {
+          $('#disasm .running').removeClass('running');
+          $('#disasm #instr_' + env.register.IP).addClass('running');
+          if (env.debug && env.register.IP in ws_ide.openFile.breakPoints) {
+            throw new "Break";
+          }
+        }
+      
+        compileProgram();
+        ws_ide.env.running = true;
+        ws_ide.continueRun();
+      } catch (err) {
+        console.error("Compile Error: " + err);
+      }
+    },
+
     runProgram: function() {
       try {
-        this.inputStream = '';
-        this.inputStreamPtr = 0;
+        ws_ide.inputStream = '';
+        ws_ide.inputStreamPtr = 0;
         ws_ide.initEnv();
         compileProgram();
         ws_ide.env.running = true;
@@ -462,7 +517,7 @@ var ws_ide = (function () {
     },
 
     handleFileRename: function (fileKey) {
-      var input$ = $('#' + fileKey + ' input');
+      var input$ = $('#file_' + fileKey + ' input');
       if (!input$.length) return;
       ws_ide.files[ws_ide.openFile.fileKey].name = input$.val();
       
