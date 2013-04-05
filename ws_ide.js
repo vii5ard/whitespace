@@ -42,6 +42,8 @@ var ws_ide = (function () {
 
     var openFile = ws_ide.openFile;
     var src = programSource();
+    var errorDiv = $('#errorDiv');
+    errorDiv.text('');
     try { 
       if (openFile.lang == "WS") {
         ws_ide.program = ws.compile(src);
@@ -50,7 +52,7 @@ var ws_ide = (function () {
       }
     } catch (err) {
       if (err.program) {
-        console.error("Compilation failed: " + err.message);
+        errorDiv.text(err.message);
         ws_ide.program = err.program;
       } else {
         throw err;
