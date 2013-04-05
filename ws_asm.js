@@ -8,31 +8,6 @@ var  ws_asm  = (function() {
     return mnemo;
   })(); 
 
-  var StrArr = function(str) {
-    return {
-      arr: str.split(''),
-      pos: 0,
-      line: 1,
-      col: 1,
-      hasNext: function  () {
-        return this.pos  < this.arr.length;
-      },
-      getNext: function  () {
-        var next = this.arr[this.pos++];
-        if (next == '\n') {
-          this.line++;
-          this.col = 1;
-        } else {
-          this.col++;
-        }
-        return next;
-      },
-      peek:  function ()  {
-        return this.arr[this.pos];
-      }
-    };
-  };
-
   var parseWhitespace = function  (strArr) {
     var  space =  "";
     while (strArr.hasNext()  && strArr.peek().match(/[ \t\n\r]/)) {
@@ -216,7 +191,7 @@ var  ws_asm  = (function() {
 
   return {
     compile: function (str) {
-      var strArr = new StrArr(str);
+      var strArr = new ws_util.StrArr(str);
       var tokens = getTokens(strArr);
       var builder = ws.programBuilder(str);
       var tokenNr = 0;
