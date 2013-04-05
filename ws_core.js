@@ -3,20 +3,6 @@
   /* 
    * Private interface
    */
-  var SourceTokenizer = function(fullSource) {
-    var self = {
-      source: fullSource.split(''),
-      ptr: 0,
-      hasMore: function () {
-        return this.ptr < this.source.length;
-      },
-      getNext: function () {
-        return this.source[this.ptr++];
-      }
-    };
-    return self;
-  };
-
   var Heap = function () {
     var heapSpace = {};
     return {
@@ -50,7 +36,7 @@
     var sign = 0;
     var value = 0;
     var paramStr = '';
-    while (tokenizer.hasMore()) {
+    while (tokenizer.hasNext()) {
       var token = tokenizer.getNext();
       if (!isSource(token)) continue;
       paramStr += token;
@@ -156,10 +142,10 @@ ws = {
   compile: function (fullSource) {
     var builder = ws.programBuilder(fullSource);
     var parser = instParser;
-    var tokenizer = SourceTokenizer(fullSource);
+    var tokenizer = new ws_util.StrArr(fullSource);
  
     var debugToken = '';
-    while (tokenizer.hasMore()) {
+    while (tokenizer.hasNext()) {
       var token = tokenizer.getNext();
       if (!sourceTokens[token]) {
         continue;
@@ -169,7 +155,7 @@ ws = {
       if (!parser) {
         throw {
           program: builder,
-          message: 'Unexpected token @' + tokenizer.ptr + ':' + debugToken
+          message: 'Unexpected token at line ' + tokenizer.line + ':' + tokenizer.col + ' - ' + debugToken
         }
       }
       if (parser.instFn) {
