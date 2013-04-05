@@ -232,7 +232,11 @@ var  ws_asm  = (function() {
             if (op.param) {
               var param = tokens[tokenNr++];
               if (!param) {
-                throw "Parameter expected at line + " + token.line + ".";
+                throw { 
+                  program: builder,
+                  line: meta.line,
+                  message: "Parameter expected at line + " + meta.line + "." 
+                };
               }
               if (op.param == "NUMBER") {
                 if (param.type == "NUMBER") {
@@ -244,16 +248,26 @@ var  ws_asm  = (function() {
                 }
               } else if (op.param == "LABEL") {
                 var instruction = new op.constr();
-                instruction.param = {token: labeler.getLabel(param.token), value: null };
+                instruction.param = {
+                  token: labeler.getLabel(param.token), value: null 
+                };
                 builder.pushInstruction(instruction); 
               } else {
-                throw "Unsupported parameter type " + op.param + " (should never happen).";
+                throw {
+                  program: builder,
+                  line: meta.line,
+                  message: "Unsupported parameter type " + op.param + " (should never happen)."
+                }
               }
             } else {
               pushInstruction(builder, op.constr);
             }
           } else {
-             throw "Unexpected token at line " + meta.line + ":" + meta.col + ".";
+             throw {
+               program: builder,
+               line: meta.line,
+               message: "Unexpected token at line " + meta.line + ":" + meta.col + "."
+             }
           }
        }
        builder.postProcess();

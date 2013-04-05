@@ -154,7 +154,7 @@ ws = {
   },
 
   compile: function (fullSource) {
-    var compiler = ws.programBuilder(fullSource);
+    var builder = ws.programBuilder(fullSource);
     var parser = instParser;
     var tokenizer = SourceTokenizer(fullSource);
  
@@ -167,28 +167,31 @@ ws = {
       debugToken += {' ': 's', '\t':'t', '\n':'n'}[token]
       parser = parser.cont[token];
       if (!parser) {
-        throw 'Unexpected token @' + tokenizer.ptr + ':' + debugToken;
+        throw {
+          program: builder,
+          message: 'Unexpected token @' + tokenizer.ptr + ':' + debugToken
+        }
       }
       if (parser.instFn) {
         var instruction = new parser.instFn();
         if (instruction.paramType != null) {
           instruction.param = parseParam(tokenizer);
         }
-        compiler.pushInstruction(instruction);
+        builder.pushInstruction(instruction);
        // Reset parser
         parser = instParser;
         debugToken='';
       }
     }
 
-    compiler.postProcess();
+    builder.postProcess();
 
-    for (label in compiler.labels) {
-      var inst = compiler.programStack[compiler.labels[label]];
+    for (label in builder.labels) {
+      var inst = builder.programStack[builder.labels[label]];
       if (!inst.labels) inst.labels = [];
       inst.labels.push(label);
     }
-    return compiler;
+    return builder;
   },
 
   programBuilder: function (fullSource) {

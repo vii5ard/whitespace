@@ -41,11 +41,20 @@ var ws_ide = (function () {
     disasm.html('');
 
     var openFile = ws_ide.openFile;
-    var src = programSource(); 
-    if (openFile.lang == "WS") {
-      ws_ide.program = ws.compile(src);
-    } else {
-      ws_ide.program = ws_asm.compile(src);
+    var src = programSource();
+    try { 
+      if (openFile.lang == "WS") {
+        ws_ide.program = ws.compile(src);
+      } else {
+        ws_ide.program = ws_asm.compile(src);
+      }
+    } catch (err) {
+      if (err.program) {
+        console.error("Compilation failed: " + err.message);
+        ws_ide.program = err.program;
+      } else {
+        throw err;
+      }
     }
     var disasmSrc = ws_ide.program.getAsmSrc();
     for (var i in disasmSrc) {
@@ -72,11 +81,7 @@ var ws_ide = (function () {
     updateOverlay();
     ws_util.handleOverflow("#scrollableSource");
 
-    try {
-      compileProgram();
-    } catch (err) {
-      // Ignore it at the moment
-    }
+    compileProgram();
   }
 
   var programSource = function (src) {
@@ -361,7 +366,9 @@ var ws_ide = (function () {
         ws_ide.env.running = true;
         ws_ide.continueRun();
       } catch (err) {
-        console.error("Compile Error: " + err);
+        if (!err.program) {
+          console.error("Compile Error: " + err);
+        }
       }
     },
 
@@ -374,7 +381,9 @@ var ws_ide = (function () {
         ws_ide.env.running = true;
         ws_ide.continueRun();
       } catch (err) {
-        console.error("Compile Error: " + err);
+        if (!err.program) {
+          console.error("Compile Error: " + err);
+        }
       }
     },
 
