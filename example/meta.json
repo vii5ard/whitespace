@@ -44,7 +44,7 @@
   {
     "name":"Fibonacci",
     "file":"example/fibonacci.ws",
-    "author": "?",
+    "author": "Chris Morris",
     "origin":"https://github.com/hostilefork/whitespacers/blob/master/examples/fibonacci.ws",
     "lang": "WS"
   },
@@ -65,6 +65,7 @@
   {
     "name":"Quine v2",
     "file":"example/quine-2.ws",
+    "author": "Benjamin Lerman",
     "origin":"http://compsoc.dur.ac.uk/whitespace/quine-2.ws",
     "lang": "WS"
   },
