@@ -19,6 +19,7 @@ body, input, textarea {
   background: transparent;
   outline: none;
   border: none;
+  min-height: 250px;
 }
 
 textarea.inputBox {
