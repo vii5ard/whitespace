@@ -97,6 +97,14 @@ var ws_ide = (function () {
     }
   };
 
+  var resizeUserInput = function() {
+    var input = $('#userInput');
+    var form = input.closest('form');
+    var container = form.parent();
+    input.width(0);
+    input.width(container.width() - (input.position().left - container.position().left));
+  }
+
   var printOutput = function(str) {
     if (typeof str != "string") {
       str = "" + str;
@@ -119,7 +127,7 @@ var ws_ide = (function () {
     if (!tabLabel.is('.activeTab')) {
       tabLabel.addClass('emph');
     }
-
+    resizeUserInput();
   };
 
   var readChar = function() {
