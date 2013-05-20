@@ -1,11 +1,23 @@
 var  ws_asm  = (function() {
   var mnemo = (function () {
-    var mnemo = {};
-     for (var i in ws.keywords) {
-       var keyword = ws.keywords[i];
-       mnemo[keyword.mnemo] = keyword;
-     }
-    return mnemo;
+    var mnemoCodes = {};
+    // Collect keywords
+    for (var i in ws.keywords) {
+      var keyword = ws.keywords[i];
+      mnemoCodes[keyword.mnemo] = keyword;
+    }
+
+    // Add aliases
+    for (var mnemo in ws.keywordAliases) {
+      var aliases = ws.keywordAliases[mnemo];
+      for (var i in aliases) {
+        var alias = aliases[i];
+        if (!(alias in mnemoCodes) && mnemo in mnemoCodes) {
+          mnemoCodes[alias] = mnemoCodes[mnemo];
+        }
+      }
+    }
+    return mnemoCodes;
   })(); 
 
   var parseWhitespace = function  (strArr) {

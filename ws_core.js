@@ -530,6 +530,21 @@ ws.keywords = [
     { ws: '\t\n\t\t', mnemo: 'readi',    constr: ws.WsReadNum,        param: null }
   ];
 
+// Adding aliases for compatibility with other WSA implementations
+ws.keywordAliases = {
+  'dup':    ['doub', 'duplicate'],
+  'jmp':    ['jump'],
+  'jz':     ['jumpz'],
+  'jn':     ['jumpn'],
+  'printc': ['outn', 'putc'],
+  'printi': ['outi', 'puti', 'putn'],
+  'readc':  ['getc'],
+  'readi':  ['geti', 'getn'],
+  'push':   ['pushs'], // push string is embedded by default
+  'ret':    ['ret'],
+  'end':    ['exit', 'halt']
+};
+
   for (var i in ws.keywords) {
     var keyword = ws.keywords[i];
     var constr = keyword.constr;
