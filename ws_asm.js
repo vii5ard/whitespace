@@ -171,7 +171,7 @@ var  ws_asm  = (function() {
 
       var next = strArr.peek();
       var token = null;
-      if (next == ';') {
+      if (next == ';' || next == '#') {
         token = parseLineComment(strArr);
       } else if (next.match(/\"|\'/)) {
         token = parseString(strArr);
