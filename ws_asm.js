@@ -147,7 +147,7 @@ var  ws_asm  = (function() {
     }
 
     var op = mnemo[label];
-    if (op) {
+    if (op && type == "TOKEN") {
        type = "KEYWORD";
     }
     return {
