@@ -272,6 +272,11 @@ var ws_ide = (function () {
     file.src = programSource();
   }
 
+  var showLang = function(lang) {
+    $('#filetype .btn').hide();
+    $('#filetype #lang_' + lang).show();
+  }
+
   var self = {
     files: {},
     inputStream: '',
@@ -343,6 +348,7 @@ var ws_ide = (function () {
         this.setHighlight(false);
       }
 
+
       $('.localStorageButton').hide();
 
       if (typeof ex.src != "undefined") {
@@ -354,6 +360,7 @@ var ws_ide = (function () {
         $.get(ex.file, load);
       }
 
+      showLang(ex.lang || 'WS');
     },
 
     debugProgram: function() {
@@ -538,7 +545,7 @@ var ws_ide = (function () {
     handleFileRename: function (fileKey) {
       var input$ = $('#file_' + fileKey + ' input');
       if (!input$.length) return;
-      ws_ide.files[ws_ide.openFile.fileKey].name = input$.val();
+      ws_ide.openFile.name = input$.val();
       
       this.saveFile();
       updateFileList();
@@ -559,6 +566,12 @@ var ws_ide = (function () {
     hideModal: function() {
       $('#fog').hide();
       $('#modal').html('');
+    },
+    setLang: function(lang) {
+      ws_ide.openFile.lang = lang;
+      showLang(lang);
+      updateFileList();
+      compileProgram();
     }
   };
   $(self.init);
