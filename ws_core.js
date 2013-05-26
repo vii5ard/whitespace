@@ -162,12 +162,25 @@ ws = {
         var instruction = new parser.instFn();
         if (instruction.paramType != null) {
           instruction.param = parseParam(tokenizer);
+          if (!instruction.param.token) {
+            throw {
+              program: builder,
+              message: 'Unexpected EOF'
+            };
+          }
         }
         builder.pushInstruction(instruction);
        // Reset parser
         parser = instParser;
         debugToken='';
       }
+    }
+
+    if (debugToken) {
+      throw {
+        program: builder,
+        message: 'Unexpected EOF'
+      };
     }
 
     builder.postProcess();
