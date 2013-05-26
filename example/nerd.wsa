@@ -13,5 +13,6 @@ print:
 
 ; Graceful end
 end:
+	drop
 	end
 
