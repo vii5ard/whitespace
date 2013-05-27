@@ -185,7 +185,7 @@ var ws_ide = (function () {
 
 
     sortedFiles.sort(function (a,b) {
-      return a.name.toLowerCase() < b.name.toLowerCase ? -1 : 1;
+      return a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1;
     })
  
     for (var i in sortedFiles) {
@@ -434,7 +434,10 @@ var ws_ide = (function () {
       link.closest(".btn").addClass("activeTab").removeClass("emph");
 
       tab.closest(".allTabs").find(".tabContent:visible").not(tabSelector).hide();
-      tab.show(); 
+      tab.show();
+
+      resizeUserInput(); // FIXME: Actually only needed when user input displayed
+ 
       return false; 
     },
 
