@@ -213,12 +213,12 @@ div.panel div.label span {
 }
 
 .fileTypeWs .ico {
-  background: url('img/icoset.png') 0 0 no-repeat;
+  background: url('../img/icoset.png') 0 0 no-repeat;
   background-position: 0 0
 }
 
 .fileTypeAsm .ico {
-  background: url('img/icoset.png') no-repeat;
+  background: url('../img/icoset.png') no-repeat;
   background-position: -15px 0
 }
 
@@ -268,7 +268,7 @@ div.panel div.label span {
   height:200px; 
   display:inline-block; 
   background-color: white;
-  background: url(img/lips.png) white no-repeat;
+  background: url(../img/lips.png) white no-repeat;
   background-position-y: 20px;
 }
 
@@ -277,19 +277,6 @@ div.panel div.label span {
   margin-left:140px;
   margin-top: 90px;
   white-space: pre;
-}
-
-.asmLine.running {
-  background-color: blue;
-  color: white;
-}
-
-.asmLine.asmInstr {
-  padding-left: 12px;
-}
-
-.asmLine.breakPoint {
-  background-color: lightblue;
 }
 
 #errorDiv {

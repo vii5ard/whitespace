@@ -1,0 +1,19 @@
+.asmLine.running {
+  background-color: blue;
+  color: white;
+}
+
+.asmLine.running.breakpoint {
+  background-color: blue;
+  color: white;
+}
+
+.asmLine.breakpoint {
+  background-color: lightblue;
+}
+
+.asmLine.asmInstr {
+  padding-left: 12px;
+}
+
+
