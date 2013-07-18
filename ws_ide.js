@@ -68,14 +68,19 @@ var ws_ide = (function () {
         div.addClass('asmInstr');
         div.attr('id', 'instr_' + ln.IP);
 
-        if (ws_ide.openFile.breakPoints && ln.IP in ws_ide.openFile.breakPoints) {
+        if (ws_ide.openFile.breakpoints && ln.IP in ws_ide.openFile.breakpoints) {
           div.addClass('breakpoint');
         }
+
+        div.click((function(ip) { 
+          return function () {ws_ide.toggleBreakpoint(ip);}
+         })(ln.IP));
       } else {
         div.addClass('asmLabel');
       }
       div.appendTo(disasm);
     }
+    ws_ide.openFile.breakpoints = ws_ide.openFile.breakpoints || {}
     ws_util.handleOverflow(disasm.parent());
   };
 
@@ -270,12 +275,27 @@ var ws_ide = (function () {
     var file = ws_ide.openFile;
     if (!file) return;
     file.src = programSource();
-  }
+  };
 
   var showLang = function(lang) {
     $('#filetype .btn').hide();
     $('#filetype #lang_' + lang).show();
-  }
+  };
+
+  var beforeInstructionRun = function(env) {
+    if (!env.debug) return;
+
+    $('#disasm .running').removeClass('running');
+    $('#disasm #instr_' + env.register.IP).addClass('running');
+    if (env.continueDebug) {
+      env.continueDebug = false;
+    } else if (env.stepProgram) {
+      throw "Break";
+    } else if (env.debug && env.register.IP in ws_ide.openFile.breakpoints) {
+      throw "Break";
+    }
+  };
+
 
   var self = {
     files: {},
@@ -313,6 +333,7 @@ var ws_ide = (function () {
       env.readChar = readChar;
       env.readNum = readNum;
       env.afterInstructionRun = afterInstructionRun;
+      env.beforeInstructionRun = beforeInstructionRun;
       ws_ide.env = env;
       return env;
     },
@@ -361,41 +382,25 @@ var ws_ide = (function () {
       }
 
       showLang(ex.lang || 'WS');
+
+      ws_ide.initEnv();
+      ws_ide.setDebug(false);
     },
 
-    debugProgram: function() {
+    runProgram: function(debugMode) {
       try {
-        ws_ide.inputStream = '';
-        ws_ide.inputStreamPtr = 0;
-        ws_ide.initEnv();
-        
-        ws_ide.env.debug = true;
-        ws_ide.openFile.breakPoints = ws_ide.openFile.breakPoints || {}
-        ws_ide.env.beforeInstructionRun = function(env) {
-          $('#disasm .running').removeClass('running');
-          $('#disasm #instr_' + env.register.IP).addClass('running');
-          if (env.debug && env.register.IP in ws_ide.openFile.breakPoints) {
-            throw new "Break";
+        if (!debugMode || !ws_ide.env.running) { 
+          ws_ide.inputStream = '';
+          ws_ide.inputStreamPtr = 0;
+          compileProgram();
+          if (!debugMode || !ws_ide.env.running) {
+            ws_ide.initEnv();
           }
+          ws_ide.env.debug = debugMode || false;
+          ws_ide.env.running = true;
+        } else if (debugMode) {
+          ws_ide.env.continueDebug = true;
         }
-      
-        compileProgram();
-        ws_ide.env.running = true;
-        ws_ide.continueRun();
-      } catch (err) {
-        if (!err.program) {
-          console.error("Compile Error: " + err);
-        }
-      }
-    },
-
-    runProgram: function() {
-      try {
-        ws_ide.inputStream = '';
-        ws_ide.inputStreamPtr = 0;
-        ws_ide.initEnv();
-        compileProgram();
-        ws_ide.env.running = true;
         ws_ide.continueRun();
       } catch (err) {
         if (!err.program) {
@@ -417,6 +422,18 @@ var ws_ide = (function () {
         }
       }
       updateMemoryTab(ws_ide.env);
+    },
+
+    continueDebug: function () {
+      ws_ide.env.continueDebug = true;
+      ws_ide.env.stepProgram = false;
+      ws_ide.continueRun();
+    },
+
+    stepProgram: function () {
+      ws_ide.env.stepProgram = true;
+      ws_ide.env.continueDebug = true;
+      ws_ide.continueRun();
     },
 
     optimizeProgram: function() {
@@ -509,6 +526,7 @@ var ws_ide = (function () {
       updateFileList();
       ws_ide.loadFile(fileKey);
     },
+
     deleteFile: function () {
       var fileKey = ws_ide.openFile.fileKey;
       if (!ws_ide.files[fileKey] || 
@@ -528,6 +546,7 @@ var ws_ide = (function () {
         }
       }
     },
+
     saveFile: function () {
       storeSource();
 
@@ -575,6 +594,30 @@ var ws_ide = (function () {
       showLang(lang);
       updateFileList();
       compileProgram();
+    },
+
+    toggleBreakpoint: function(ip) {
+      var instrDiv = $('#instr_' + ip);
+
+      if (ip in ws_ide.openFile.breakpoints) {
+        delete ws_ide.openFile.breakpoints[ip];
+        instrDiv.removeClass('breakpoint');
+      } else {
+        ws_ide.openFile.breakpoints[ip] = true;
+        instrDiv.addClass('breakpoint');
+      }
+    },
+
+    setDebug: function (debugMode) {
+      ws_ide.env.debug = debugMode;
+      if (debugMode) {
+        $('#btnEnableDebug').hide();
+        $('#btnDisableDebug').show();
+      } else {
+        ws_ide.env.beforeInstructionRun = function (env) {};
+        $('#btnEnableDebug').show();
+        $('#btnDisableDebug').hide();
+      }
     }
   };
   $(self.init);

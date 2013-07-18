@@ -288,6 +288,10 @@ div.panel div.label span {
   padding-left: 12px;
 }
 
+.asmLine.breakPoint {
+  background-color: lightblue;
+}
+
 #errorDiv {
   margin-top: 3px;
   margin-bottom: 3px;

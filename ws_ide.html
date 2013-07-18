@@ -159,11 +159,13 @@ You really need to enable javascript or sth!
            class="panel">
         <div id="panelRightLabel"
              class="label">
-          <span>Disasm</span>
+          <span>Debug</span>
         </div>
         <div class="buttonBar">
-          <span class="btn"><a href="javascript:void(0);"
-            onclick="ws_ide.debugProgram();">[Debug]</a></span>
+          <span class="btn" id="btnEnableDebug" style="display:none"><a href="javascript:void(0);" onclick="ws_ide.setDebug(true);">[ ]Debug</a></span> 
+          <span class="btn" id="btnDisableDebug" style="display:none;"><a href="javascript:void(0);"  onclick="ws_ide.setDebug(false);">[X]Debug</a></span>
+          <span class="btn" id="btnDebugRunProgram"><a href="javascript:void(0);"  onclick="ws_ide.runProgram(true);">[Run]</a></span>
+          <span class="btn" id="btnDebugStepProgram"><a href="javascript:void(0);"  onclick="ws_ide.stepProgram();">[Step]</a></span>
         </div>
         <div class="content">
           <div id="disasm">
