@@ -391,7 +391,7 @@ var ws_ide = (function () {
       ws_ide.initEnv();
     },
 
-    runProgram: function(debugMode) {
+    runProgram: function(debugMode, stepMode) {
       try {
         if (!debugMode || !ws_ide.env.running) { 
           ws_ide.inputStream = '';
@@ -405,6 +405,7 @@ var ws_ide = (function () {
         } else if (debugMode) {
           ws_ide.env.continueDebug = true;
         }
+        ws_ide.env.stepProgram = stepMode || false;
         ws_ide.continueRun();
       } catch (err) {
         if (!err.program) {
@@ -432,9 +433,13 @@ var ws_ide = (function () {
     },
 
     stepProgram: function () {
-      ws_ide.env.stepProgram = true;
-      ws_ide.env.continueDebug = true;
-      ws_ide.continueRun();
+      if (!ws_ide.env.running) {
+        ws_ide.runProgram(true, true);
+      } else {
+        ws_ide.env.stepProgram = true;
+        ws_ide.env.continueDebug = true;
+        ws_ide.continueRun();
+      }
     },
 
     optimizeProgram: function() {
