@@ -297,6 +297,10 @@ var ws_ide = (function () {
     }
   };
 
+  var cleanupDebug = function() {
+    $('.asmline.running').removeClass('running');
+  }
+
 
   var self = {
     files: {},
@@ -413,6 +417,9 @@ var ws_ide = (function () {
      if (!ws_ide.env.running) return;
      try {
         ws_ide.env.runProgram(ws_ide.program);
+        if (!ws_ide.env.running) {
+          cleanupDebug();
+        }
       } catch (err) {
         if (err == "IOWait") {
           // Do nothing - wait for IO
