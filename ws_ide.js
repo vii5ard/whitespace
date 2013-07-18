@@ -290,6 +290,7 @@ var ws_ide = (function () {
     if (env.continueDebug) {
       env.continueDebug = false;
     } else if (env.stepProgram) {
+      env.stepProgram = false;
       throw "Break";
     } else if (env.debug && env.register.IP in ws_ide.openFile.breakpoints) {
       throw "Break";
@@ -384,7 +385,6 @@ var ws_ide = (function () {
       showLang(ex.lang || 'WS');
 
       ws_ide.initEnv();
-      ws_ide.setDebug(false);
     },
 
     runProgram: function(debugMode) {
@@ -422,12 +422,6 @@ var ws_ide = (function () {
         }
       }
       updateMemoryTab(ws_ide.env);
-    },
-
-    continueDebug: function () {
-      ws_ide.env.continueDebug = true;
-      ws_ide.env.stepProgram = false;
-      ws_ide.continueRun();
     },
 
     stepProgram: function () {
@@ -607,18 +601,6 @@ var ws_ide = (function () {
         instrDiv.addClass('breakpoint');
       }
     },
-
-    setDebug: function (debugMode) {
-      ws_ide.env.debug = debugMode;
-      if (debugMode) {
-        $('#btnEnableDebug').hide();
-        $('#btnDisableDebug').show();
-      } else {
-        ws_ide.env.beforeInstructionRun = function (env) {};
-        $('#btnEnableDebug').show();
-        $('#btnDisableDebug').hide();
-      }
-    }
   };
   $(self.init);
 
