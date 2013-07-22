@@ -65,9 +65,11 @@
         <div class="content">
           <div id="buttonDiv">
              <span class="btn"><a href="javascript:void(0);" onclick="ws_ide.runProgram();">[Run]</a></span> 
-             <span class="btn"><a href="javascript:void(0);" onclick="ws_ide.optimizeProgram();">[Optimize]</a></span> 
+             <span class="btn" id="btnCompile"><a href="javascript:void(0);" onclick="ws_ide.compileAsm();">[Compile]</a></span> 
+             <span class="btn" id="btnOptimize"><a href="javascript:void(0);" onclick="ws_ide.optimizeProgram();">[Optimize]</a></span> 
              <span class="btn" id="btnEnableHighlight"  style="display:none"><a href="javascript:void(0);" onclick="ws_ide.setHighlight(true);">[ ]Highlight</a></span> 
              <span class="btn" id="btnDisableHighlight" style="display: none;"><a href="javascript:void(0);"  onclick="ws_ide.setHighlight(false);">[X]Highlight</a></span>
+             <span class="btn" id="btnDownload"><a href="javascript:void(0);" onclick="ws_ide.downloadFile();">[Download]</a></span> 
            <div style="display:inline-block;">
             <div style="display:inline-block;">
               Filetype:

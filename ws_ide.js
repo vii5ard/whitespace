@@ -280,6 +280,16 @@ var ws_ide = (function () {
   var showLang = function(lang) {
     $('#filetype .btn').hide();
     $('#filetype #lang_' + lang).show();
+    if (lang == "WS") {
+      $('#btnOptimize').show();
+    } else {
+      $('#btnOptimize').hide();
+    }
+    if (lang == "WSA") {
+      $('#btnCompile').show();
+    } else {
+      $('#btnCompile').hide();
+    }
   };
 
   var beforeInstructionRun = function(env) {
@@ -299,8 +309,33 @@ var ws_ide = (function () {
 
   var cleanupDebug = function() {
     $('.asmline.running').removeClass('running');
-  }
+  };
 
+  var createNewFile = function () {
+    var fileName = 'New file ';
+    var count = 1;
+    var fileKey = '';
+    while (true) {
+      fileKey = stupidHash(fileName + count);
+      if (!ws_ide.files[fileKey]) {
+        fileName = fileName + count;
+        break;
+      }
+      count++;
+    }
+    var file = {
+      fileKey: fileKey,
+      name: fileName,
+      file: "<localStorage>",
+      autohor: "",
+      origin: "",
+      src: "",
+      lang: "WS",
+      localStorage: true
+    }
+    ws_ide.files[fileKey] = file;
+    return fileKey;
+  };
 
   var self = {
     files: {},
@@ -507,28 +542,7 @@ var ws_ide = (function () {
     },
     
     newFile: function () {
-      var fileName = 'New file ';
-      var count = 1;
-      var fileKey = '';
-      while (true) {
-        fileKey = stupidHash(fileName + count);
-        if (!ws_ide.files[fileKey]) {
-          fileName = fileName + count;
-          break;
-        }
-        count++;
-      }
-      var file = {
-        fileKey: fileKey,
-        name: fileName,
-	file: "<localStorage>",
-        autohor: "",
-        origin: "",
-        src: "",
-        lang: "WS",
-        localStorage: true
-      }
-      ws_ide.files[fileKey] = file;
+      var fileKey = createNewFile();
       updateFileList();
       ws_ide.loadFile(fileKey);
     },
@@ -613,6 +627,21 @@ var ws_ide = (function () {
         instrDiv.addClass('breakpoint');
       }
     },
+
+    compileAsm: function() {
+      var wsSrc = ws_ide.program.getWsSrc();
+      var fileKey = createNewFile();
+      var file = ws_ide.files[fileKey];
+      file.src = wsSrc;
+
+      updateFileList();
+      ws_ide.loadFile(fileKey);
+    },
+
+    downloadFile: function() {
+      window.open('data:text/plain;base64,' + btoa(ws_ide.openFile.src), '_download');
+      
+    }
   };
   $(self.init);
 
