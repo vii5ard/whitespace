@@ -175,7 +175,7 @@ var  ws_asm  = (function() {
         token = parseLineComment(strArr);
       } else if (next.match(/\"|\'/)) {
         token = parseString(strArr);
-      } else if (next.match(/[+-\d]/)) {
+      } else if (next.match(/[-+\d]/)) {
         token = parseNumber(strArr);
       } else {
         token = parseLabel(strArr);
