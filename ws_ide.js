@@ -641,6 +641,14 @@ var ws_ide = (function () {
     downloadFile: function() {
       window.open('data:text/plain;base64,' + btoa(ws_ide.openFile.src), '_download');
       
+    },
+    
+    stopProgram: function() {
+      if (!ws_ide.env.running) {
+        return;
+      }
+      ws_ide.env.running = false;
+      cleanupDebug();
     }
   };
   $(self.init);
