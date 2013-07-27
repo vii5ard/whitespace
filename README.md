@@ -9,6 +9,7 @@ Whitelips features:
 * Whitespace virtual machine,
 * Whitespace optimizer,
 * On-the-fly compilation,
+* Local storage (browser) for programs (programs are never sent to the server),
 * Whitespace assembly virtual machine and compiler to Whitespace,
 * Disassebler,
 * Debugging Whitespace and assembly programs,
