@@ -8,9 +8,9 @@ Itself, and should not be taken too seriously (unless you want to contribute).
 Whitelips features:
 * Whitespace virtual machine,
 * Whitespace optimizer,
-* On the fly compilation,
-* Whitespace assembly virtual machine and compiler to Whitespace
-* Disassebler
-* Debugging Whitespace and assembly programs
-* Whitespace syntax highlight
-* Example programs (including a Brainfuck [interpreter](https://github.com/vii5ard/brainfuck-whitespace))
+* On-the-fly compilation,
+* Whitespace assembly virtual machine and compiler to Whitespace,
+* Disassebler,
+* Debugging Whitespace and assembly programs,
+* Whitespace syntax highlight,
+* Example programs (including a Brainfuck [interpreter](https://github.com/vii5ard/brainfuck-whitespace)).
