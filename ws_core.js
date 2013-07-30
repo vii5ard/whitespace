@@ -484,7 +484,7 @@ ws = {
       }
     }
     this.postProcess = function(compiler) {
-      this.successI = compiler.labels[this.param];
+      this.successI = compiler.labels[this.param.token];
     }
    this.getAsm = asmWithLabelParam;
   },
