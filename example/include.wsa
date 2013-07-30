@@ -1,0 +1,8 @@
+include "example/lib/stack.asm"
+
+push "Hello std!"
+
+call printStackC
+
+end
+

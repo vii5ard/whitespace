@@ -21,6 +21,13 @@
     "lang": "WSA"
   },
   {
+    "name":"Hello Include",
+    "file":"example/include.wsa",
+    "author":"Vii5ard",
+    "origin":"example/include.wsa",
+    "lang":"WSA"
+  },
+  {
     "name":"Hello User",
     "file":"example/name.ws",
     "author": "?",

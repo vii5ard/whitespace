@@ -1,4 +1,34 @@
 var  ws_asm  = (function() {
+  var ws_macro = {
+    "include": { 
+        param: 1,
+        action: function (params, builder) {
+           var param = params[0];
+           if (!param || param.type != "STRING") {
+             throw "Expected string parameter for include";
+           }
+           var fileName = param.token;
+           fileName = fileName.slice(1, fileName.length - 1);
+           if (!(fileName in builder.includes)) {
+             $.ajax({
+               url: fileName,
+               async: false,
+               success: function(data) {
+                 builder.includes[fileName] = data;
+               }
+             });
+
+           if (builder.includes[fileName]) {
+             var srcArr = new ws_util.StrArr(builder.includes[fileName]);
+             var tokens = getTokens(srcArr);
+           
+             builder.tokens = builder.tokens.concat(tokens);
+           }
+         }
+       }
+     }
+  };
+
   var mnemo = (function () {
     var mnemoCodes = {};
     // Collect keywords
@@ -146,9 +176,12 @@ var  ws_asm  = (function() {
       } 
     }
 
-    var op = mnemo[label];
-    if (op && type == "TOKEN") {
+    var op = null; 
+    if (type == "TOKEN" && label in mnemo) {
        type = "KEYWORD";
+       op = mnemo[label];
+    } else if (label in ws_macro) {
+       type = "MACRO";
     }
     return {
       type: type,
@@ -204,12 +237,13 @@ var  ws_asm  = (function() {
   return {
     compile: function (str) {
       var strArr = new ws_util.StrArr(str);
-      var tokens = getTokens(strArr);
       var builder = ws.programBuilder(str);
-      var tokenNr = 0;
+      builder.includes = {};
+      builder.tokens = getTokens(strArr);
+      builder.tokenNr = 0;
       var labeler = new ws_util.labelTransformer(ws_util.getWsUnsignedNumber);
-      while (tokenNr < tokens.length) {
-         var token = tokens[tokenNr++];
+      while (builder.tokenNr < builder.tokens.length) {
+         var token = builder.tokens[builder.tokenNr++];
          var meta = token.meta;
          if (token.type == "LABEL") {
            builder.labels[labeler.getLabel(token.token)] = builder.programStack.length;
@@ -217,7 +251,7 @@ var  ws_asm  = (function() {
             var op = token.op;
             var instruction = new op.constr();
             if (op.param) {
-              var param = tokens[tokenNr++];
+              var param = builder.tokens[builder.tokenNr++];
               if (!param) {
                 throw { 
                   program: builder,
@@ -248,6 +282,19 @@ var  ws_asm  = (function() {
               }
             } else {
               pushInstruction(builder, op.constr);
+            }
+          } else if (token.type == "MACRO") {
+            var macro = ws_macro[token.token];
+            if (typeof macro.action == "function") {
+              var params = [];
+              var count = macro.param;
+              while (count) {
+                params.push(builder.tokens[builder.tokenNr++]);
+                count--;
+              }
+              macro.action(params, builder);
+            } else {
+              throw "Unimplemented macro type " + typeof macro.action;
             }
           } else {
              throw {
