@@ -1,4 +1,4 @@
-{"examples":[
+{"files":[
   {
     "name":"Hello World",
     "file":"example/hworld.ws",
@@ -89,5 +89,26 @@
     "origin": "example/bf.ws",
     "author": "Vii5ard",
     "lang": "WS"
+  },
+  {
+    "name": "lib/math.wsa",
+    "file": "example/lib/math.wsa",
+    "origin": "example/lib/math.wsa",
+    "author": "Vii5ard",
+    "lang": "WSA"
+  },
+  {
+    "name": "lib/stack.wsa",
+    "file": "example/lib/stack.wsa",
+    "origin": "example/lib/stack.wsa",
+    "author": "Vii5ard",
+    "lang": "WSA"
+  },
+  {
+    "name": "lib/heap.wsa",
+    "file": "example/lib/heap.wsa",
+    "origin": "example/lib/heap.wsa",
+    "author": "Vii5ard",
+    "lang": "WSA"
   }
 ]}
