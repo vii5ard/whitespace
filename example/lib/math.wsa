@@ -1,3 +1,4 @@
+end
 pow:
   push 1
 _pow_loop:
