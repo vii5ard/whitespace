@@ -10,13 +10,9 @@ var  ws_asm  = (function() {
            var fileName = param.token;
            fileName = fileName.slice(1, fileName.length - 1);
            if (!(fileName in builder.includes)) {
-             $.ajax({
-               url: fileName,
-               async: false,
-               success: function(data) {
-                 builder.includes[fileName] = data;
-               }
-             });
+             var file = ws_fs.getFile(fileName);
+
+             builder.includes[fileName] = ws_fs.openFile(file);
 
            if (builder.includes[fileName]) {
              var srcArr = new ws_util.StrArr(builder.includes[fileName]);

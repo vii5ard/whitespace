@@ -183,19 +183,13 @@ var ws_ide = (function () {
     fileList.find('.fileEntry').remove();
 
 
-    var sortedFiles = [];
-    for (var fileKey in ws_ide.files) {
-      sortedFiles.push(ws_ide.files[fileKey]);
-    }
+    var sortedFileNames = ws_fs.getFileNames();
 
-
-    sortedFiles.sort(function (a,b) {
-      return a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1;
-    })
- 
-    for (var i in sortedFiles) {
-      var file = sortedFiles[i];
-      var line = $('<div id="file_'+ file.fileKey + '"></div>');
+    var id = 0;
+    for (var i in sortedFileNames) {
+      var fileName = sortedFileNames[i];
+      var file = ws_fs.getFile(fileName);
+      var line = $('<div id="file_'+ id++ + '"></div>');
       line.addClass('fileEntry');
       if (file.lang == "WSA") {
         line.addClass('fileTypeAsm');
@@ -203,24 +197,24 @@ var ws_ide = (function () {
         line.addClass('fileTypeWs');
       }
       if (!file.localStorage) {
-        var link = $('<a href="javascript: void(0);" onClick="ws_ide.loadFile(\'' + file.fileKey + '\');"></a>')
-        link.html('<div class="ico"></div>' + $('<span></span>').text(file.name).html());
+        var link = $('<a href="javascript: void(0);" onClick="ws_ide.loadFile(\'' + fileName + '\');"></a>')
+        link.html('<div class="ico"></div>' + $('<span></span>').text(fileName).html());
         link.appendTo(line);
       } else {
         var link = $('<div><div class="ico"></div></div>');
-        link.click((function(fileKey) {
+        link.click((function(fileName) {
           return function() {
-            ws_ide.loadFile(fileKey);
+            ws_ide.loadFile(fileName);
             $(this).find('input').focus().select();
           }
-        })(file.fileKey));
+        })(fileName));
         var form = $('<form onsubmit="return false;"></form>');
         var inp = $('<input type="text" class="userInput"></input>');
-        var nameChange = (function (fileKey) {
+        var nameChange = (function (fileName) {
           return function () {
-            ws_ide.handleFileRename(fileKey);
+            ws_ide.handleFileRename(fileName);
           };
-        })(file.fileKey);
+        })(fileName);
         inp.blur(nameChange);
         inp.change(nameChange);
         inp.val(file.name);
@@ -233,42 +227,6 @@ var ws_ide = (function () {
       
     }
     ws_util.handleOverflow(fileList.closest('.content'));
-  };
-
-  loadExampleFiles = function () {
-    $.getJSON('example/meta.json', function(result) {
-      var loadFirst = '';
-      for(var i=0; i < result.examples.length; i++) {
-        var ex = result.examples[i];
-        var fileKey = stupidHash(ex.file);
-        if (!ws_ide.defaultFile.length) {
-          ws_ide.defaultFile.push(fileKey);
-        } 
-        ex.fileKey = fileKey;
-        ws_ide.files[fileKey] = ex;
-      }
-
-      updateFileList();
-
-      if (ws_ide.defaultFile[0]) {
-        ws_ide.loadFile(ws_ide.defaultFile[0]);
-      }
-    });
-  };
-
-
-  var loadLocalFiles = function () {
-    if (typeof localStorage == "undefined") return;
-    var localFiles = JSON.parse(localStorage.files || "{}");
-    if (!localFiles.files) return;
-
-    for (var fileKey in localFiles.files) {
-      if (ws_ide.files[fileKey]) return;
-      var file = localFiles.files[fileKey];
-      ws_ide.files[fileKey] = file;
-    }
-
-    updateFileList();
   };
 
   var storeSource = function () {
@@ -314,17 +272,14 @@ var ws_ide = (function () {
   var createNewFile = function () {
     var fileName = 'New file ';
     var count = 1;
-    var fileKey = '';
     while (true) {
-      fileKey = stupidHash(fileName + count);
-      if (!ws_ide.files[fileKey]) {
+      if (!((fileName + count) in ws_fs.files)) {
         fileName = fileName + count;
         break;
       }
       count++;
     }
     var file = {
-      fileKey: fileKey,
       name: fileName,
       file: "<localStorage>",
       autohor: "",
@@ -333,8 +288,8 @@ var ws_ide = (function () {
       lang: "WS",
       localStorage: true
     }
-    ws_ide.files[fileKey] = file;
-    return fileKey;
+    ws_fs.files[fileName] = file;
+    return fileName;
   };
 
   var self = {
@@ -357,8 +312,8 @@ var ws_ide = (function () {
         return ret;
       });
 
-      loadExampleFiles();
-      loadLocalFiles();
+      ws_ide.loadFile("hworld.ws");
+
       updateFileList();
 
       ws_ide.initEnv();
@@ -384,44 +339,36 @@ var ws_ide = (function () {
       return ret;
     },
 
-    loadFile: function(idx) {
+    loadFile: function(fileName) {
       storeSource();
-      $('#fileList:not(#file_' + idx + ') .fileEntry.emph').removeClass('emph');
-      $('#fileList #file_' + idx).addClass('emph');
-      var ex = ws_ide.files[idx];
-      if (!ex) return;
+      $('#fileList .fileEntry.emph').removeClass('emph');
+      var file = ws_fs.getFile(fileName);
+      if (!file) return;
 
       if (ws_ide.openFile) {
-        if (ws_ide.defaultFile[ws_ide.defaultFile.length -1] != ws_ide.openFile.fileKey) {
-          ws_ide.defaultFile.push(ws_ide.openFile.fileKey);
+        if (ws_ide.defaultFile[ws_ide.defaultFile.length -1] != ws_ide.openFile.name) {
+          ws_ide.defaultFile.push(ws_ide.openFile.name);
         }
       }
-      var load = function(src) {
-        ws_ide.openFile = ex;
-        if (!ex.src) ex.src = src;
-        ws_ide.loadSource(src);
-        updateEditor();
-        $('#panelMiddleLabel span').text(ex.file);
-      }
-      if (ex.lang == 'WS' || ex.file.match(/\.ws$/i)) {
+      if (file.lang == 'WS' || file.file.match(/\.ws$/i)) {
         this.setHighlight(true);
       } else {
         this.setHighlight(false);
       }
 
+      ws_ide.openFile = file;
+      ws_ide.loadSource(ws_fs.openFile(file));
+      updateEditor();
+      $('#panelMiddleLabel span').text(file.file);
+ 
 
       $('.localStorageButton').hide();
 
-      if (typeof ex.src != "undefined") {
-        load(ex.src);
-        if (ex.localStorage) {
-          $('.localStorageButton').show();
-        }
-      } else {
-        $.get(ex.file, load);
+      if (file.localStorage) {
+        $('.localStorageButton').show();
       }
 
-      showLang(ex.lang || 'WS');
+      showLang(file.lang || 'WS');
 
       ws_ide.initEnv();
     },
@@ -542,24 +489,24 @@ var ws_ide = (function () {
     },
     
     newFile: function () {
-      var fileKey = createNewFile();
+      var fileName = createNewFile();
       updateFileList();
-      ws_ide.loadFile(fileKey);
+      ws_ide.loadFile(fileName);
     },
 
     deleteFile: function () {
-      var fileKey = ws_ide.openFile.fileKey;
-      if (!ws_ide.files[fileKey] || 
-          !ws_ide.files[fileKey].localStorage) {
+      var fileName = ws_ide.openFile.name;
+      if (!ws_fs.files[fileName] || 
+          !ws_fs.files[fileName].localStorage) {
         return;
       }
-      delete ws_ide.files[fileKey];
+      ws_fs.deleteFile(fileName);
       updateFileList();
       while (true) {
         if (!ws_ide.defaultFile.length) break;
-        var fileKey = ws_ide.defaultFile[ws_ide.defaultFile.length - 1];
-        if (ws_ide.files[fileKey]) {
-          ws_ide.loadFile(fileKey);
+        fileName = ws_ide.defaultFile[ws_ide.defaultFile.length - 1];
+        if (ws_fs.files[fileName]) {
+          ws_ide.loadFile(fileName);
           break;
         } else {
           ws_ide.defaultFile.pop();
@@ -580,7 +527,7 @@ var ws_ide = (function () {
       var localFiles = JSON.parse(localFilesJSON);
       if (!localFiles.files) localFiles.files = {};
 
-      localFiles.files[file.fileKey] = file;
+      localFiles.files[file.name] = file;
       localStorage.files = JSON.stringify(localFiles);
     },
 
@@ -630,12 +577,12 @@ var ws_ide = (function () {
 
     compileAsm: function() {
       var wsSrc = ws_ide.program.getWsSrc();
-      var fileKey = createNewFile();
-      var file = ws_ide.files[fileKey];
+      var fileName = createNewFile();
+      var file = ws_fs.files[fileName];
       file.src = wsSrc;
 
       updateFileList();
-      ws_ide.loadFile(fileKey);
+      ws_ide.loadFile(fileName);
     },
 
     downloadFile: function() {

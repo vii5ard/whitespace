@@ -1,31 +1,34 @@
 var ws_fs = function(metaFile) {
-  var isiValidFileName = function(fileName) {
-    return true && fileName.match(/^[a-zA-z0-9._() -]+$/);
+  var isValidFileName = function(fileName) {
+    return true && fileName.match(/^[a-zA-z0-9._() \/-]+$/);
   };
 
-  var handleFiles(data, files) {
+  var handleFiles = function(data, files) {
     try {
       var json = JSON.parse(data);
     } catch (err) {
       console.log("Unable to parse JSON: " + err);
     }
-    for (fileName in json) {
+    for (fileName in json.files) {
       if (isValidFileName(fileName) && !(fileName in files)) {
-        files[fileName] = json[fileName];
+        var file = json.files[fileName];
+        file.name = fileName;
+        files[fileName] = file;
       }
     } 
   };
  
   var loadFilesServer = function(files) {
     $.ajax({
-      url: metafile,
+      url: metaFile,
+      converters: {"text json": window.String},
       success: function (data) {
         handleFiles(data, files);
      },
-      error: function(jqXHR, textStatus, errorThrown) {
-        console.log("Unable to read '" + metaFile + "': " + textStatus);
-      }
-      async: false      
+     error: function(jqXHR, textStatus, errorThrown) {
+       console.log("Unable to read '" + metaFile + "': " + textStatus);
+     },
+     async: false      
     });
   };
 
@@ -61,7 +64,9 @@ var ws_fs = function(metaFile) {
         console.log("Not a valid file name: '" + newName + "'.");
         return;
       }
+      delete self.fileNames; // Empty cache
       var file = self.files[oldName];
+      file.name = newName;
       self.files[newName] = file;
       delete self.files[oldName]; 
     },
@@ -76,13 +81,27 @@ var ws_fs = function(metaFile) {
             file.src = data;
           },
           error: function () {
-            console.log("Unable to load file: '" + file.file + "'.";
+            console.log("Unable to load file: '" + file.file + "'.");
           }
         });
         return file.src;
       } else {
         console.log("Unable to open file: '" + JSON.stringify(file));
       }
+    },
+    deleteFile: function(fileName) {
+      delete self.fileNames;
+      delete self.files[fileName];
+    },
+    getFileNames: function() {
+      // if (self.fileNames) return self.fileNames;
+      self.fileNames = [];
+      for (fileName in self.files) {
+        self.fileNames.push(fileName);
+      }
+      self.fileNames.sort();
+      return self.fileNames;
+    }
   };
 
   return self;

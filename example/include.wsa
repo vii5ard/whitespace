@@ -1,4 +1,4 @@
-include "example/lib/stack.asm"
+include "lib/stack.wsa"
 
 push "Hello std!"
 

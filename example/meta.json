@@ -1,114 +1,102 @@
-{"files":[
-  {
-    "name":"Hello World",
+{"files": {
+  "hworld.ws": {
     "file":"example/hworld.ws",
     "author": "?",
     "origin": "http://compsoc.dur.ac.uk/whitespace/examples.php",
     "lang": "WS"
   },
-  {
+  "nerd.ws": {
     "name":"Hello Nerd",
     "file":"example/nerd.ws",
     "author":"Vii5ard",
     "origin":"example/nerd.ws",
     "lang": "WS"
   },
-  {
-    "name":"Hello Nerd (ASM)",
+  "nerd.wsa": {
     "file":"example/nerd.wsa",
     "author":"Vii5ard",
     "origin":"example/nerd.wsa",
     "lang": "WSA"
   },
-  {
-    "name":"Hello Include",
+  "include.wsa": {
     "file":"example/include.wsa",
     "author":"Vii5ard",
     "origin":"example/include.wsa",
     "lang":"WSA"
   },
-  {
-    "name":"Hello User",
+  "name.ws": {
     "file":"example/name.ws",
     "author": "?",
     "origin": "http://compsoc.dur.ac.uk/whitespace/name.ws",
     "lang": "WS"
   },
-  {
-    "name":"Count",
+  "count.ws": {
     "file":"example/count.ws",
     "author": "?",
     "origin": "https://github.com/hostilefork/whitespacers/tree/master/examples/count.ws",
     "lang": "WS"
   },
-  {
-    "name":"Quine v1",
+  "quine.ws": {
     "file":"example/quine.ws",
     "author": "Benjamin Lerman",
     "origin": "http://compsoc.dur.ac.uk/whitespace/contrib.php",
     "lang": "WS"
   },
-  {
+  "fibonacci.ws": {
     "name":"Fibonacci",
     "file":"example/fibonacci.ws",
     "author": "Chris Morris",
     "origin":"https://github.com/hostilefork/whitespacers/blob/master/examples/fibonacci.ws",
     "lang": "WS"
   },
-  {
-    "name":"Calculator",
+  "calc.ws": {
     "file":"example/calc.ws",
     "author": "?",
     "origin":"https://github.com/hostilefork/whitespacers/blob/master/examples/calc.ws",
     "lang": "WS"
   },
-  {
-    "name":"Hanoi Towers",
+  "hanoi.ws": {
     "file":"example/hanoi.ws",
     "author": "?",
     "origin": "https://github.com/hostilefork/whitespacers/blob/master/examples/hanoi.ws",
     "lang": "WS"
   },
-  {
-    "name":"Quine v2",
+  "quine-2.ws": {
     "file":"example/quine-2.ws",
     "author": "Benjamin Lerman",
     "origin":"http://compsoc.dur.ac.uk/whitespace/quine-2.ws",
     "lang": "WS"
   },
-  {
-    "name": "Brainfuck (ASM)",
+  "bf.wsa": {
     "file": "example/bf.wsa",
     "origin": "example/bf.wsa",
     "autohor": "Vii5ard",
     "lang": "WSA"
   },
-  {
-    "name": "Brainfuck",
+  "bf.ws": {
     "file": "example/bf.ws",
     "origin": "example/bf.ws",
     "author": "Vii5ard",
     "lang": "WS"
   },
-  {
-    "name": "lib/math.wsa",
+  "lib/math.wsa": {
     "file": "example/lib/math.wsa",
     "origin": "example/lib/math.wsa",
     "author": "Vii5ard",
     "lang": "WSA"
   },
-  {
+  "lib/stack.wsa": {
     "name": "lib/stack.wsa",
     "file": "example/lib/stack.wsa",
     "origin": "example/lib/stack.wsa",
     "author": "Vii5ard",
     "lang": "WSA"
   },
-  {
+  "lib/heap.wsa": {
     "name": "lib/heap.wsa",
     "file": "example/lib/heap.wsa",
     "origin": "example/lib/heap.wsa",
     "author": "Vii5ard",
     "lang": "WSA"
   }
-]}
+}}

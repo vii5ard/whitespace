@@ -1,26 +1,100 @@
 end
+
+# Power function
 pow:
   push 1
 _pow_loop:
   copy 2
   jn _pow_neg
   copy 2 
-  jz _pow
-
+  jz _pow_end
   copy 3
   mul
-
   swap
   push 1
   sub
   swap
-
   jmp _pow_loop
-
 _pow_neg:
   drop
   push 0
+_pow_end:
+  slide 2
+  ret
 
-_pow:
+# Absolute value function
+abs:
+  dup
+  jn _abs_neg
+  jmp _abs_end
+_abs_neg:
+  push -1
+  mul
+_abs_end:
+  ret
+
+# Max value of two topmost stack elements
+max:
+  dup
+  copy 3
+  sub
+  jn _max_second
+  slide 1 
+  jmp _max_end
+_max_second:
+  drop
+_max_end:
+  ret
+
+# Min value of two topmost stack elements
+min:
+  dup
+  copy 3
+  sub
+  jn _min_second
+  drop 
+  jmp _min_end
+_min_second:
+  slide 1
+_min_end:
+  ret
+
+# Sign function
+sign:
+  dup
+  jz _sign_0
+  jn _sign_neg
+  push 1
+  jmp _sign_end
+_sign_0:
+  push 0
+  jmp _sign_end
+_sign_neg:
+  push -1
+_sign_end:
+  ret
+
+# Greatest common divisor
+gcd:
+  dup
+  jz _gcd_end
+  swap
+  copy 2
+  mod
+  jmp gcd
+_gcd_end:
+  drop
+  ret
+
+# Least common multiple
+lcm:
+  dup
+  copy 3 
+  mul
+  call abs
+  copy 2
+  copy 4 
+  call gcd
+  div
   slide 2
   ret
