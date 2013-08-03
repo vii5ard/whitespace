@@ -8,9 +8,11 @@ var ws_util = (function () {
       }
       return result + '\n';
     },
+
     getWsSignedNumber: function (num) {
       return ((num >= 0) ? ' ' : '\t') + this.getWsUnsignedNumber(Math.abs(num));
     },
+
     labelTransformer: function (labelGenerator) {
       var length = 0;
       return {
@@ -20,16 +22,27 @@ var ws_util = (function () {
           if (label in this.labels) {
             return this.labels[label];
           } else {
-            var gen = labelGenerator(length++);
+            var gen = null;
+            if (!label.match(/^[_.]/)) {
+              gen = "";
+              for (var i = 0; i < label.length; i++) {
+                 gen += ws_util.getWsUnsignedNumber(label.charCodeAt(i)).replace(/\n$/,'');
+              }
+              gen += '\n';
+            } else {
+              gen = labelGenerator(length++);
+            }
             this.labels[label] = gen;
             return gen;
           }
         }
       };
     },
+
     getFilename: function (path) {
       return path.replace(/^(?:.*[\/\\])?((?:[^\/\\])*)$/, '$1');
     },
+
     handleOverflow: function(selector) {
       var selector$ = $(selector);
 
@@ -39,6 +52,7 @@ var ws_util = (function () {
         selector$.css('overflow-y', 'hidden');
       }
     },
+
     StrArr: function(str) {
       return {
         arr: str.split(''),
