@@ -239,10 +239,10 @@ var  ws_asm  = (function() {
       builder.tokenNr = 0;
       var labeler = new ws_util.labelTransformer(function(counter, label) {
         var num = counter;
-        if (label.match(/^[._]/)) {
+        if (!label.match(/^[._]/)) {
           num = 0;
           for (var i = 0; i < label.length; i++) {
-            num += label.charCodeAt(i);
+            num = num * 8 + label.charCodeAt(i);
           }
         }
         return ws_util.getWsUnsignedNumber(num);

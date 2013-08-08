@@ -318,16 +318,25 @@
    * Public interface
    */
   ws.reduceProgram = function(program) {
-    var tree = parseTree(program);
-    tree = inlineFunctions(tree);
-    tree = reduceJump(tree);
-    reduceLabels(tree);
-    var newProgram = genProgram(tree);
-    var newSource = newProgram.getWsSrc();
-     console.log('Reduced ' + program.source.length + ' bytes to ' + newSource.length + ' bytes (' + 
-      Math.round(((program.source.length - newSource.length) / program.source.length) * 100) + 
-      '%)');
-    return newSource;
-    
+    var initialLength = program.source.length;
+    while (true) {
+      var tree = parseTree(program);
+      tree = inlineFunctions(tree);
+      tree = reduceJump(tree);
+      reduceLabels(tree);
+      var newProgram = genProgram(tree);
+      var newSource = newProgram.getWsSrc();
+      if (newSource.length >= program.source.length) {
+        if (initialLength > program.source.length) {
+          console.log('Reduced ' + initialLength + ' bytes to ' + program.source.length + ' bytes (' + 
+            Math.round(((initialLength - program.source.length) / initialLength) * 100) + 
+            '%)');
+        } else {
+          console.log('Unable to reduce initial ' + initialLength + ' bytes.');
+        } 
+        return program.source;
+      }
+      program = ws.compile(newSource);
+    }
   }
 })();
