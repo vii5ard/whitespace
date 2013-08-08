@@ -269,15 +269,17 @@ var ws_ide = (function () {
     $('.asmline.running').removeClass('running');
   };
 
-  var createNewFile = function () {
-    var fileName = 'New file ';
-    var count = 1;
-    while (true) {
-      if (!((fileName + count) in ws_fs.files)) {
-        fileName = fileName + count;
-        break;
+  var createNewFile = function (fileName) {
+    if (!fileName) {
+      fileName = 'New file ';
+      var count = 1;
+      while (true) {
+        if (!((fileName + count) in ws_fs.files)) {
+          fileName = fileName + count;
+          break;
+        }
+        count++;
       }
-      count++;
     }
     var file = {
       name: fileName,
@@ -576,9 +578,13 @@ var ws_ide = (function () {
     },
 
     compileAsm: function() {
+      var fileName = "compile.ws";
+      if (!(fileName in ws_fs.files)) {
+        createNewFile(fileName);
+      }
+      var file = ws_fs.getFile(fileName);
+
       var wsSrc = ws_ide.program.getWsSrc();
-      var fileName = createNewFile();
-      var file = ws_fs.files[fileName];
       file.src = wsSrc;
 
       updateFileList();

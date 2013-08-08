@@ -22,16 +22,7 @@ var ws_util = (function () {
           if (label in this.labels) {
             return this.labels[label];
           } else {
-            var gen = null;
-            if (!label.match(/^[_.]/)) {
-              gen = "";
-              for (var i = 0; i < label.length; i++) {
-                 gen += ws_util.getWsUnsignedNumber(label.charCodeAt(i)).replace(/\n$/,'');
-              }
-              gen += '\n';
-            } else {
-              gen = labelGenerator(length++);
-            }
+            var gen = labelGenerator(length++, label);
             this.labels[label] = gen;
             return gen;
           }

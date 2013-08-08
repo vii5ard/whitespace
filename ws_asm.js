@@ -237,7 +237,16 @@ var  ws_asm  = (function() {
       builder.includes = {};
       builder.tokens = getTokens(strArr);
       builder.tokenNr = 0;
-      var labeler = new ws_util.labelTransformer(ws_util.getWsUnsignedNumber);
+      var labeler = new ws_util.labelTransformer(function(counter, label) {
+        var num = counter;
+        if (label.match(/^[._]/)) {
+          num = 0;
+          for (var i = 0; i < label.length; i++) {
+            num += label.charCodeAt(i);
+          }
+        }
+        return ws_util.getWsUnsignedNumber(num);
+      });
       while (builder.tokenNr < builder.tokens.length) {
          var token = builder.tokens[builder.tokenNr++];
          var meta = token.meta;
