@@ -1,3 +1,7 @@
+.asmLine {
+  white-space: nowrap;
+}
+
 .asmLine.running {
   background-color: blue;
   color: white;

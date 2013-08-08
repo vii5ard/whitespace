@@ -197,7 +197,8 @@ ws = {
     return {
       source: fullSource,
       programStack: [],
-      labels: [],
+      labels: {},
+      asmLabels: {},
       getAsm: function () {
         var asm = [];
         for (var i in this.programStack) {
@@ -227,13 +228,13 @@ ws = {
       getAsmSrc: function () {
         var src = [];
         var asm = this.getAsm();
-        var labler = new ws_util.labelTransformer(function (n) { return "label_" + n; } );
+        var labler = new ws_util.labelTransformer(function (n, label) { return "label_" + n; } );
         for (var i in asm) {
           var ln = asm[i];
           var labels = "";
           for (l in ln.labels) {
             var wsLabel = ln.labels[l];
-            var label = labler.getLabel(wsLabel);
+            var label = this.asmLabels[wsLabel] || labler.getLabel(wsLabel);
             labels += (labels ? "\n": "") + label + ":";
           }
           if (labels) {
@@ -241,7 +242,7 @@ ws = {
           }
           var instrStr = ln.mnemo;
           if (ln.param.label != null) {
-            instrStr += " " + labler.getLabel(ln.param.label);
+            instrStr += " " + (this.asmLabels[ln.param.label] || labler.getLabel(ln.param.label));
           }
           if (ln.param.val != null) {
             instrStr += " " + ln.param.val;

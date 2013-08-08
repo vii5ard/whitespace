@@ -252,6 +252,7 @@ var  ws_asm  = (function() {
          var meta = token.meta;
          if (token.type == "LABEL") {
            builder.labels[labeler.getLabel(token.token)] = builder.programStack.length;
+           builder.asmLabels[labeler.getLabel(token.token)] = token.token;
          } else if (token.type == "KEYWORD") {
             var op = token.op;
             var instruction = new op.constr();
