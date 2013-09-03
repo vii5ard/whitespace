@@ -3,8 +3,8 @@ var ws_util = (function () {
     getWsUnsignedNumber: function (num) {
       var result = "";
       while (num > 0) {
-        result = ((num & 1) ? '\t' : ' ') + result;
-        num >>= 1;
+        result = ((num % 2) ? '\t' : ' ') + result;
+        num = Math.floor(num / 2);
       }
       return result + '\n';
     },

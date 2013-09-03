@@ -4,11 +4,11 @@ end
 pow:
   push 1
 _pow_loop:
-  copy 2
+  copy 1
   jn _pow_neg
-  copy 2 
+  copy 1 
   jz _pow_end
-  copy 3
+  copy 2
   mul
   swap
   push 1
@@ -36,7 +36,7 @@ _abs_end:
 # Max value of two topmost stack elements
 max:
   dup
-  copy 3
+  copy 2
   sub
   jn _max_second
   slide 1 
@@ -49,7 +49,7 @@ _max_end:
 # Min value of two topmost stack elements
 min:
   dup
-  copy 3
+  copy 2
   sub
   jn _min_second
   drop 
@@ -79,7 +79,7 @@ gcd:
   dup
   jz _gcd_end
   swap
-  copy 2
+  copy 1
   mod
   jmp gcd
 _gcd_end:
@@ -89,11 +89,11 @@ _gcd_end:
 # Least common multiple
 lcm:
   dup
-  copy 3 
+  copy 2 
   mul
   call abs
-  copy 2
-  copy 4 
+  copy 1
+  copy 3 
   call gcd
   div
   slide 2

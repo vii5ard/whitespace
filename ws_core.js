@@ -293,7 +293,7 @@ ws = {
 
   WsCopyNth: function() {
     this.run = function (env) {
-      var actualPos = env.register.SP - this.param.value;
+      var actualPos = env.register.SP - this.param.value - 1;
       env.stackPush(env.stack[actualPos]);
       env.register.IP++;
     }
