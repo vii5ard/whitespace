@@ -29,7 +29,7 @@ var ws_ide = (function () {
     srcOverlay.html(overlay);
 
     var pre = $('#srcHiddenDiv');
-    pre.html(src);
+    pre.text(src);
   
     srcInput.width(pre.width() + 30 );
     srcInput.height(pre.height() + 30);
