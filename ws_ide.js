@@ -43,7 +43,7 @@ var ws_ide = (function () {
     var openFile = ws_ide.openFile;
     var src = programSource();
     var errorDiv = $('#errorDiv');
-    errorDiv.text('');
+    errorDiv.html('&nbsp;');
     try { 
       if (openFile.lang == "WS") {
         ws_ide.program = ws.compile(src);
@@ -169,6 +169,10 @@ var ws_ide = (function () {
   }
  
   var afterInstructionRun = function(env) {
+    env.runCount++;
+    if (env.runCount > 100) { // TODO - find a better solution
+      throw "SLEEP";
+    }
     if (env.debug) {
       updateMemoryTab(env);
     }
@@ -187,9 +191,10 @@ var ws_ide = (function () {
 
     var id = 0;
     for (var i in sortedFileNames) {
+      ++id;
       var fileName = sortedFileNames[i];
       var file = ws_fs.getFile(fileName);
-      var line = $('<div id="file_'+ id++ + '"></div>');
+      var line = $('<div id="file_'+ id + '"></div>');
       line.addClass('fileEntry');
       if (file.lang == "WSA") {
         line.addClass('fileTypeAsm');
@@ -210,11 +215,11 @@ var ws_ide = (function () {
         })(fileName));
         var form = $('<form onsubmit="return false;"></form>');
         var inp = $('<input type="text" class="userInput"></input>');
-        var nameChange = (function (fileName) {
+        var nameChange = (function (fileName, id) {
           return function () {
-            ws_ide.handleFileRename(fileName);
+            ws_ide.handleFileRename(fileName, id);
           };
-        })(fileName);
+        })(fileName, id);
         inp.blur(nameChange);
         inp.change(nameChange);
         inp.val(file.name);
@@ -289,8 +294,9 @@ var ws_ide = (function () {
       src: "",
       lang: "WS",
       localStorage: true
-    }
-    ws_fs.files[fileName] = file;
+    };
+    ws_fs.saveFile(file);
+    
     return fileName;
   };
 
@@ -298,6 +304,9 @@ var ws_ide = (function () {
     files: {},
     inputStream: '',
     inputStreamPtr: 0,
+    animator: 0,
+//    animation: ['-', '\\', '|', '/'],
+    animation: ['.oO0 ', ' .oO0', '  .o0', '   .0', '    0', '   0O', '  00o', ' 0Oo.', '0Oo. ', '0o.  ', '0.   ', '0    ', 'O0   ', 'oO0  ',], 
     defaultFile: [],
     highlightSourceWs: function(src) {
       return src.replace(/[^\t\n ]/g, '#')
@@ -376,6 +385,7 @@ var ws_ide = (function () {
     },
 
     runProgram: function(debugMode, stepMode) {
+     ws_ide.animateRunning(true);
       try {
         if (!debugMode || !ws_ide.env.running) { 
           ws_ide.inputStream = '';
@@ -400,13 +410,17 @@ var ws_ide = (function () {
 
     continueRun: function() {
      if (!ws_ide.env.running) return;
+     ws_ide.env.runCount = 0;
      try {
         ws_ide.env.runProgram(ws_ide.program);
         if (!ws_ide.env.running) {
           cleanupDebug();
+          ws_ide.stopAnimateRunning();
         }
       } catch (err) {
-        if (err == "IOWait") {
+        if (err == "SLEEP") {
+          setTimeout(ws_ide.continueRun, 1);
+        } else if (err == "IOWait") {
           // Do nothing - wait for IO
         } else if (err != "Break") {
           console.error("Runtime Error: " + err);
@@ -525,22 +539,14 @@ var ws_ide = (function () {
 
       if (typeof localStorage == "undefined") return;
 
-      var localFilesJSON = localStorage.files || "{}";
-      var localFiles = JSON.parse(localFilesJSON);
-      if (!localFiles.files) localFiles.files = {};
-
-      localFiles.files[file.name] = file;
-      localStorage.files = JSON.stringify(localFiles);
+      ws_fs.saveFile(file);
     },
 
-    handleFileRename: function (fileKey) {
-      var input$ = $('#file_' + fileKey + ' input');
-      if (!input$.length) return;
-      ws_ide.openFile.name = input$.val();
+    handleFileRename: function (fileName, id) {
+      var input$ = $('#file_' + id + ' input');
+      ws_fs.rename(fileName, input$.val());
       
-      this.saveFile();
       updateFileList();
-      this.loadFile(ws_ide.openFile.fileKey);
     },
     displayModal: function(selector) {
       var selector$ = $(selector);
@@ -602,7 +608,26 @@ var ws_ide = (function () {
       }
       ws_ide.env.running = false;
       cleanupDebug();
+      ws_ide.stopAnimateRunning();
+    },
+
+    animateRunning: function(resume) {
+      var ad = $('#animDiv');
+      if (ws_ide.animator < 0 && resume) {
+        ws_ide.animator = 0;
+      } else if (ws_ide.animator < 0) {
+        ad.html('&nbsp;');
+        return;
+      }
+      ad.text(ws_ide.animation[ws_ide.animator]);
+      ws_ide.animator = (ws_ide.animator + 1) % ws_ide.animation.length;
+      setTimeout(ws_ide.animateRunning, 150);
+    },
+
+    stopAnimateRunning: function () {
+      ws_ide.animator = -1;
     }
+
   };
   $(self.init);
 

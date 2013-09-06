@@ -3,7 +3,18 @@ var ws_fs = function(metaFile) {
     return true && fileName.match(/^[a-zA-z0-9._() \/-]+$/);
   };
 
-  var handleFiles = function(data, files) {
+  var flush = function(files) {
+    var local = {files: {}};
+    for (var fileName in files) {
+      var file = files[fileName];
+      if (!file.extFile) {
+        local.files[fileName] = file;
+      }
+    }
+    localStorage.ws_fs = JSON.stringify(local);
+  }
+
+  var handleFiles = function(data, files, extFile) {
     try {
       var json = JSON.parse(data);
     } catch (err) {
@@ -12,6 +23,7 @@ var ws_fs = function(metaFile) {
     for (fileName in json.files) {
       if (isValidFileName(fileName) && !(fileName in files)) {
         var file = json.files[fileName];
+        file.extFile = extFile;
         file.name = fileName;
         files[fileName] = file;
       }
@@ -23,7 +35,7 @@ var ws_fs = function(metaFile) {
       url: metaFile,
       converters: {"text json": window.String},
       success: function (data) {
-        handleFiles(data, files);
+        handleFiles(data, files, true);
      },
      error: function(jqXHR, textStatus, errorThrown) {
        console.log("Unable to read '" + metaFile + "': " + textStatus);
@@ -37,8 +49,8 @@ var ws_fs = function(metaFile) {
       console.log("Local storage not supported!");
       return;
     }
-    var data = localStorage.files || "{}";
-    handleFiles(data, files);
+    var data = localStorage.ws_fs || "{}";
+    handleFiles(data, files, false);
   }
 
   var loadFiles = function() {
@@ -56,7 +68,8 @@ var ws_fs = function(metaFile) {
       return self.files[fileName];
     },
     rename: function(oldName, newName) {
-      if (!(oldName in self.files) || newFile in self.files) {
+      if (oldName == newName) return;
+      if (!(oldName in self.files) || newName in self.files) {
         console.log("Won't replace file!");
         return;
       }
@@ -68,10 +81,11 @@ var ws_fs = function(metaFile) {
       var file = self.files[oldName];
       file.name = newName;
       self.files[newName] = file;
-      delete self.files[oldName]; 
+      delete self.files[oldName];
+      flush(self.files); 
     },
     openFile: function(file) {
-      if (file.src) {
+      if (file.src || !file.extFile) {
         return file.src;
       } else if (file.file) {
         $.ajax({
@@ -92,6 +106,7 @@ var ws_fs = function(metaFile) {
     deleteFile: function(fileName) {
       delete self.fileNames;
       delete self.files[fileName];
+      flush(self.files);
     },
     getFileNames: function() {
       // if (self.fileNames) return self.fileNames;
@@ -101,6 +116,10 @@ var ws_fs = function(metaFile) {
       }
       self.fileNames.sort();
       return self.fileNames;
+    },
+    saveFile: function(file) {
+      self.files[file.name] = file;
+      flush(self.files);
     }
   };
 
