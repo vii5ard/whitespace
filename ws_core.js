@@ -99,16 +99,15 @@ ws = {
         try {
           this.running = true;
           this.paused = false;
-          while (this.register.IP < program.programStack.length ) {
+          while (this.running && this.register.IP < program.programStack.length ) {
             var callable = program.programStack[this.register.IP];
             this.beforeInstructionRun(this);
             callable.run(this);
             this.afterInstructionRun(this);
           }
+          (new ws.WsEndProgram).run(this); // If the program did not call "end" statement
 	} catch (err) {
-	  if (err == 'END') {
-	     this.running = false;
-	  } else if(err == "Break") {
+	  if(err == "Break") {
             this.paused = true;
           } else {
 	    throw err;
@@ -416,7 +415,7 @@ ws = {
 
   WsEndProgram: function() {
     this.run = function(env) {
-      throw "END";
+      env.running = false;
     };
     this.getAsm = asmWithNoParam;
   },
