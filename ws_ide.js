@@ -194,7 +194,7 @@ var ws_ide = (function () {
       ++id;
       var fileName = sortedFileNames[i];
       var file = ws_fs.getFile(fileName);
-      var line = $('<div id="file_'+ id + '"></div>');
+      var line = $('<div id="file_'+ id + '" title="' + fileName + '"></div>');
       line.addClass('fileEntry');
       if (file.lang == "WSA") {
         line.addClass('fileTypeAsm');
