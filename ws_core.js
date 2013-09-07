@@ -215,9 +215,8 @@ ws = {
           this.programStack.push(instruction);
         }
 
-        var sp = this.programStack.length;
         for (var l in instruction.labels) {
-          this.labels[instruction.labels[l]] = sp;
+          this.labels[instruction.labels[l]] = instruction.address;
         }
 
       },
