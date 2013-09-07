@@ -300,6 +300,16 @@ var ws_ide = (function () {
     return fileName;
   };
 
+  var getProgramStat = function(src) {
+    var size = src.length;
+    var prog = ws.compile(src);
+    var instCount = prog.programStack.length;
+    return {
+      size: size,
+      instCount: instCount
+    };
+  }
+
   var self = {
     files: {},
     inputStream: '',
@@ -442,7 +452,16 @@ var ws_ide = (function () {
 
     optimizeProgram: function() {
       var src = programSource();
-      var src = ws.reduceProgram(ws.compile(src));
+      var currentStat = getProgramStat(src);
+//      var src = ws.reduceProgram(ws.compile(src));
+      var prog = ws.compile(src);
+      var src = ws_opt.optimize(prog).getWsSrc();
+      var optStat = getProgramStat(src);
+
+      console.log("Optimized " + ws_ide.openFile.name + ":\n" + 
+                  "  Size:         " + currentStat.size + " bytes -> " + optStat.size + " bytes (" + Math.round((currentStat.size - optStat.size) / currentStat.size * 100) + "%)\n" + 
+                  "  Instructions: " + currentStat.instCount + " -> " + optStat.instCount + " (" + Math.round((currentStat.instCount - optStat.instCount) / currentStat.instCount * 100) + "%)");
+
       programSource(src);
     },
     

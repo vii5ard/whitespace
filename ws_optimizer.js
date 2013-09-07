@@ -22,11 +22,6 @@
 
         builder.pushInstruction(inst);
 
-        var sp = builder.programStack.length;
-        for (var l in inst.labels) {
-          builder.labels[inst.labels[l]] = sp;
-        }
-
         if (inst.branch) {
           todo.push(inst.branch);
         }
