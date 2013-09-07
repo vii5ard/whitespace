@@ -314,6 +314,13 @@ var  ws_asm  = (function() {
 
        for (label in builder.labels) {
          var inst = builder.programStack[builder.labels[label]];
+         if (typeof inst == "undefined") {
+           throw {
+             program: builder,
+             line: meta.line,
+             message: "Label '" + builder.asmLabels[label] + "' references to nothing."
+           }
+         }
          if (!inst.labels) {
            inst.labels = [];
          }
