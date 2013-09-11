@@ -14,6 +14,8 @@ var ws_opt = (function() {
       reachable: false,
       continues: continues, // will continue after last statement
       continued: false, // continued from last piece
+      recursion: false,
+      innerLoop: false,
       calledFrom: {},
       jumpedFrom: {},
       callsTo: {},
@@ -72,7 +74,11 @@ var ws_opt = (function() {
               piece.jumpsTo[target] = true;
             }
           } else {
-            piece.innerLoop = true;
+            if (inst instanceof ws.WsCall) {
+              piece.recursion = true;
+            } else { 
+              piece.innerLoop = true;
+            }
           }
         }
       }
@@ -110,7 +116,7 @@ var ws_opt = (function() {
       var piece = shred.pieces[pieceNr];
       if (Object.keys(piece.jumpedFrom).length == 1 && 
           Object.keys(piece.calledFrom).length == 0 && 
-          (pieceNr -1) in piece.jumpedFrom
+          (!piece.continued || ((pieceNr -1) in piece.jumpedFrom))
       ) {
         var parentPieceNr = Object.keys(piece.jumpedFrom).shift();
         var parentPiece = shred.pieces[parentPieceNr];
@@ -130,7 +136,8 @@ var ws_opt = (function() {
             tmpPiece.calledFrom[parentPiece] = (tmpPiece.calledFrom[parentPiece] || 0) + count;
           }
         }
-        parentPiece.innerLoop = parentPiece.innerLoop || piece.innerLoop || parentPieceNr in piece.jumpsTo || parentPieceNr in piece.callsTo;
+        parentPiece.innerLoop = parentPiece.innerLoop || piece.innerLoop || parentPieceNr in piece.jumpsTo;
+        parentPiece.recursion = parentPiece.recursion || piece.recursion || parentPieceNr in piece.callsTo
       }
     }
   }
@@ -200,7 +207,8 @@ var ws_opt = (function() {
             Object.keys(target.jumpedFrom).length == 0 && 
             Object.keys(target.calledFrom).length == 1 && 
             target.calledFrom[Object.keys(target.calledFrom).shift()] == 1 &&
-            !target.innerLoop) {
+            !target.recursion // TODO! recursion messes up a lot 
+           ) {
           inlinePiece(target, shred);
           for (var i in target.stack) {
             var targetInst = target.stack[i];
@@ -208,6 +216,8 @@ var ws_opt = (function() {
               newStack.push(targetInst);
             } else if ((targetInst.labels || []).length > 0) {
                newStack.push(new LabelPlaceholder(targetInst.labels));
+            } else if (parseInt(i)+1 != target.stack.length) {
+              console.warn("Probably corrupted optimization!");
             }
           }
           target.reachable = false; // mark code block as deprecated
@@ -229,6 +239,50 @@ var ws_opt = (function() {
     }
   }
 
+  var reduceLabels = function(prog) {
+    var refCount = {};
+    for (var iNr in prog.programStack) {
+      var inst = prog.programStack[iNr];
+      if (inst instanceof ws.WsCall || 
+          inst instanceof ws.WsJump ||
+          inst instanceof ws.WsJumpZ ||
+          inst instanceof ws.WsJumpNeg
+      ) {
+        var ref = prog.labels[inst.param.token];
+        refCount[ref] = (refCount[ref] || 0) + 1
+      }
+    }
+
+    var orderRef = [];
+    for (var iNr in refCount) {
+      orderRef.push({ iNr: iNr, count: refCount[iNr]});
+    }
+
+    orderRef = orderRef.sort(function (a,b) { return b.count - a.count; });
+    
+    var refLabel = {};
+    for (var i in orderRef) {
+      refLabel[orderRef[i].iNr] = ws_util.getWsUnsignedNumber(i);
+    }
+
+    for (var iNr in prog.programStack) {
+      var inst = prog.programStack[iNr];
+      inst.labels = [];
+      if (iNr in refLabel) {
+        inst.labels.push(refLabel[iNr]);
+      }
+
+      if (inst instanceof ws.WsCall || inst instanceof ws.WsJump || inst instanceof ws.WsJumpZ || inst instanceof ws.WsJumpNeg) {
+        inst.param.token = refLabel[prog.labels[inst.param.token]];
+      }
+    }
+
+    prog.labels = {};
+    for (var i in refLabel) {
+      prog.labels[refLabel[i]] = i;
+    }
+  }
+
   var self = {
     _shred: function(prog) {
       return shredProgram(prog);
@@ -244,7 +298,11 @@ var ws_opt = (function() {
       filterPieces(shrd);
       unifyPieces(shrd);
       inlineShred(shrd);
-      return reassemble(shrd);
+      var optProg = reassemble(shrd);
+
+      reduceLabels(optProg);
+
+      return optProg;
     }
   };
   return self;
