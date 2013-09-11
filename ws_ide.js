@@ -1,7 +1,7 @@
 var console = (function () {
-  var writeTab = function (msg) {
+  var writeTab = function (msg, level) {
     var consoleArea = $('#consoleArea');
-    consoleArea.append('<div>' + msg + '<div>');
+    consoleArea.append('<div>' + (level?level+': ':'') + msg + '<div>');
     consoleArea.scrollTop(consoleArea[0].scrollHeight);
     ws_util.handleOverflow(consoleArea);
  
@@ -12,8 +12,9 @@ var console = (function () {
   };
   return {
     log: writeTab,
-    info: writeTab,
-    error: writeTab
+    info: function(msg) {writeTab (msg, "INFO");},
+    error: function(msg) {writeTab(msg, "ERROR"); },
+    warn: function(msg) {writeTab(msg, "WARNING");}
   };
 })();
 
@@ -256,10 +257,20 @@ var ws_ide = (function () {
   };
 
   var beforeInstructionRun = function(env) {
-    if (!env.debug) return;
+    if (!env.debug || !env.running) return;
 
     $('#disasm .running').removeClass('running');
-    $('#disasm #instr_' + env.register.IP).addClass('running');
+    var instLine = $('#disasm #instr_' + env.register.IP);
+    var scroller = instLine.closest(".content");
+
+    // Scroll to view
+    if ((instLine.offset().top + instLine.height()) > scroller.offset().top + scroller.height() || instLine.offset().top < scroller.offset().top) {
+      scroller.animate({scrollTop:(scroller.scrollTop() + instLine.offset().top - scroller.height() / 2) + "px"}, 0);
+    }
+
+    instLine.addClass('running');
+
+    
     if (env.continueDebug) {
       env.continueDebug = false;
     } else if (env.stepProgram) {
