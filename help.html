@@ -1,0 +1,73 @@
+<style type="text/css">
+  @import "css/help.css";
+</style>
+<html>
+<a id="top"></a>
+<div name="toc">
+o <a href="#about">[About]</a>
+o <a href="#usage">[Usage]</a>
+o <a href="#whitespace">[Whitespace]</a>
+o <a href="#assembly">[Assembly]</a>
+o <a href="#optimizer">[Optimizer]</a>
+</div>
+<div>
+<a id="about"/>
+About <a href="#top">[top]</a>
+=====
+
+Whitelips is an online IDE for Whitespace.
+
+<a href="#top">[top]</a>
+</div>
+<div name="whitespace">
+<a id="whitespace" />
+Whitespace <a href="#top">[top]</a>
+==========
+TODO!
+
+<a href="#top">[top]</a>
+</div>
+<div>
+<a id="assembly" />
+Assembly <a href="#top">[top]</a>
+========
+
+As there is no official standard, Whitelips features it's own assembly
+language. Care has been taken to make it compatible with others, but
+this has never been a goal.
+</div>
+<div name="asm_keywords">
+  push     $n - Pushe value $n onto the stack.
+  dup         - Duplicate the topmost stack element.
+  copy     $n - copies the $n-th element from stack, where 0 is the topmost
+                value.
+  swap        - swap two topmost stack elements.
+  drop        - discards the topmost stack value.
+  slide    $n - keeps the topmost element, and deletes the next $n elements.
+  add         -
+  sub         -
+  mul         -
+  div         -
+  mod         -
+  store       -
+  retrieve    -
+  label    $l -
+  call     $l -
+  jmp      $l -
+  jz       $l -
+  jn       $l -
+  ret         -
+  end         - Terminate the program.
+  printc      -
+  printi      -
+  readc       -
+  readi       -
+
+Where:
+  $n - an integer parameter.
+  $l - a label.
+
+<a href="#top">[top]</a>
+</div>
+
+</html>
