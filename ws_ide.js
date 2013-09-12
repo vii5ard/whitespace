@@ -660,7 +660,14 @@ var ws_ide = (function () {
     },
 
     displayHelp: function () {
-      ws_ide.displayModal("#helpModal"); 
+      var helpModal = $('#helpModal');
+      var content = helpModal.find("#helpModalContent");
+      ws_ide.displayModal(helpModal);
+      if (!content.find('iframe').length) {
+        var iframe = $('<iframe style="width:100%; height:100%"></iframe>');
+        iframe.attr('src', 'help.html');
+        content.append(iframe);
+      } 
     }
 
   };
