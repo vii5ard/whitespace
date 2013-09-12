@@ -51,10 +51,13 @@ var ws_ide = (function () {
       } else {
         ws_ide.program = ws_asm.compile(src);
       }
+      delete ws_ide.program.compileError;
     } catch (err) {
+      ws_ide.program.compileError = "Unknown compile error";
       if (err.program) {
         errorDiv.text(err.message);
         ws_ide.program = err.program;
+        ws_ide.program.compileError = err.message;
       } else {
         throw err;
       }
@@ -614,6 +617,10 @@ var ws_ide = (function () {
     },
 
     compileAsm: function() {
+      if (ws_ide.program.compileError) {
+        console.error(ws_ide.program.compileError)
+        return;
+      }
       var fileName = "compile.ws";
       if (!(fileName in ws_fs.files)) {
         createNewFile(fileName);
