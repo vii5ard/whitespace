@@ -37,7 +37,7 @@ language. Care has been taken to make it compatible with others, but
 this has never been a goal.
 </div>
 <div>
-  push     $n - Pushe value $n onto the stack.
+  push     $n - Push value $n onto the stack.
   dup         - Duplicate the topmost stack element.
   copy     $n - copies the $n-th element from stack, where 0 is the topmost
                 value.
@@ -75,7 +75,7 @@ Where:
 Optimizer <a href="#top">[top]</a>
 =========
 
-The main filosophy behind the optimizer is that all Whitespace instructions are
+The main philosophy behind the optimizer is that all Whitespace instructions are
 equally slow. This means that all optimizations are made to reduce the number of
 instructions. Optimizer guarantees that the number of instructions in the output
 is less or equal to the original program.
@@ -90,7 +90,7 @@ This is a serious restriction by design.
 
 Rules:
   * Remove unreachable code.
-  * Inline unconditional jumps, if possibe.
+  * Inline unconditional jumps, if possible.
   * Inline function calls.
   * Remove unused and duplicate labels.
   * Mimimize label names by usage in the program.
