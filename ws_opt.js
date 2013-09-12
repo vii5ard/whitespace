@@ -114,12 +114,25 @@ var ws_opt = (function() {
     for (var pieceNr = shred.pieces.length - 1; pieceNr >= 0; pieceNr--) {
       pieceNr = parseInt(pieceNr);
       var piece = shred.pieces[pieceNr];
-      if (Object.keys(piece.jumpedFrom).length == 1 && 
+      if (!piece.continues &&
+          Object.keys(piece.jumpedFrom).length == 1 && 
           Object.keys(piece.calledFrom).length == 0 && 
           (!piece.continued || ((pieceNr -1) in piece.jumpedFrom))
       ) {
-        var parentPieceNr = Object.keys(piece.jumpedFrom).shift();
+        var parentPieceNr = null;
+        if (piece.continued) {
+          parentPieceNr = pieceNr - 1;
+        } else if ((pieceNr - 1) in piece.jumpedFrom) {
+          parentPieceNr = Object.keys(piece.jumpedFrom).shift();
+        } else {
+          continue;
+        }
         var parentPiece = shred.pieces[parentPieceNr];
+
+        if (parentPiece.continues && !piece.continued) {
+          continue;
+        }
+
         parentPiece.stack = parentPiece.stack.concat(piece.stack);
         delete parentPiece.jumpsTo[pieceNr];
         piece.reachable = false; // code block is deprecated
@@ -138,6 +151,7 @@ var ws_opt = (function() {
         }
         parentPiece.innerLoop = parentPiece.innerLoop || piece.innerLoop || parentPieceNr in piece.jumpsTo;
         parentPiece.recursion = parentPiece.recursion || piece.recursion || parentPieceNr in piece.callsTo
+        parentPiece.continues = piece.continues;
       }
     }
   }
@@ -195,7 +209,11 @@ var ws_opt = (function() {
       var inst = piece.stack[iNr];
       if (inst instanceof ws.WsJump) {
         var target = getTarget(inst, shred); 
-        if (!target.continued && Object.keys(target.jumpedFrom).length == 1 && target.jumpedFrom[Object.keys(target.jumpedFrom).shift()] == 1) {
+        if (!target.continued && 
+            !target.continues && 
+            Object.keys(target.jumpedFrom).length == 1 && 
+            target.jumpedFrom[Object.keys(target.jumpedFrom).shift()] == 1
+        ) {
           inlinePiece(target, shred);
           newStack = newStack.concat(target.stack);
           target.reachable = false; // this piece is deprecated
@@ -204,6 +222,7 @@ var ws_opt = (function() {
       } else if (inst instanceof ws.WsCall) {
         var target = getTarget(inst, shred);
         if (!target.continued && 
+            !target.continues &&
             Object.keys(target.jumpedFrom).length == 0 && 
             Object.keys(target.calledFrom).length == 1 && 
             target.calledFrom[Object.keys(target.calledFrom).shift()] == 1 &&
