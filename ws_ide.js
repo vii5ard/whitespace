@@ -53,7 +53,9 @@ var ws_ide = (function () {
       }
       delete ws_ide.program.compileError;
     } catch (err) {
-      ws_ide.program.compileError = "Unknown compile error";
+      if (ws_ide.program) {
+        ws_ide.program.compileError = "Unknown compile error";
+      }
       if (err.program) {
         errorDiv.text(err.message);
         ws_ide.program = err.program;

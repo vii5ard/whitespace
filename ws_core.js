@@ -153,7 +153,7 @@ ws = {
       parser = parser.cont[token];
       if (!parser) {
         throw {
-          program: builder,
+          program: builder.postProcess(),
           message: 'Unexpected token at line ' + tokenizer.line + ':' + tokenizer.col + ' - ' + debugToken
         }
       }
@@ -163,7 +163,7 @@ ws = {
           instruction.param = parseParam(tokenizer);
           if (!instruction.param.token) {
             throw {
-              program: builder,
+              program: builder.postProcess(),
               message: 'Unexpected EOF'
             };
           }
@@ -177,19 +177,12 @@ ws = {
 
     if (debugToken) {
       throw {
-        program: builder,
+        program: builder.postProcess,
         message: 'Unexpected EOF'
       };
     }
 
-    builder.postProcess();
-
-    for (label in builder.labels) {
-      var inst = builder.programStack[builder.labels[label]];
-      if (!inst.labels) inst.labels = [];
-      inst.labels.push(label);
-    }
-    return builder;
+    return builder.postProcess();
   },
 
   programBuilder: function (fullSource) {
@@ -227,6 +220,20 @@ ws = {
             this.programStack[i].postProcess(this);
           }
         }
+        for (label in this.labels) {
+          var inst = this.programStack[this.labels[label]];
+          if (inst) {
+            if (!inst.labels) inst.labels = [];
+            inst.labels.push(label);
+          } else {
+            // Label to void
+            var labelInst = new ws.WsLabel();
+            labelInst.address = this.programStack.length;
+            labelInst.param = {token: label};
+            this.programStack.push(labelInst);
+          }
+        }
+        return this;
       },
 
       getAsmSrc: function () {
@@ -416,6 +423,7 @@ ws = {
     this.apply = function(compiler) {
       compiler.labels[this.param.token] = compiler.programStack.length;
     };
+    this.getAsm = asmWithLabelParam;
   },
 
   WsEndProgram: function() {

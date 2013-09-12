@@ -200,14 +200,26 @@ var  ws_asm  = (function() {
 
       var next = strArr.peek();
       var token = null;
-      if (next == ';' || next == '#') {
-        token = parseLineComment(strArr);
-      } else if (next.match(/\"|\'/)) {
-        token = parseString(strArr);
-      } else if (next.match(/[-+\d]/)) {
-        token = parseNumber(strArr);
-      } else {
-        token = parseLabel(strArr);
+      try {
+        if (next == ';' || next == '#') {
+          token = parseLineComment(strArr);
+        } else if (next.match(/\"|\'/)) {
+          token = parseString(strArr);
+        } else if (next.match(/[-+\d]/)) {
+          token = parseNumber(strArr);
+        } else {
+          token = parseLabel(strArr);
+        }
+      } catch (err) {
+        if (typeof err == "string") {
+           throw {
+              tokens: tokens,
+              meta: meta,
+              message: err
+           }
+        } else {
+           throw err;
+        }
       }
 
       token.meta = meta;
@@ -235,7 +247,16 @@ var  ws_asm  = (function() {
       var strArr = new ws_util.StrArr(str);
       var builder = ws.programBuilder(str);
       builder.includes = {};
-      builder.tokens = getTokens(strArr);
+      try {
+        builder.tokens = getTokens(strArr);
+      } catch (err) {
+        if (err.tokens) {
+          builder.tokens = err.tokens;
+          var tokenError = err;
+        } else {
+          throw err;
+        }
+      }
       builder.tokenNr = 0;
       var labeler = new ws_util.labelTransformer(function(counter, label) {
         var num = counter;
@@ -260,9 +281,9 @@ var  ws_asm  = (function() {
               var param = builder.tokens[builder.tokenNr++];
               if (!param) {
                 throw { 
-                  program: builder,
+                  program: builder.postProcess(),
                   line: meta.line,
-                  message: "Parameter expected at line + " + meta.line + "." 
+                  message: "Parameter expected at line " + meta.line + "." 
                 };
               }
               if (op.param == "NUMBER") {
@@ -281,7 +302,7 @@ var  ws_asm  = (function() {
                 builder.pushInstruction(instruction); 
               } else {
                 throw {
-                  program: builder,
+                  program: builder.postProcess(),
                   line: meta.line,
                   message: "Unsupported parameter type " + op.param + " (should never happen)."
                 }
@@ -304,30 +325,22 @@ var  ws_asm  = (function() {
             }
           } else {
              throw {
-               program: builder,
+               program: builder.postProcess(),
                line: meta.line,
                message: "Unexpected token at line " + meta.line + ":" + meta.col + "."
              }
           }
        }
-       builder.postProcess();
 
-       for (label in builder.labels) {
-         var inst = builder.programStack[builder.labels[label]];
-         if (typeof inst == "undefined") {
-           throw {
-             program: builder,
-             line: meta.line,
-             message: "Label '" + builder.asmLabels[label] + "' references to nothing."
-           }
-         }
-         if (!inst.labels) {
-           inst.labels = [];
-         }
-         inst.labels.push(label);
+      if (tokenError) {
+        throw {
+          program: builder.postProcess(),
+          line: tokenError.meta.line,
+          message: tokenError.message
+        }
       }
 
-      return builder;
+      return builder.postProcess();
     }
   };
 
