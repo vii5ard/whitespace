@@ -470,8 +470,8 @@ var ws_ide = (function () {
       var optStat = getProgramStat(src);
 
       console.log("Optimized " + ws_ide.openFile.name + ":\n" + 
-                  "  Size:         " + currentStat.size + " bytes -> " + optStat.size + " bytes (" + Math.round((currentStat.size - optStat.size) / currentStat.size * 100) + "%)\n" + 
-                  "  Instructions: " + currentStat.instCount + " -> " + optStat.instCount + " (" + Math.round((currentStat.instCount - optStat.instCount) / currentStat.instCount * 100) + "%)");
+                  "  Size:         " + currentStat.size + " bytes -> " + optStat.size + " bytes (" + Math.round((currentStat.size - optStat.size) / (currentStat.size || 1) * 100) + "%)\n" + 
+                  "  Instructions: " + currentStat.instCount + " -> " + optStat.instCount + " (" + Math.round((currentStat.instCount - optStat.instCount) / (currentStat.instCount || 1) * 100) + "%)");
 
       programSource(src);
     },

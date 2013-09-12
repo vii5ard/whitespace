@@ -89,6 +89,8 @@ var ws_opt = (function() {
         shred.pieces[pieceNr + 1].continued = true;
       }
     }
+
+    shred.pieces[shred.pieces.length -1].continues = false; // In case the last piece does not end properly
     return shred;
   };
 
@@ -101,7 +103,9 @@ var ws_opt = (function() {
       if (piece.reachable) continue;
       piece.reachable = true;
 
-      if (piece.continues) reachables.push(pieceNr + 1);
+      if (piece.continues) {
+        reachables.push(pieceNr + 1);
+      }
 
       var targets = Object.keys(piece.callsTo).concat(Object.keys(piece.jumpsTo));
       for (var t in targets) {
