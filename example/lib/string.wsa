@@ -10,6 +10,11 @@ macro printMem:
   call printHeap
 $$
 
+macro nl:
+  push '\n'
+  printc
+$$
+
 printStack:
   dup
   jz .printStack

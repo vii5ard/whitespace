@@ -19,7 +19,7 @@ var ws_util = (function () {
         length: length,
         labels: {},
         getLabel: function (label) {
-          if (label in this.labels) {
+          if (typeof label != "undefined" && label in this.labels) {
             return this.labels[label];
           } else {
             var gen = labelGenerator(length++, label);

@@ -49,6 +49,7 @@ var ws_opt = (function() {
     }
     pieces.push(makePiece(currentStack, !ignorePieceEnd));
     return {
+      builder: prog,
       labelMap: labelMap,
       pieces: pieces
     };
@@ -233,6 +234,10 @@ var ws_opt = (function() {
             !target.recursion // TODO! recursion messes up a lot 
            ) {
           inlinePiece(target, shred);
+         
+
+          var retLabel = null; 
+ 
           for (var i in target.stack) {
             var targetInst = target.stack[i];
             if (!(targetInst instanceof ws.WsReturn)) { // skip all returns
@@ -240,8 +245,23 @@ var ws_opt = (function() {
             } else if ((targetInst.labels || []).length > 0) {
                newStack.push(new LabelPlaceholder(targetInst.labels));
             } else if (parseInt(i)+1 != target.stack.length) {
-              console.warn("Probably corrupted optimization!");
+              if (!retLabel) {
+                var tmp = 0;
+                while (true) {
+                  retLabel = ws_util.getWsUnsignedNumber(tmp++);
+                  if (!(retLabel in shred.builder.labels)) {
+                    shred.builder.labels[retLabel] = -1; // DANGER: hack alert!
+                    break;
+                  }
+                }
+              }
+              var jmpInst = new ws.WsJump();
+              jmpInst.param = {token: retLabel};
+              newStack.push(jmpInst);
             }
+          }
+          if (retLabel) {
+            newStack.push(new LabelPlaceholder(retLabel));
           }
           target.reachable = false; // mark code block as deprecated
           pushInst = false;

@@ -1,0 +1,38 @@
+#
+# Collatz program with a tricky function to optimize.
+#
+
+include "lib/std.wsa"
+  prints "Enter a number: "
+  push 0
+  readi
+  push 0
+  retrieve
+main:
+  dup
+  printi
+  nl
+  dup
+  push 1
+  sub
+  jz .end
+  call collatz
+  jmp main
+.end:
+  end
+
+collatz:
+  dup
+  push 2
+  mod
+  jz .collatz
+  push 3
+  mul
+  push 1
+  add
+  ret
+.collatz:
+  push 2
+  div
+  ret
+

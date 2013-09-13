@@ -79,6 +79,12 @@
     "author": "Vii5ard",
     "lang": "WS"
   },
+  "collatz.wsa": {
+    "file": "example/collatz.wsa",
+    "origin": "example/collatz.wsa",
+    "author": "Vii5ard",
+    "lang": "WSA"
+  },
   "lib/math.wsa": {
     "file": "example/lib/math.wsa",
     "origin": "example/lib/math.wsa",
