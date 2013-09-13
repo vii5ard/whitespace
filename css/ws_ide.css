@@ -241,17 +241,18 @@ div.panel div.label span {
 
 .modalFog {
   z-index: 1000;
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  height: 562px;
-  width: 950;
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  height: 100%;
+  width: 100%;
   background-color: rgba(255, 255, 255,0.75);
-  display: table-cell;
-  vertical-align: middle;
 }
 
 #modal {
+  position: absolute;
+  z-index: 1002;
+
   margin-left:auto;
   margin-right:auto;
 
@@ -263,7 +264,7 @@ div.panel div.label span {
   
 }
 
-#splashScreen {
+#splashScreenModal {
   width:300px; 
   height:200px; 
   display:inline-block; 
@@ -272,11 +273,31 @@ div.panel div.label span {
   background-position-y: 20px;
 }
 
-#splashScreen .nameVersion {
+#splashScreenModal .nameVersion {
   display: inline-block;
   margin-left:140px;
   margin-top: 90px;
   white-space: pre;
+}
+
+#helpModal {
+  background-color: white;
+}
+
+#helpModal #helpModalContent {
+  width: 700px;
+  height: 500px;
+}
+
+#helpModal #helpModalContent iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+#modal .modalContent {
+  z-index: 1003;
+  display: none;
 }
 
 #errorDiv {

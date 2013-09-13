@@ -34,10 +34,6 @@
    <title>Whitelips the Whitespace IDE</title>
   </head>
   <body>
-    <div id="fog" class="modalFog" style="display: none;">
-      <p>
-        <div id="modal"></div>
-      </p>
     </div>
     <div id="panels">
       <div id="panelLeft"
@@ -67,22 +63,23 @@
         </div>
         <div class="content">
           <div id="buttonDiv">
-             <span class="btn"><a href="javascript:void(0);" onclick="ws_ide.runProgram();">[Run]</a></span> 
-             <span class="btn" id="btnCompile"><a href="javascript:void(0);" onclick="ws_ide.compileAsm();">[Compile]</a></span> 
-             <span class="btn" id="btnOptimize"><a href="javascript:void(0);" onclick="ws_ide.optimizeProgram();">[Optimize]</a></span> 
-             <span class="btn" id="btnEnableHighlight"  style="display:none"><a href="javascript:void(0);" onclick="ws_ide.setHighlight(true);">[ ]Highlight</a></span> 
-             <span class="btn" id="btnDisableHighlight" style="display: none;"><a href="javascript:void(0);"  onclick="ws_ide.setHighlight(false);">[X]Highlight</a></span>
-             <span class="btn" id="btnDownload"><a href="javascript:void(0);" onclick="ws_ide.downloadFile();">[Download]</a></span> 
-           <div style="display:inline-block;">
+            <span class="btn"><a href="javascript:void(0);" onclick="ws_ide.runProgram();">[Run]</a></span> 
+            <span class="btn" id="btnCompile"><a href="javascript:void(0);" onclick="ws_ide.compileAsm();">[Compile]</a></span> 
+            <span class="btn" id="btnOptimize"><a href="javascript:void(0);" onclick="ws_ide.optimizeProgram();">[Optimize]</a></span> 
+            <span class="btn" id="btnEnableHighlight"  style="display:none"><a href="javascript:void(0);" onclick="ws_ide.setHighlight(true);">[ ]Highlight</a></span> 
+            <span class="btn" id="btnDisableHighlight" style="display: none;"><a href="javascript:void(0);"  onclick="ws_ide.setHighlight(false);">[X]Highlight</a></span>
+            <span class="btn" id="btnDownload"><a href="javascript:void(0);" onclick="ws_ide.downloadFile();">[Download]</a></span> 
             <div style="display:inline-block;">
-              Filetype:
-            </div>
-            <div id="filetype" style="display:inline-block;">
-              <span class="btn" id="lang_WS"><a href="javascript:void(0);" onclick="ws_ide.setLang('WSA');">[Whitespace]</a></span>
-              <span class="btn" id="lang_WSA"><a href="javascript:void(0);" onclick="ws_ide.setLang('WS');" >[ Assembly ]</a></span>
+              <div style="display:inline-block;">
+                Filetype:
+              </div>
+              <div id="filetype" style="display:inline-block;">
+               <span class="btn" id="lang_WS"><a href="javascript:void(0);" onclick="ws_ide.setLang('WSA');">[Whitespace]</a></span>
+               <span class="btn" id="lang_WSA"><a href="javascript:void(0);" onclick="ws_ide.setLang('WS');" >[ Assembly ]</a></span>
+              </div>
+              <span class="btn" id="btnHelp"><a href="javascript:void(0);" onclick="ws_ide.displayHelp();">[ HELP ]</a></span> 
             </div>
           </div>
-         </div>
           <div id="scrollableSource" class="scrollable">
             <div id="inputContainer"
                  class="inputContainer">
@@ -179,9 +176,9 @@ You really need to enable javascript or sth!
         </div>
       </div>
     </div>
-    <div style="display: none">
-      <div id="splashScreenModal">
-       <div id="splashScreen">
+    <div style="display: none" id="fog" class="modalFog" onClick="ws_ide.hideModal();"></div>
+      <div id="modal">
+       <div id="splashScreenModal" class="modalContent" onClick="ws_ide.hideModal();">
          <div class="nameVersion">
 Whitelips IDE 
       for <a href="http://compsoc.dur.ac.uk/whitespace/" target="_blank">Whitespace</a>
@@ -190,8 +187,13 @@ Whitelips IDE
          <div>
           Source: <a href="https://github.com/vii5ard/whitespace" target="_blank" >https://github.com/vii5ard/whitespace</a>
          </div>
-       </div>
       </div>
-    </div>
+      <div id="helpModal" class="modalContent">
+        <div class="buttonBar">
+          <span class="btn"><a href="javascript:void(0);" onClick="ws_ide.hideModal();">[Close]</a></span>
+          <span class="btn"><a href="help.html" target="_blank" onClick="ws_ide.hideModal();">[Open in new window]</a></span>
+        </div>
+        <div id="helpModalContent"></div>
+      </div>
   </body>
 </html>

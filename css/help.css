@@ -1,0 +1,18 @@
+body {
+  font-size: 12px;
+  font-family: monospace;
+}
+
+div {
+  white-space: pre;
+}
+
+a {
+  color: black;
+  text-decoration: none;
+}
+
+a:hover {
+  color: white;
+  background-color: black;
+}
