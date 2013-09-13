@@ -37,7 +37,7 @@ var  ws_asm  = (function() {
       "macro": {
         param: ["LABEL"],
         action: function (params, builder) {
-          var metaTypes = { "$number": "NUMBER", "$label": "LABEL", "$string": "STRING" };
+          var metaTypes = { "$number": "NUMBER", "$label": "TOKEN", "$string": "STRING" };
           var macroLabel = params[1].token.replace(/:$/, "");
           var closed = false;
           var newMacro = {

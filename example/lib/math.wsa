@@ -104,10 +104,10 @@ lcm:
   dup
   copy 2 
   mul
-  call abs
+  abs
   copy 1
   copy 3 
-  call gcd
+  gcd
   div
   slide 2
   ret
