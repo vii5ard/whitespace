@@ -186,7 +186,7 @@ ws = {
 
     if (debugToken) {
       throw {
-        program: builder.postProcess,
+        program: builder.postProcess(),
         message: 'Unexpected EOF'
       };
     }
