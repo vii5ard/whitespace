@@ -86,10 +86,16 @@
     "lang": "WSA"
   },
   "lib/string.wsa": {
-    "name": "lib/string.wsa",
     "file": "example/lib/string.wsa",
     "origin": "example/lib/string.wsa",
     "author": "Vii5ard",
     "lang": "WSA"
+  },
+  "lib/std.wsa": {
+    "file": "example/lib/std.wsa",
+    "origin": "example/lib/std.wsa",
+    "author": "Vii5ard",
+    "lang": "WSA"
   }
+
 }}

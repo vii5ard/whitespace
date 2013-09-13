@@ -1,0 +1,14 @@
+#
+# One single file to load libraries only if needed.
+#
+
+macro pow:  include "lib/math.wsa" $redef $$
+macro abs:  include "lib/math.wsa" $redef $$
+macro max:  include "lib/math.wsa" $redef $$
+macro min:  include "lib/math.wsa" $redef $$
+macro sign: include "lib/math.wsa" $redef $$
+macro gcd:  include "lib/math.wsa" $redef $$
+macro lcm:  include "lib/math.wsa" $redef $$
+
+macro prints: include "lib/string.wsa" $redef $$
+

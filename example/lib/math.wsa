@@ -1,3 +1,16 @@
+# Math library
+
+# Macro definitons
+macro pow:  call pow $$
+macro abs:  call abs $$
+macro max:  call max $$
+macro min:  call min $$
+macro sign: call sign $$
+macro gcd:  call gcd $$
+macro lcm:  call lcm $$
+
+# Actual code
+
 end
 
 # Power function

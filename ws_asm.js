@@ -4,7 +4,7 @@ var  ws_asm  = (function() {
       "include": { 
         param: ["STRING"],
         action: function (params, builder) {
-          var param = params[0];
+          var param = params[1];
          
           var fileName = param.token;
           fileName = fileName.slice(1, fileName.length - 1);
@@ -38,22 +38,29 @@ var  ws_asm  = (function() {
         param: ["LABEL"],
         action: function (params, builder) {
           var metaTypes = { "$number": "NUMBER", "$label": "LABEL", "$string": "STRING" };
-          var macroLabel = params.shift().token.replace(/:$/, "");
+          var macroLabel = params[1].token.replace(/:$/, "");
           var closed = false;
           var newMacro = {
             tokens: [],
             param: [],
             action: function (params, builder) {
+              params[0].called = (params[0].called || 0) + 1
+              if (params[0].called > 16) {
+                throw "Circular reference of macros";
+              } 
+
               var toks = [];
+              var pp = 1;
               for (var t in this.tokens) {
                 var token = this.tokens[t];
                 if (token.token in metaTypes) {
-                  toks.push(params.shift());
+                  toks.push(params[pp++]);
                 } else {
                   toks.push(token);
                 }
-              } 
-              builder.tokens = toks.concat(builder.tokens); 
+              }
+             
+              builder.tokens = toks.concat(builder.tokens);
             }
           };
           while (true) {
@@ -65,12 +72,16 @@ var  ws_asm  = (function() {
               if (token.token == "$$") {
                 closed = true;
                 break;
-              } 
-              if (token.token in metaTypes) {
-                newMacro.param.push(metaTypes[token.token]);
-              } else {
-                throw "Nested macro call";
               }
+              if (token.token == "include") {
+                // do nothing 
+              } else if (token.token == "$redef") {
+                params[1].type = "MACRO";
+                newMacro.tokens.push(params[1]);
+                continue;
+              } else if (token.token in metaTypes) {
+                newMacro.param.push(metaTypes[token.token]);
+              } 
             } 
 
             newMacro.tokens.push(token);
@@ -78,6 +89,7 @@ var  ws_asm  = (function() {
           if (!closed) {
             throw "Macro not closed";
           }
+
           builder.macros[macroLabel] = newMacro;
         }
       },
@@ -103,6 +115,12 @@ var  ws_asm  = (function() {
         param: [],
         action: function (params, builder) {
           throw "String-pop called outside of a macro";
+        }
+      },
+      "$redef": {
+        param: [],
+        action: function (params, builder) {
+          throw "Can't redefine macro outside of a macro"
         }
       }
     };
@@ -405,9 +423,10 @@ var  ws_asm  = (function() {
                 pushInstruction(builder, op.constr);
               }
             } else if (token.token in builder.macros) {
+              token.type = "MACRO"; // can be label in some cases
               var macro = builder.macros[token.token];
               if (typeof macro.action == "function") {
-                var params = [];
+                var params = [token];
                 for (var p in macro.param) {
                   var paramType = macro.param[p];
                   var parToken = builder.tokens.shift();
