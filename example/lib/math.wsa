@@ -10,6 +10,8 @@ macro gcd:  call gcd $$
 macro lcm:  call lcm $$
 
 macro neg: push -1 mul $$
+macro shr: push 2 div $$ # no speed advantage,
+macro shl: push 2 mul $$ # but just for fun
 
 # Actual code
 

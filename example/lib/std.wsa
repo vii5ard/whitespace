@@ -10,6 +10,8 @@ macro sign: include "lib/math.wsa" $redef $$
 macro gcd:  include "lib/math.wsa" $redef $$
 macro lcm:  include "lib/math.wsa" $redef $$
 macro neg:  include "lib/math.wsa" $redef $$
+macro shr:  include "lib/math.wsa" $redef $$
+macro shl:  include "lib/math.wsa" $redef $$
 
 macro prints: include "lib/string.wsa" $redef $$
 macro nl:     include "lib/string.wsa" $redef $$
