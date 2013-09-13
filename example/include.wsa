@@ -1,8 +1,0 @@
-include "lib/stack.wsa"
-
-push "Hello std!"
-
-call printStackC
-
-end
-

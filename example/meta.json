@@ -18,10 +18,10 @@
     "origin":"example/nerd.wsa",
     "lang": "WSA"
   },
-  "include.wsa": {
-    "file":"example/include.wsa",
+  "hmacro.wsa": {
+    "file":"example/hmacro.wsa",
     "author":"Vii5ard",
-    "origin":"example/include.wsa",
+    "origin":"example/hmacro.wsa",
     "lang":"WSA"
   },
   "name.ws": {
@@ -85,17 +85,10 @@
     "author": "Vii5ard",
     "lang": "WSA"
   },
-  "lib/stack.wsa": {
-    "name": "lib/stack.wsa",
-    "file": "example/lib/stack.wsa",
-    "origin": "example/lib/stack.wsa",
-    "author": "Vii5ard",
-    "lang": "WSA"
-  },
-  "lib/heap.wsa": {
-    "name": "lib/heap.wsa",
-    "file": "example/lib/heap.wsa",
-    "origin": "example/lib/heap.wsa",
+  "lib/string.wsa": {
+    "name": "lib/string.wsa",
+    "file": "example/lib/string.wsa",
+    "origin": "example/lib/string.wsa",
     "author": "Vii5ard",
     "lang": "WSA"
   }

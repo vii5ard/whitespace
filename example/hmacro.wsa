@@ -1,0 +1,4 @@
+include "lib/string.wsa"
+
+prints "Hello macro world!\n"
+

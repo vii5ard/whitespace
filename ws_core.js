@@ -185,100 +185,107 @@ ws = {
     return builder.postProcess();
   },
 
-  programBuilder: function (fullSource) {
-    return {
-      source: fullSource,
-      programStack: [],
-      labels: {},
-      asmLabels: {},
-      getAsm: function () {
-        var asm = [];
-        for (var i in this.programStack) {
-          var inst = this.programStack[i];
-          asm.push(inst.getAsm());
-        }
-        return asm;
-      },
+  programBuilder: function (fullSource, master) {
+    var builder = {};
 
-      pushInstruction: function (instruction) {
-        if (instruction.apply) {
-          instruction.apply(this);
-        } else {
-          instruction.address = this.programStack.length;
-          this.programStack.push(instruction);
-        }
+    for (var key in master) {
+      builder[key] = master[key];
+    }
 
-        for (var l in instruction.labels) {
-          this.labels[instruction.labels[l]] = instruction.address;
-        }
+    builder.source = fullSource;
+    builder.programStack = [];
+    builder.labels = {};
+    builder.asmLabels = builder.asmLabels || {};
+    builder.getAsm = function () {
+      var asm = [];
+      for (var i in this.programStack) {
+        var inst = this.programStack[i];
+        asm.push(inst.getAsm());
+      }
+      return asm;
+    };
 
-      },
-
-      postProcess: function () {
-        for (var i in this.programStack) {
-          if (this.programStack[i].postProcess) {
-            this.programStack[i].postProcess(this);
-          }
-        }
-        for (label in this.labels) {
-          var inst = this.programStack[this.labels[label]];
-          if (inst) {
-            if (!inst.labels) inst.labels = [];
-            inst.labels.push(label);
-          } else {
-            // Label to void
-            var labelInst = new ws.WsLabel();
-            labelInst.address = this.programStack.length;
-            labelInst.param = {token: label};
-            this.programStack.push(labelInst);
-          }
-        }
-        return this;
-      },
-
-      getAsmSrc: function () {
-        var src = [];
-        var asm = this.getAsm();
-        var labler = new ws_util.labelTransformer(function (n, label) { return "label_" + n; } );
-        for (var i in asm) {
-          var ln = asm[i];
-          var labels = "";
-          for (l in ln.labels) {
-            var wsLabel = ln.labels[l];
-            var label = this.asmLabels[wsLabel] || labler.getLabel(wsLabel);
-            labels += (labels ? "\n": "") + label + ":";
-          }
-          if (labels) {
-            src.push({IP: null, str: labels});
-          }
-          var instrStr = ln.mnemo;
-          if (ln.param.label != null) {
-            instrStr += " " + (this.asmLabels[ln.param.label] || labler.getLabel(ln.param.label));
-          }
-          if (ln.param.val != null) {
-            instrStr += " " + ln.param.val;
-          }
-          src.push({IP:i, str: instrStr});
-        }
-       
-        return src;
-      },
-      getWsSrc: function () {
-        var src = '';
-        for (var i in this.programStack) {
-          var inst = this.programStack[i];
-          for (l in inst.labels) {
-            src += '\n  ' + inst.labels[l];
-          }
-          src += inst.wsToken;
-          var par = inst.param;
-          if (par) {
-            src += par.token;
-          }   
-        }   
-        return src;
+    builder.pushInstruction = function (instruction) {
+      if (instruction.apply) {
+        instruction.apply(this);
+      } else {
+        instruction.address = this.programStack.length;
+        this.programStack.push(instruction);
+      }
+      for (var l in instruction.labels) {
+        this.labels[instruction.labels[l]] = instruction.address;
       }
     };
+
+    builder.postProcess = function () {
+      for (var i in this.programStack) {
+        if (this.programStack[i].postProcess) {
+          this.programStack[i].postProcess(this);
+        }
+      }
+
+      for (label in this.labels) {
+        var inst = this.programStack[this.labels[label]];
+        if (inst) {
+          if (!inst.labels) inst.labels = [];
+          if ($.inArray(label, inst.labels) < 0) {
+            inst.labels.push(label);
+          }
+        } else {
+          // Label to void
+          var labelInst = new ws.WsLabel();
+          labelInst.address = this.programStack.length;
+          labelInst.param = {token: label};
+          this.programStack.push(labelInst);
+        }
+      }
+      return this;
+    };
+
+    builder.getAsmSrc = function () {
+      var src = [];
+      var asm = this.getAsm();
+      var labler = new ws_util.labelTransformer(function (n, label) { return "label_" + n; } );
+      for (var i in asm) {
+        var ln = asm[i];
+        var labels = "";
+        for (l in ln.labels) {
+          var wsLabel = ln.labels[l];
+          var label = this.asmLabels[wsLabel] || labler.getLabel(wsLabel);
+          labels += (labels ? "\n": "") + label + ":";
+        }
+        if (labels) {
+          src.push({IP: null, str: labels});
+        }
+        var instrStr = ln.mnemo;
+        if (ln.param.label != null) {
+          instrStr += " " + (this.asmLabels[ln.param.label] || labler.getLabel(ln.param.label));
+        }
+        if (ln.param.val != null) {
+          instrStr += " " + ln.param.val;
+        }
+        src.push({IP:i, str: instrStr});
+      }
+     
+      return src;
+    };
+
+    builder.getWsSrc = function () {
+      var src = '';
+      for (var i in this.programStack) {
+        var inst = this.programStack[i];
+        for (l in inst.labels) {
+          src += '\n  ' + inst.labels[l];
+        }
+        src += inst.wsToken;
+        var par = inst.param;
+        if (par) {
+          src += par.token;
+        }   
+      }   
+      return src;
+    }
+    return builder;
   },
  
  

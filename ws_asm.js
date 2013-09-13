@@ -1,31 +1,112 @@
 var  ws_asm  = (function() {
-  var ws_macro = {
-    "include": { 
+  var builtinMacros = function() {
+    return {
+      "include": { 
         param: ["STRING"],
         action: function (params, builder) {
-           var param = params[0];
-           
-           var fileName = param.token;
-           fileName = fileName.slice(1, fileName.length - 1);
-           if (!(fileName in builder.includes)) {
-             var file = ws_fs.getFile(fileName);
+          var param = params[0];
+         
+          var fileName = param.token;
+          fileName = fileName.slice(1, fileName.length - 1);
+          if (!(fileName in builder.includes)) {
+            var file = ws_fs.getFile(fileName);
+            if (!file) {
+              throw "File not found: '" + fileName + "'.";
+            }
 
-             if (!file) {
-               throw "File not found: '" + fileName + "'.";
-             }
+            builder.includes[fileName] = ws_fs.openFile(file);
 
-             builder.includes[fileName] = ws_fs.openFile(file);
+            if (builder.includes[fileName]) {
+              var srcArr = new ws_util.StrArr(builder.includes[fileName]);
+              try {
+                var ext = ws_asm.compile(builder.includes[fileName], builder);
+                builder.externals.push(ext);
+              } catch (err) {
+                if (err.program) {
+                  builder.externals.push(err.program);
+                  console.warn("Broken include '" + fileName + "': " + err.message);
+                } else {
+                  console.error(err);
+                  throw "Unknown error loading '" + fileName + "'";
+                }
+              }
+            }
+          }
+        }
+      },
+      "macro": {
+        param: ["LABEL"],
+        action: function (params, builder) {
+          var metaTypes = { "$number": "NUMBER", "$label": "LABEL", "$string": "STRING" };
+          var macroLabel = params.shift().token.replace(/:$/, "");
+          var closed = false;
+          var newMacro = {
+            tokens: [],
+            param: [],
+            action: function (params, builder) {
+              var toks = [];
+              for (var t in this.tokens) {
+                var token = this.tokens[t];
+                if (token.token in metaTypes) {
+                  toks.push(params.shift());
+                } else {
+                  toks.push(token);
+                }
+              } 
+              builder.tokens = toks.concat(builder.tokens); 
+            }
+          };
+          while (true) {
+            var token = builder.tokens.shift();
+            if (!token) {
+              break;
+            }
+            if (token.type == "MACRO") {
+              if (token.token == "$$") {
+                closed = true;
+                break;
+              } 
+              if (token.token in metaTypes) {
+                newMacro.param.push(metaTypes[token.token]);
+              } else {
+                throw "Nested macro call";
+              }
+            } 
 
-           if (builder.includes[fileName]) {
-             var srcArr = new ws_util.StrArr(builder.includes[fileName]);
-             var tokens = getTokens(srcArr);
-           
-             builder.tokens = builder.tokens.concat(tokens);
-           }
-         }
-       }
-     }
-  };
+            newMacro.tokens.push(token);
+          }
+          if (!closed) {
+            throw "Macro not closed";
+          }
+          builder.macros[macroLabel] = newMacro;
+        }
+      },
+      "$$": {
+        param: [],
+        action: function (params, builder) {
+          throw "Unexpected end of macro";
+        }
+      },
+      "$label": {
+        param: [],
+        action: function (params, builde) {
+          throw "Label-pop called outside of a macro";
+        }
+      },
+      "$number": {
+        param: [],
+        action: function (params, builder) {
+          throw "Number-pop called outside of a macro";
+        }
+      },
+      "$string": {
+        param: [],
+        action: function (params, builder) {
+          throw "String-pop called outside of a macro";
+        }
+      }
+    };
+  }
 
   var mnemo = (function () {
     var mnemoCodes = {};
@@ -157,7 +238,7 @@ var  ws_asm  = (function() {
      };
   }
 
-  var parseLabel = function(strArr) {
+  var parseLabel = function(strArr, builder) {
     var  label = "";
     while  (strArr.hasNext() && strArr.peek().match(/[0-9a-zA-Z_$.]/)) {
       label +=  strArr.getNext();
@@ -175,11 +256,13 @@ var  ws_asm  = (function() {
     }
 
     var op = null; 
-    if (type == "TOKEN" && label in mnemo) {
-       type = "KEYWORD";
-       op = mnemo[label];
-    } else if (label in ws_macro) {
-       type = "MACRO";
+    if (type == "TOKEN") {
+      if (label in mnemo) {
+        type = "KEYWORD";
+        op = mnemo[label];
+      } else if (label in builder.macros) {
+        type = "MACRO";
+      }
     }
     return {
       type: type,
@@ -189,7 +272,7 @@ var  ws_asm  = (function() {
 
   };
 
-  var getTokens = function(strArr) {
+  var getTokens = function(strArr, builder) {
     var tokens = [];
     while (strArr.hasNext()) {
       if (parseWhitespace(strArr).token) {
@@ -210,7 +293,7 @@ var  ws_asm  = (function() {
         } else if (next.match(/[-+\d]/)) {
           token = parseNumber(strArr);
         } else {
-          token = parseLabel(strArr);
+          token = parseLabel(strArr, builder);
         }
       } catch (err) {
         if (typeof err == "string") {
@@ -244,13 +327,26 @@ var  ws_asm  = (function() {
     builder.pushInstruction(instruction);
   }
 
+  var postProcess = function(builder) {
+    while (builder.externals.length > 0) {
+      var ext = builder.externals.shift();
+      for (var i in ext.programStack) {
+        var inst = ext.programStack[i];
+        builder.pushInstruction(inst);
+      } 
+    }
+    return builder.postProcess();
+  }
+
   return {
-    compile: function (str) {
+    compile: function (str, master) {
       var strArr = new ws_util.StrArr(str);
-      var builder = ws.programBuilder(str);
-      builder.includes = {};
+      var builder = ws.programBuilder(str, master);
+      builder.macros = builder.macros || builtinMacros();
+      builder.includes = builder.includes || {};
+      builder.externals = builder.externals || [];
       try {
-        builder.tokens = getTokens(strArr);
+        builder.tokens = getTokens(strArr, builder);
       } catch (err) {
         if (err.tokens) {
           builder.tokens = err.tokens;
@@ -259,8 +355,7 @@ var  ws_asm  = (function() {
           throw err;
         }
       }
-      builder.tokenNr = 0;
-      var labeler = new ws_util.labelTransformer(function(counter, label) {
+      builder.asmLabeler = builder.asmLabeler || new ws_util.labelTransformer(function(counter, label) {
         var num = counter;
         if (!label.match(/^[._]/)) {
           num = 0;
@@ -270,10 +365,12 @@ var  ws_asm  = (function() {
         }
         return ws_util.getWsUnsignedNumber(num);
       });
-      while (builder.tokenNr < builder.tokens.length) {
-         var token = builder.tokens[builder.tokenNr++];
+
+      var labeler = builder.asmLabeler;
+      while (builder.tokens.length > 0) {
+         var token = builder.tokens.shift();
          var meta = token.meta;
-try {
+         try {
            if (token.type == "LABEL") {
              builder.labels[labeler.getLabel(token.token)] = builder.programStack.length;
              builder.asmLabels[labeler.getLabel(token.token)] = token.token;
@@ -281,7 +378,7 @@ try {
               var op = token.op;
               var instruction = new op.constr();
               if (op.param) {
-                var param = builder.tokens[builder.tokenNr++];
+                var param = builder.tokens.shift();
                 if (!param) {
                   throw "Parameter expected";
                 }
@@ -307,13 +404,13 @@ try {
               } else {
                 pushInstruction(builder, op.constr);
               }
-            } else if (token.type == "MACRO") {
-              var macro = ws_macro[token.token];
+            } else if (token.token in builder.macros) {
+              var macro = builder.macros[token.token];
               if (typeof macro.action == "function") {
                 var params = [];
                 for (var p in macro.param) {
                   var paramType = macro.param[p];
-                  var parToken = builder.tokens[builder.tokenNr++];
+                  var parToken = builder.tokens.shift();
                   if (!parToken || parToken.type != paramType) {
                     throw "Expected " + paramType;
                   } else {
@@ -330,7 +427,7 @@ try {
          } catch (err) {
            if (typeof err == "string") {
              throw {
-               program: builder.postProcess(),
+               program: postProcess(builder),
                line: meta.line,
                message: err + " at line " + meta.line + "." 
              };
@@ -342,14 +439,14 @@ try {
 
       if (tokenError) {
         throw {
-          program: builder.postProcess(),
+          program: postProcess(builder),
           line: tokenError.meta.line,
           message: tokenError.message
         }
       }
 
-      return builder.postProcess();
-    }
+      return postProcess(builder);
+    },
   };
 
 })();
