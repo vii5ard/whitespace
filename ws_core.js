@@ -118,7 +118,16 @@ ws = {
         this.stack[this.register.SP++] = val;
       },
       stackPop: function () {
-        return this.stack[--this.register.SP];
+        if (this.register.SP <= 0) {
+          throw "Stack underflow";
+        }
+        return this.stack[--this.register.SP] || 0;
+      },
+      stackPeek: function () {
+        if (this.register.SP <= 0) {
+          throw "Stack underflow";
+        }
+        return this.stack[this.register.SP - 1] || 0;
       },
       createFrame: function () {
         this.callStack.push(this.register.IP);
@@ -303,7 +312,7 @@ ws = {
 
   WsDouble: function() {
     this.run = function(env) {
-      env.stackPush(env.stack[env.register.SP-1]);
+      env.stackPush(env.stackPeek());
       env.register.IP++;
     }
     this.getAsm = asmWithNoParam;
@@ -321,9 +330,10 @@ ws = {
   WsSwapTop: function() {
     this.run = function (env) {
       var last = env.register.SP - 1;
-      var tmp = env.stack[last];
-      env.stack[last] = env.stack[last-1];
-      env.stack[last-1] = tmp;
+      var tmp1 = env.stackPop();
+      var tmp2 = env.stackPop();
+      env.stackPush(tmp1);
+      env.stackPush(tmp2);
       env.register.IP++;
     }
     this.getAsm = asmWithNoParam;

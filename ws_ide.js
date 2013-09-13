@@ -451,6 +451,7 @@ var ws_ide = (function () {
         } else if (err != "Break") {
           console.error("Runtime Error: " + err);
           ws_ide.env.running = false;
+          ws_ide.stopAnimateRunning();
         }
       }
       updateMemoryTab(ws_ide.env);
@@ -469,7 +470,6 @@ var ws_ide = (function () {
     optimizeProgram: function() {
       var src = programSource();
       var currentStat = getProgramStat(src);
-//      var src = ws.reduceProgram(ws.compile(src));
       var prog = ws.compile(src);
       var src = ws_opt.optimize(prog).getWsSrc();
       var optStat = getProgramStat(src);
