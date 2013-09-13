@@ -12,6 +12,7 @@ macro lcm:  include "lib/math.wsa" $redef $$
 macro neg:  include "lib/math.wsa" $redef $$
 macro shr:  include "lib/math.wsa" $redef $$
 macro shl:  include "lib/math.wsa" $redef $$
+macro sqrt: include "lib/math.wsa" $redef $$
 
 macro prints: include "lib/string.wsa" $redef $$
 macro nl:     include "lib/string.wsa" $redef $$
@@ -33,4 +34,4 @@ macro pushs:     include "lib/alias.wsa" $redef $$
 macro return:    include "lib/alias.wsa" $redef $$
 macro exit:      include "lib/alias.wsa" $redef $$
 macro halt:      include "lib/alias.wsa" $redef $$
-#
+

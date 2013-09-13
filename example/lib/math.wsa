@@ -8,6 +8,7 @@ macro min:  call min $$
 macro sign: call sign $$
 macro gcd:  call gcd $$
 macro lcm:  call lcm $$
+macro sqrt: call sqrt $$
 
 macro neg: push -1 mul $$
 macro shr: push 2 div $$ # no speed advantage,
@@ -115,3 +116,63 @@ lcm:
   div
   slide 2
   ret
+
+# Floor value of the square root
+sqrt:
+  dup
+  jz .sqrt_01
+  dup
+  push 1
+  sub
+  jz .sqrt_01
+  jmp .sqrt_gt1
+.sqrt_01:
+  ret
+.sqrt_gt1:
+  push 0
+  copy 1
+.sqrt:
+  dup
+  copy 2
+  sub
+  dup
+  mul
+  push 1
+  sub
+  jz .sqrt_floor_result
+  dup
+  copy 2
+  add
+  push 2
+  div
+  dup
+  dup
+  mul
+  copy 4
+  swap
+  sub
+  dup
+  jz .sqrt_result
+  jn .sqrt_ceil
+  drop
+  swap
+  copy 1
+  add
+  push 2
+  div
+  swap
+  jmp .sqrt_continue
+.sqrt_ceil:
+  slide 1
+  jmp .sqrt
+.sqrt_continue:
+  jmp .sqrt
+.sqrt_result:
+  drop
+  slide 3
+  ret
+.sqrt_floor_result:
+  drop
+  slide 1
+  ret
+
