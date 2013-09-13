@@ -9,6 +9,8 @@ macro sign: call sign $$
 macro gcd:  call gcd $$
 macro lcm:  call lcm $$
 
+macro neg: push -1 mul $$
+
 # Actual code
 
 end
