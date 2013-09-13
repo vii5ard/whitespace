@@ -233,6 +233,9 @@ var  ws_asm  = (function() {
        } else {
          escape = false;
        }
+       if (strArr.peek() == '\n' && !escape) {
+         throw "Unexpected end of line";
+       }
        str += strArr.getNext();
      }
      if (!strArr.hasNext || strArr.peek() != strEnd) {
