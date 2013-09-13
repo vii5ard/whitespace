@@ -12,3 +12,21 @@ macro lcm:  include "lib/math.wsa" $redef $$
 
 macro prints: include "lib/string.wsa" $redef $$
 
+macro doub:      include "lib/alias.wsa" $redef $$
+macro duplicate: include "lib/alias.wsa" $redef $$
+macro jump:      include "lib/alias.wsa" $redef $$
+macro jumpz:     include "lib/alias.wsa" $redef $$
+macro jumpn:     include "lib/alias.wsa" $redef $$
+macro outn:      include "lib/alias.wsa" $redef $$
+macro putc:      include "lib/alias.wsa" $redef $$
+macro outi:      include "lib/alias.wsa" $redef $$
+macro puti:      include "lib/alias.wsa" $redef $$
+macro putn:      include "lib/alias.wsa" $redef $$
+macro getc:      include "lib/alias.wsa" $redef $$
+macro geti:      include "lib/alias.wsa" $redef $$
+macro getn:      include "lib/alias.wsa" $redef $$
+macro pushs:     include "lib/alias.wsa" $redef $$
+macro return:    include "lib/alias.wsa" $redef $$
+macro exit:      include "lib/alias.wsa" $redef $$
+macro halt:      include "lib/alias.wsa" $redef $$
+#

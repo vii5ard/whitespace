@@ -134,16 +134,6 @@ var  ws_asm  = (function() {
       mnemoCodes[keyword.mnemo] = keyword;
     }
 
-    // Add aliases
-    for (var mnemo in ws.keywordAliases) {
-      var aliases = ws.keywordAliases[mnemo];
-      for (var i in aliases) {
-        var alias = aliases[i];
-        if (!(alias in mnemoCodes) && mnemo in mnemoCodes) {
-          mnemoCodes[alias] = mnemoCodes[mnemo];
-        }
-      }
-    }
     return mnemoCodes;
   })(); 
 

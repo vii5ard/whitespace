@@ -1,0 +1,22 @@
+#
+# Aliases for compatibility
+#
+
+macro doub: dup $$
+macro duplicate: dup $$
+macro jump: jmp $$
+macro jumpz: jz $$
+macro jumpn: jn $$
+macro outn: printc $$
+macro putc: printc $$
+macro outi: printi $$
+macro puti: printi $$
+macro putn: printi $$
+macro getc: readc $$
+macro geti: readi $$
+macro getn: readi $$
+macro pushs: push $$
+macro return: ret $$
+macro exit: end $$
+macro halt: end $$
+

@@ -91,6 +91,12 @@
     "author": "Vii5ard",
     "lang": "WSA"
   },
+  "lib/alias.wsa": {
+    "file": "example/lib/alias.wsa",
+    "origin": "example/lib/alias.wsa",
+    "author": "Vii5ard",
+    "lang": "WSA"
+  },
   "lib/std.wsa": {
     "file": "example/lib/std.wsa",
     "origin": "example/lib/std.wsa",
