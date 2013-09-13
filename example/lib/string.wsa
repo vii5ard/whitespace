@@ -1,0 +1,35 @@
+end
+
+macro prints:
+  push $string
+  call printStack
+$$
+
+macro printMem:
+  push $number
+  call printHeap
+$$
+
+printStack:
+  dup
+  jz .printStack
+  printc
+  jmp printStack
+.printStack:
+  drop
+  ret
+
+printHeap:
+  dup
+  retrieve
+  dup
+  jz .printHeap
+  printc
+  push 1
+  add
+  jmp printHeap
+.printHeap:
+  drop
+  drop
+  ret
+
