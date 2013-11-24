@@ -103,6 +103,12 @@
     "author": "Vii5ard",
     "lang": "WSA"
   },
+  "lib/rot13.wsa": {
+    "file": "example/lib/rot13.wsa",
+    "origin": "example/lib/rot13.wsa",
+    "author": "Vii5ard",
+    "lang": "WSA"
+  },
   "lib/std.wsa": {
     "file": "example/lib/std.wsa",
     "origin": "example/lib/std.wsa",

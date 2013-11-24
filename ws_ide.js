@@ -1,4 +1,4 @@
-var console = (function () {
+var logger = (function () {
   var writeTab = function (msg, level) {
     var consoleArea = $('#consoleArea');
     consoleArea.append('<div>' + (level?level+': ':'') + msg + '<div>');
@@ -429,7 +429,7 @@ var ws_ide = (function () {
         ws_ide.continueRun();
       } catch (err) {
         if (!err.program) {
-          console.error("Compile Error: " + err);
+          logger.error("Compile Error: " + err);
         }
       }
     },
@@ -449,7 +449,8 @@ var ws_ide = (function () {
         } else if (err == "IOWait") {
           // Do nothing - wait for IO
         } else if (err != "Break") {
-          console.error("Runtime Error: " + err);
+          logger.error("Runtime Error: " + err);
+
           ws_ide.env.running = false;
           ws_ide.stopAnimateRunning();
         }
@@ -474,7 +475,7 @@ var ws_ide = (function () {
       var src = ws_opt.optimize(prog).getWsSrc();
       var optStat = getProgramStat(src);
 
-      console.log("Optimized " + ws_ide.openFile.name + ":\n" + 
+      logger.log("Optimized " + ws_ide.openFile.name + ":\n" + 
                   "  Size:         " + currentStat.size + " bytes -> " + optStat.size + " bytes (" + Math.round((currentStat.size - optStat.size) / (currentStat.size || 1) * 100) + "%)\n" + 
                   "  Instructions: " + currentStat.instCount + " -> " + optStat.instCount + " (" + Math.round((currentStat.instCount - optStat.instCount) / (currentStat.instCount || 1) * 100) + "%)");
 
@@ -621,7 +622,7 @@ var ws_ide = (function () {
 
     compileAsm: function() {
       if (ws_ide.program.compileError) {
-        console.error(ws_ide.program.compileError)
+        logger.error(ws_ide.program.compileError)
         return;
       }
       var fileName = "compile.ws";

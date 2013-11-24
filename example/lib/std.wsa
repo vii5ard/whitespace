@@ -14,8 +14,10 @@ macro shr:  include "lib/math.wsa" $redef $$
 macro shl:  include "lib/math.wsa" $redef $$
 macro sqrt: include "lib/math.wsa" $redef $$
 
-macro prints: include "lib/string.wsa" $redef $$
-macro nl:     include "lib/string.wsa" $redef $$
+macro prints:    include "lib/string.wsa" $redef $$
+macro nl:        include "lib/string.wsa" $redef $$
+macro storeStr:  include "lib/string.wsa" $redef $$
+macro printHeap: include "lib/string.wsa" $redef $$
 
 macro doub:      include "lib/alias.wsa" $redef $$
 macro duplicate: include "lib/alias.wsa" $redef $$
@@ -34,4 +36,6 @@ macro pushs:     include "lib/alias.wsa" $redef $$
 macro return:    include "lib/alias.wsa" $redef $$
 macro exit:      include "lib/alias.wsa" $redef $$
 macro halt:      include "lib/alias.wsa" $redef $$
+
+macro rot13:     include "lib/rot13.wsa" $redef $$
 

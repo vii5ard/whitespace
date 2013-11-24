@@ -15,6 +15,34 @@ macro nl:
   printc
 $$
 
+macro storeStr:
+  push $string
+  push $number
+  call storeStr
+$$
+
+macro printHeap:
+  push $number
+  call printHeap
+$$
+
+storeStr:
+  copy 1
+  jz
+  .storeStr_end
+  dup
+  copy 2
+  store
+  push 1
+  add
+  slide 1
+  jmp storeStr
+
+.storeStr_end:
+  swap
+  store
+  ret
+
 printStack:
   dup
   jz .printStack
@@ -37,4 +65,3 @@ printHeap:
   drop
   drop
   ret
-

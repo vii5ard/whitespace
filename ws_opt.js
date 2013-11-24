@@ -88,6 +88,8 @@ var ws_opt = (function() {
       }
       if (piece.continues && (pieceNr + 1) in shred.pieces) {
         shred.pieces[pieceNr + 1].continued = true;
+        piece.jumpsTo[pieceNr + 1] = (piece.jumpsTo[pieceNr +1] || 0) + 1;
+        shred.pieces[pieceNr + 1].jumpedFrom[pieceNr] = (shred.pieces[pieceNr +1].jumpedFrom[pieceNr] || 0) + 1;
       }
     }
 
@@ -115,49 +117,77 @@ var ws_opt = (function() {
     }
   }
 
-  var unifyPieces = function(shred) {
-    for (var pieceNr = shred.pieces.length - 1; pieceNr >= 0; pieceNr--) {
-      pieceNr = parseInt(pieceNr);
-      var piece = shred.pieces[pieceNr];
-      if (!piece.continues &&
-          Object.keys(piece.jumpedFrom).length == 1 && 
-          Object.keys(piece.calledFrom).length == 0 && 
-          (!piece.continued || ((pieceNr -1) in piece.jumpedFrom))
+  var growPiece = function(masterNr, shred) {
+    var masterPiece = shred.pieces[masterNr];
+    if (!masterPiece.reachable) return;
+    if (masterPiece.grown) return;
+    masterPiece.grown = true;
+
+    for (var subNr = masterNr + 1; subNr < shred.pieces.length; subNr++) {
+      var subPiece = shred.pieces[subNr];
+      if (!subPiece.reachable) continue;
+      growPiece(subNr, shred);
+      if (masterNr in subPiece.jumpedFrom &&
+          Object.keys(subPiece.jumpedFrom).length == 1 &&
+          (Object.keys(subPiece.calledFrom).length == 0 || Object.keys(subPiece.calledFrom).length == 1 && masterNr in subPiece.calledFrom)
       ) {
-        var parentPieceNr = null;
-        if (piece.continued) {
-          parentPieceNr = pieceNr - 1;
-        } else if ((pieceNr - 1) in piece.jumpedFrom) {
-          parentPieceNr = Object.keys(piece.jumpedFrom).shift();
-        } else {
-          continue;
-        }
-        var parentPiece = shred.pieces[parentPieceNr];
 
-        if (parentPiece.continues && !piece.continued) {
-          continue;
+        if (subNr < masterNr && subPiece.continued) break;
+
+        masterPiece.stack = masterPiece.stack.concat(subPiece.stack);
+        
+
+        delete masterPiece.jumpsTo[subNr];
+        subPiece.reachable = false;
+
+        masterPiece.innerLoop = masterPiece.innerLoop || subPiece.innerLoop || masterNr in subPiece.jumpsTo;
+        masterPiece.recursion = masterPiece.recursion || subPiece.recursion || masterNr in subPiece.callsTo;
+        masterPiece.continues = subPiece.continues;
+
+        for (var tmpNr = subNr - 1; tmpNr >= 0; tmpNr--) {
+          var tmpPiece = shred.pieces[tmpNr];
+          tmpPiece.continues = false;
+          if (tmpPiece.reachable) break;
         }
 
-        parentPiece.stack = parentPiece.stack.concat(piece.stack);
-        delete parentPiece.jumpsTo[pieceNr];
-        piece.reachable = false; // code block is deprecated
-        for (var tmp in shred.pieces) {
-          var tmpPiece = shred.pieces[tmp];
-          if (pieceNr in tmpPiece.jumpedFrom) {
-            var count = tmpPiece.jumpedFrom[pieceNr];
-            delete tmpPiece.jumpedFrom[pieceNr];
-            tmpPiece.jumpedFrom[parentPiece] = (tmpPiece.jumpedFrom[parentPiece] || 0) + count;
+        for (var i in subPiece.jumpsTo) {
+          if (i != masterNr) {
+            masterPiece.jumpsTo[i] = (masterPiece.jumpsTo[i] || 0) + subPiece.jumpsTo[i];
           }
-          if (pieceNr in tmpPiece.calledFrom) {
-            var count = tmpPiece.calledFrom[pieceNr];
-            delete tmpPiece.calledFrom[pieceNr];
-            tmpPiece.calledFrom[parentPiece] = (tmpPiece.calledFrom[parentPiece] || 0) + count;
+        } 
+        for (var i in subPiece.callsTo) {
+          if (i != masterNr) {
+            masterPiece.callsTo[i] = (masterPiece.callsTo[i] || 0) + subPiece.callsTo[i];
           }
         }
-        parentPiece.innerLoop = parentPiece.innerLoop || piece.innerLoop || parentPieceNr in piece.jumpsTo;
-        parentPiece.recursion = parentPiece.recursion || piece.recursion || parentPieceNr in piece.callsTo
-        parentPiece.continues = piece.continues;
+        for (var tmpNr = 0; tmpNr < shred.pieces.length; tmpNr++) {
+          var tmpPiece = shred.pieces[tmpNr];
+          if (subNr in tmpPiece.calledFrom) {
+            var count = tmpPiece.calledFrom[subNr];
+            delete tmpPiece.calledFrom[subNr];
+            tmpPiece.calledFrom[masterNr] = (tmpPiece.calledFrom[masterNr] || 0) + count;
+          }
+          if (subNr in tmpPiece.jumpedFrom) {
+            var count = tmpPiece.jumpedFrom[subNr];
+            delete tmpPiece.jumpedFrom[subNr];
+            tmpPiece.jumpedFrom[masterNr] = (tmpPiece.jumpedFrom[masterNr] || 0) + count; 
+          }
+        }
+        for (var i in shred.labelMap) {
+          if (shred.labelMap[i] == subNr) {
+            shred.labelMap[i] = masterNr;
+          }
+        }
+        if (masterNr in masterPiece.calledFrom) delete masterPiece.calledFrom[masterNr];
+        if (masterNr in masterPiece.jumpedFrom) delete masterPiece.jumpedFrom[masterNr];
       }
+    }
+ 
+  }
+
+  var unifyPieces = function(shred) {
+    for (var pieceNr = 0; pieceNr < shred.pieces.length; pieceNr++) {
+      growPiece(pieceNr, shred);
     }
   }
 
