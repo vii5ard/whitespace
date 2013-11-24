@@ -1,0 +1,69 @@
+end
+
+macro rot13:
+  push $number
+  call rot13
+$$
+
+rot13:
+  dup
+  retrieve
+  dup
+  jz .rot13_end
+  call .rot13c
+  copy 1
+  swap
+  store
+  push 1
+  add
+  jmp rot13
+
+.rot13_end:
+  drop
+  ret
+
+.rot13c:
+  dup
+  push 'A'
+  sub
+  jn .rot13c_end_upper
+
+  dup
+  push 'Z'
+  swap
+  sub
+  jn .rot13c_end_upper
+
+  push 'A'
+
+  jmp .rot13c_do
+
+.rot13c_end_upper:
+
+  dup
+  push 'a'
+  sub
+  jn .rot13c_end
+
+  dup
+  push 'z'
+  swap
+  sub
+  jn .rot13c_end
+
+  push 'a'
+  
+.rot13c_do:
+  swap
+copy 1
+  sub
+  push 13
+  add
+  push 26
+  mod
+  add
+  jmp .rot13c_end
+
+.rot13c_end:
+  ret
+
