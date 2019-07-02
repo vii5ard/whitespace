@@ -3,7 +3,6 @@ var logger = (function () {
     var consoleArea = $('#consoleArea');
     consoleArea.append('<div>' + (level?level+': ':'') + msg + '<div>');
     consoleArea.scrollTop(consoleArea[0].scrollHeight);
-    ws_util.handleOverflow(consoleArea);
  
    var tabLabel = $('#tabLabelConsole');
     if (!tabLabel.is('.activeTab')) {
@@ -37,7 +36,34 @@ var ws_ide = (function () {
     $('#inputContainer').height(srcInput.height()); 
   };
 
-  var compileProgram = function() {
+  var getExtension = function(fn) {
+    return fn.replace(/.*\.([^.]+)$/,'$1');
+  };
+
+  var getExecPath = function(fn, vms) {
+    if (typeof vms == 'undefined') {
+      var vms = ws_fs.getFileNames(/^vm\//);
+    }
+
+    var ext = getExtension(fn);
+
+    for (var i = 0; i < vms.length; i++) {
+      if (vms[i].match('^vm/' + ext + '\\..*')) {
+        var vmExt = getExtension(vms[i]);
+        if (vmExt === 'ws' || vmExt === 'wsa') {
+          return [vms[i]];
+        } else {
+          var subPath = getExecPath(vms[i], vms.slice(0,i-1).concat(vms.slice(i+1)));
+          if (subPath.length > 0) {
+            return subPath.concat([vms[i]]);
+          }
+        } 
+      }
+    }
+    return [];
+  }
+
+  var compileProgram = function(showPath) {
     var disasm = $('#disasm');
     disasm.html('');
 
@@ -45,8 +71,27 @@ var ws_ide = (function () {
     var src = programSource();
     var errorDiv = $('#errorDiv');
     errorDiv.html('&nbsp;');
-    try { 
-      if (openFile.lang == "WS") {
+    try {
+      var ext = openFile.name.replace(/.*\.([^.]+)$/,'$1');
+
+      if (openFile.lang == "OTHER") {
+        var execPath = ws_ide.getExecPath(openFile.name);
+      }
+
+      if (openFile.lang == "OTHER" && execPath.length > 0) {
+        if (showPath) logger.log('Executing VM: ' + execPath.join(' -> '));
+        if (ws_ide.getExtension(execPath[0]) === 'ws') {
+          ws_ide.program = ws.compile(ws_fs.openFile(ws_fs.getFile(execPath[0])));
+        } else {
+          ws_ide.program = ws_asm.compile(ws_fs.openFile(ws_fs.getFile(execPath[0])));
+        }
+
+        for (var i = 1; i < execPath.length; i++) {
+          ws_ide.inputStream = ws_fs.openFile(ws_fs.getFile(execPath[i])).split('').concat([0]);
+        }
+        ws_ide.inputStream = src.split('').concat([0]);
+
+      } else if (openFile.lang == "WS") {
         ws_ide.program = ws.compile(src);
       } else {
         ws_ide.program = ws_asm.compile(src);
@@ -87,12 +132,10 @@ var ws_ide = (function () {
       div.appendTo(disasm);
     }
     ws_ide.openFile.breakpoints = ws_ide.openFile.breakpoints || {}
-    ws_util.handleOverflow(disasm.parent());
   };
 
   var updateEditor = function(evt) {
     updateOverlay();
-    ws_util.handleOverflow("#scrollableSource");
 
     compileProgram();
   }
@@ -125,13 +168,12 @@ var ws_ide = (function () {
     var last = printArea.find('span:last');
     for (var ln in arr) {
       if (ln != 0) {
-        last.after('<br><span></span>');
+        last.after('<br><span style="display:inline-block; min-height:13px" autocomplete="off"></span>');
         last = printArea.find('span:last');
       }
       last.html(last.html() + arr[ln]);
     }
     outputArea = printArea.closest('.outputArea');
-    ws_util.handleOverflow(outputArea);
     outputArea.scrollTop(outputArea[0].scrollHeight);
 
     var tabLabel = $('#tabLabelPrint');
@@ -142,8 +184,8 @@ var ws_ide = (function () {
   };
 
   var readChar = function() {
-    if (ws_ide.inputStreamPtr < ws_ide.inputStream.length) {
-      return ws_ide.inputStream[ws_ide.inputStreamPtr++];
+    if (ws_ide.inputStream.length > 0) {
+      return ws_ide.inputStream.shift();
     } else {
       ws_ide.focusUserInput('#userInput');
       throw "IOWait";
@@ -202,10 +244,15 @@ var ws_ide = (function () {
       var file = ws_fs.getFile(fileName);
       var line = $('<div id="file_'+ id + '" title="' + fileName + '"></div>');
       line.addClass('fileEntry');
-      if (file.lang == "WSA") {
-        line.addClass('fileTypeAsm');
-      } else {
-        line.addClass('fileTypeWs');
+      switch (file.lang) {
+        case "WSA":
+          line.addClass('fileTypeAsm');
+          break;
+        case "WS":
+          line.addClass('fileTypeWs');
+          break;
+        default:
+          line.addClass('fileTypeOther');
       }
       if (!file.localStorage) {
         var link = $('<a href="javascript: void(0);" onClick="ws_ide.loadFile(\'' + fileName + '\');"></a>')
@@ -237,7 +284,6 @@ var ws_ide = (function () {
       line.appendTo(fileList);
       
     }
-    ws_util.handleOverflow(fileList.closest('.content'));
   };
 
   var storeSource = function () {
@@ -247,14 +293,27 @@ var ws_ide = (function () {
   };
 
   var showLang = function(lang) {
+    $('#btnRun').hide();
     $('#filetype .btn').hide();
     $('#filetype #lang_' + lang).show();
+    if (lang == "OTHER") {
+      $('#btnOptimize').hide();
+      $('#btnCompile').hide();
+
+      if (ws_ide.getExecPath(ws_ide.openFile.name)) {
+        $('#btnRun').show();
+      } else {
+        $('#btnRun').hide();
+      }
+    }
     if (lang == "WS") {
       $('#btnOptimize').show();
+      $('#btnRun').show();
     } else {
       $('#btnOptimize').hide();
     }
     if (lang == "WSA") {
+      $('#btnRun').show();
       $('#btnCompile').show();
     } else {
       $('#btnCompile').hide();
@@ -287,7 +346,7 @@ var ws_ide = (function () {
   };
 
   var cleanupDebug = function() {
-    $('.asmline.running').removeClass('running');
+    $('.asmline.running').removeClass('unning');
   };
 
   var createNewFile = function (fileName) {
@@ -328,7 +387,7 @@ var ws_ide = (function () {
 
   var self = {
     files: {},
-    inputStream: '',
+    inputStream: [],
     inputStreamPtr: 0,
     animator: 0,
 //    animation: ['-', '\\', '|', '/'],
@@ -414,9 +473,8 @@ var ws_ide = (function () {
      ws_ide.animateRunning(true);
       try {
         if (!debugMode || !ws_ide.env.running) { 
-          ws_ide.inputStream = '';
-          ws_ide.inputStreamPtr = 0;
-          compileProgram();
+          ws_ide.inputStream = [];
+          compileProgram(true);
           if (!debugMode || !ws_ide.env.running) {
             ws_ide.initEnv();
           }
@@ -501,7 +559,7 @@ var ws_ide = (function () {
     handleUserInput: function (selector) {
       var input = $(selector);
       var val = input.val() + '\n';
-      ws_ide.inputStream += val;
+      ws_ide.inputStream = ws_ide.inputStream.concat(val.split(''));
       printOutput(val);
       input.val('');
       this.continueRun();
@@ -518,10 +576,8 @@ var ws_ide = (function () {
       if (area.find('span').length > 0) {
         area.find('span:not(:last)').remove();
         area.find('span').html('');
-        ws_util.handleOverflow(area.parent());
       } else {
         area.html('');
-        ws_util.handleOverflow(area);
       }
     },
 
@@ -583,6 +639,7 @@ var ws_ide = (function () {
       ws_fs.rename(fileName, input$.val());
       
       updateFileList();
+      showLang(ws_ide.openFile.lang);
     },
     displayModal: function(selector) {
       var selector$ = $(selector);
@@ -678,7 +735,10 @@ var ws_ide = (function () {
         iframe.attr('src', 'help.html');
         content.append(iframe);
       } 
-    }
+    },
+
+    getExecPath: getExecPath,
+    getExtension: getExtension
 
   };
   $(self.init);

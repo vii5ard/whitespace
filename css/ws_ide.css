@@ -39,7 +39,7 @@ textarea.inputBox {
 .scrollable {
   width: 600px;
   height: 250px;
-  overflow: hidden;
+  overflow: scroll;
   border: 1px solid;
 }
 
@@ -81,7 +81,7 @@ textarea.inputBox {
 }
 
 .outputArea {
-  overflow: hidden;
+  overflow: scroll;
   width: 600px;
   height: 200px;
 }
@@ -138,8 +138,9 @@ textarea.inputBox {
 }
 
 #panelRight .content {
+  overflow-x:scroll;
   width: 150px;
-  height: 500px;
+  height: 520px;
 }
 
 #panelLeft .content {

@@ -79,7 +79,18 @@ var ws_fs = function(metaFile) {
       }
       delete self.fileNames; // Empty cache
       var file = self.files[oldName];
+
       file.name = newName;
+
+
+      /* Update file language. */
+      if (file.name.match(/\.ws$/)) {
+        file.lang = "WS";
+      } else if (file.name.match(/\.wsa$/)) {
+        file.lang = "WSA";
+      } else {
+        file.lang = "OTHER";
+      }
       self.files[newName] = file;
       delete self.files[oldName];
       flush(self.files); 
@@ -108,11 +119,13 @@ var ws_fs = function(metaFile) {
       delete self.files[fileName];
       flush(self.files);
     },
-    getFileNames: function() {
+    getFileNames: function(pattern) {
       // if (self.fileNames) return self.fileNames;
       self.fileNames = [];
       for (fileName in self.files) {
-        self.fileNames.push(fileName);
+        if (!pattern || fileName.match(pattern)) {
+          self.fileNames.push(fileName);
+        }
       }
       self.fileNames.sort();
       return self.fileNames;

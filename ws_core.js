@@ -540,7 +540,11 @@ ws = {
     this.run = function (env) {
       var ch = env.readChar();
       var addr = env.stackPop();
-      env.heap.store(addr, ch.charCodeAt(0));
+      if (typeof ch == "number") {
+        env.heap.store(addr, ch);
+      } else {
+        env.heap.store(addr, ch.charCodeAt(0));
+      }
       env.register.IP++;
     };
     this.getAsm = asmWithNoParam;

@@ -63,7 +63,7 @@
         </div>
         <div class="content">
           <div id="buttonDiv">
-            <span class="btn"><a href="javascript:void(0);" onclick="ws_ide.runProgram();">[Run]</a></span> 
+            <span class="btn" id="btnRun"><a href="javascript:void(0);" onclick="ws_ide.runProgram();">[Run]</a></span> 
             <span class="btn" id="btnCompile"><a href="javascript:void(0);" onclick="ws_ide.compileAsm();">[Compile]</a></span> 
             <span class="btn" id="btnOptimize"><a href="javascript:void(0);" onclick="ws_ide.optimizeProgram();">[Optimize]</a></span> 
             <span class="btn" id="btnEnableHighlight"  style="display:none"><a href="javascript:void(0);" onclick="ws_ide.setHighlight(true);">[ ]Highlight</a></span> 
@@ -75,7 +75,8 @@
               </div>
               <div id="filetype" style="display:inline-block;">
                <span class="btn" id="lang_WS"><a href="javascript:void(0);" onclick="ws_ide.setLang('WSA');">[Whitespace]</a></span>
-               <span class="btn" id="lang_WSA"><a href="javascript:void(0);" onclick="ws_ide.setLang('WS');" >[ Assembly ]</a></span>
+               <span class="btn" id="lang_WSA"><a href="javascript:void(0);" onclick="ws_ide.setLang('OTHER');" >[ Assembly ]</a></span>
+               <span class="btn" id="lang_OTHER"><a href="javascript:void(0);" onclick="ws_ide.setLang('WS');" >[  OTHER   ]</a></span>
               </div>
               <span class="btn" id="btnHelp"><a href="javascript:void(0);" onclick="ws_ide.displayHelp();">[ HELP ]</a></span> 
             </div>
@@ -123,10 +124,10 @@ You really need to enable javascript or sth!
                   <div id="printArea"
                        class="outputText">
                     <span></span>
-                    <form onsubmit="return ws_ide.handleUserInput('#userInput');">
+                    <form onsubmit="return ws_ide.handleUserInput('#userInput');" autocomplete="off">
                       <input type="text"
                             id="userInput"
-                            class="userInput">
+                            class="userInput" style="height:13px">
                     </form>
                   </div>
                 </div>
@@ -144,7 +145,7 @@ You really need to enable javascript or sth!
                    class="tabContent">
                 <div class="buttonBar">
                 </div>
-                <div id="memoryArea">
+                <div id="memoryArea" class="outputArea">
                   <div>
                     <span>Stack: </span>
                     <span id="stackSpan"></span>

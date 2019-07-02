@@ -34,16 +34,6 @@ var ws_util = (function () {
       return path.replace(/^(?:.*[\/\\])?((?:[^\/\\])*)$/, '$1');
     },
 
-    handleOverflow: function(selector) {
-      var selector$ = $(selector);
-
-      if (selector$[0].scrollHeight > selector$.height()) {
-        selector$.css('overflow-y', 'scroll');
-      } else {
-        selector$.css('overflow-y', 'hidden');
-      }
-    },
-
     StrArr: function(str) {
       return {
         arr: str.split(''),
