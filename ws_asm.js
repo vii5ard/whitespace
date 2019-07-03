@@ -159,6 +159,17 @@ var  ws_asm  = (function() {
     };
   };
 
+  var parseMultiLineComment = function(strArr) {
+    var comment = "";
+    do {
+      comment += strArr.getNext();
+    } while (strArr.hasNext() && !comment.match(/{-[\s\S]*-}/));
+    return {
+      type: "COMMENT",
+      token: comment
+    };
+  }
+
   var parseNumber = function(strArr) {
     var  numStr = "";
     while  (strArr.hasNext() && (numStr + strArr.peek()).match(/^[+-]?\d*$/)) {
@@ -299,6 +310,8 @@ var  ws_asm  = (function() {
       try {
         if (next == ';' || next == '#') {
           token = parseLineComment(strArr);
+        } else if (next == '{' && strArr.peek(1) == '-') {
+          token = parseMultiLineComment(strArr);
         } else if (next.match(/\"|\'/)) {
           token = parseString(strArr);
         } else if (next.match(/[-+\d]/)) {
@@ -347,7 +360,22 @@ var  ws_asm  = (function() {
       } 
     }
     return builder.postProcess();
-  }
+  };
+
+  var checkMacroParams = function (token, builder) {
+    var macro = builder.macros[token];
+    if (typeof macro.action == "function") {
+      var n = 0;
+      for (var p in macro.param) {
+        var paramType = macro.param[p];
+        var parToken = builder.tokens[n++];
+        if (!parToken || parToken.type != paramType) {
+          return false;
+        }
+      }
+    }
+    return true;
+  };
 
   return {
     compile: function (str, master) {
@@ -385,6 +413,25 @@ var  ws_asm  = (function() {
            if (token.type == "LABEL") {
              builder.labels[labeler.getLabel(token.token)] = builder.programStack.length;
              builder.asmLabels[labeler.getLabel(token.token)] = token.token;
+           } else if (token.token in builder.macros && checkMacroParams(token.token, builder)) {
+              token.type = "MACRO"; // can be label in some cases
+              var macro = builder.macros[token.token];
+              if (typeof macro.action == "function") {
+                var params = [token];
+                for (var p in macro.param) {
+                  var paramType = macro.param[p];
+                  var parToken = builder.tokens.shift();
+                  if (!parToken || parToken.type != paramType) {
+                    throw "Expected " + paramType;
+                  } else {
+                    params.push(parToken);
+                  }
+                }
+                macro.action(params, builder);
+              } else {
+                throw "Unimplemented macro type " + typeof macro.action;
+              }
+ 
            } else if (token.type == "KEYWORD") {
               var op = token.op;
               var instruction = new op.constr();
@@ -416,25 +463,8 @@ var  ws_asm  = (function() {
                 pushInstruction(builder, op.constr);
               }
             } else if (token.token in builder.macros) {
-              token.type = "MACRO"; // can be label in some cases
-              var macro = builder.macros[token.token];
-              if (typeof macro.action == "function") {
-                var params = [token];
-                for (var p in macro.param) {
-                  var paramType = macro.param[p];
-                  var parToken = builder.tokens.shift();
-                  if (!parToken || parToken.type != paramType) {
-                    throw "Expected " + paramType;
-                  } else {
-                    params.push(parToken);
-                  }
-                }
-                macro.action(params, builder);
-              } else {
-                throw "Unimplemented macro type " + typeof macro.action;
-              }
-            } else {
-              throw "Unexpected token";
+           } else {
+              throw "Unexpected token " + token.token;
             }
          } catch (err) {
            if (typeof err == "string") {

@@ -19,4 +19,10 @@ macro pushs: push $$
 macro return: ret $$
 macro exit: end $$
 macro halt: end $$
+macro retrive: retrieve $$
+macro add: push $number add $$
+macro sub: push $number sub $$
+macro mul: push $number mul $$
+macro div: push $number div $$
+macro test: dup push $number sub $$
 

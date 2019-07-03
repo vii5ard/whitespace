@@ -53,8 +53,12 @@ var ws_util = (function () {
           }
           return next;
         },
-        peek:  function ()  {
-          return this.arr[this.pos];
+        peek:  function (off)  {
+          var pos = this.pos + (off || 0);
+          if (this.arr.length < pos) {
+            return -1; // TODO! Any alternative that is not an exception?
+          }
+          return this.arr[pos];
         }
       }
     }

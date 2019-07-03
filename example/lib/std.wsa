@@ -36,6 +36,12 @@ macro pushs:     include "lib/alias.wsa" $redef $$
 macro return:    include "lib/alias.wsa" $redef $$
 macro exit:      include "lib/alias.wsa" $redef $$
 macro halt:      include "lib/alias.wsa" $redef $$
+macro retrive:   include "lib/alias.wsa" $redef $$
+macro add:       include "lib/alias.wsa" $redef $$
+macro sub:       include "lib/alias.wsa" $redef $$
+macro mul:       include "lib/alias.wsa" $redef $$
+macro div:       include "lib/alias.wsa" $redef $$
+macro test:      include "lib/alias.wsa" $redef $$
 
 macro rot13:     include "lib/rot13.wsa" $redef $$
 
