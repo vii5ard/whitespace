@@ -402,7 +402,7 @@ var ws_ide = (function () {
     },
     
     init: function() {
-      $('#srcInput').keyup(updateEditor);
+      $('#srcInput').bind("input propertychange", updateEditor);
       $('#srcInput').keydown(function(e){
         var ret=interceptTabs(e, this);
         return ret;
