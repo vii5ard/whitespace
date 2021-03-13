@@ -1,0 +1,360 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Read input until enter
+;; start from address 100
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	push 100	; start filling data
+.readLoop:
+	dup
+	readc		; read char
+	dup
+	retrieve	; retrieve last from heap
+
+	dup
+	push -1     ; read end of file
+	sub
+	jz .loopEnd	; end loop if enter
+
+	dup
+	push '>'	; Check if '>'
+	sub
+	jz .incPP
+
+	dup
+	push '<'
+	sub
+	jz .incPP
+
+	dup
+	push '+'
+	sub
+	jz .incPP
+
+	dup
+	push '-'
+	sub
+	jz .incPP
+
+	dup
+	push '.'
+	sub
+	jz .incPP
+
+	dup
+	push ','
+	sub
+	jz .incPP
+
+	dup
+	push '['
+	sub
+	jz .incPP
+
+	dup
+	push ']'
+	sub
+	jz .incPP
+
+	drop
+	jmp .readLoop	
+.incPP:
+	drop
+	push 1		; increase program pointer
+	add
+	jmp .readLoop
+.loopEnd:
+    drop
+	dup
+	push 0		; replace newline with 0
+	store
+
+    push 1
+    add			; increase pointer (new SP start in heap)
+
+    push 100    ; push PP
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Run the stored program
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+.runLoop:
+
+; get the instruction @PP
+    dup
+    retrieve
+
+; break execution when instruction == 0
+	dup
+	jz .endProgram
+
+; check if instruction +
+.ifInc:
+    dup
+    push '+'
+    sub
+	jz .instInc
+    jmp .ifDec
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Instruction +
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+.instInc:
+    drop
+	copy 1
+    dup
+    retrieve
+    push 1
+    add
+    store
+    jmp .runLoopContinue
+
+; check if instruction -
+.ifDec:
+    dup
+    push '-'
+    sub
+    jz .instDec
+    jmp .ifShr
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Instruction -
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+.instDec:
+    drop
+    copy 1 
+    dup
+    retrieve
+    push 1
+    sub
+    store
+    jmp .runLoopContinue
+
+; check if instruction >
+.ifShr:
+    dup
+    push '>'
+    sub
+    jz .instShr
+    jmp .ifShl
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Instruction >
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+.instShr:
+	drop
+    swap
+    push 1
+    add
+    swap
+    jmp .runLoopContinue
+
+; check if instruction <	
+.ifShl:
+    dup
+    push '<'
+    sub
+    jz .instShl
+    jmp .ifPrnt
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Instruction <
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+.instShl:
+	drop
+    swap
+    push 1
+    sub
+    swap
+    jmp .runLoopContinue
+
+; check if instruction .
+.ifPrnt:
+    dup
+    push '.'
+    sub
+    jz .instPrnt
+    jmp .ifRead
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Instruction .
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+.instPrnt:
+    drop
+    copy 1 
+    retrieve
+    printc
+    jmp .runLoopContinue
+
+; check if instruction ,
+.ifRead:
+    dup
+    push ','
+    sub
+    jz .instRead
+    jmp .ifLoopFwd
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Instruction ,
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+.instRead:
+    drop
+    copy 1 
+    readc
+    jmp .runLoopContinue
+
+; check if instruction [
+.ifLoopFwd:
+    dup
+    push '['
+    sub
+    jz .instLoopFwd
+    jmp .ifLoopBwd
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Instruction [
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+.instLoopFwd:
+	drop
+
+; get data from heap
+    copy 1 
+    retrieve
+
+; continue only when heap value is non-zero
+    jz .noFwdLoop		; do not continue if *SP == 0
+    jmp .runLoopContinue
+
+.noFwdLoop:
+    push 1				; bracket count
+
+.skipFwd:
+; break when found matching bracket
+    dup
+    jz .skipFwdEnd
+
+; increase PP
+    swap
+    push 1
+    add
+    swap
+
+; get next instruction
+    copy 1 
+    retrieve
+
+; exit when end program
+    dup
+    jz .endProgram ; end program if no matching ] found
+
+; check if next instruction is a [
+    dup
+    push '['
+    sub
+    jz .incBracketCount
+    jmp .checkIfEndBracket
+    
+.incBracketCount:
+    drop
+    push 1
+    add
+    jmp .skipFwd
+
+.checkIfEndBracket:
+    push ']'
+    sub
+    jz .decBracketCount
+    jmp .skipFwd
+
+.decBracketCount:
+    push 1
+    sub
+    jmp .skipFwd
+
+
+.skipFwdEnd:
+    drop
+    jmp .runLoopContinue
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Instruction ]
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+.ifLoopBwd:
+    dup
+    push ']'
+    sub
+    jz .instLoopBwd
+    jmp .runLoopContinue
+
+; run instruction ]
+.instLoopBwd:
+    drop
+
+; get data from heap
+    copy 1 
+    retrieve
+
+; continue only when heap value is zero
+    jz .runLoopContinue		; do not loop back if *SP == 0
+
+; start looping back
+    push -1				; bracket count
+
+.skipBwd:
+; break when found matching bracket
+    dup
+    jz .skipBwdEnd
+
+; decrease PP
+    swap
+    push 1
+    sub
+    swap
+
+; get previous instruction
+    copy 1 
+    retrieve
+
+; exit when end program
+    dup
+    jz .endProgram ; end program if no matching ] found
+
+; check if next instruction is a [
+    dup
+    push '['
+    sub
+    jz .incBracketCountBwd
+    jmp .checkIfEndBracketBwd
+    
+.incBracketCountBwd:
+    drop
+    push 1
+    add
+    jmp .skipBwd
+
+.checkIfEndBracketBwd:
+    push ']'
+    sub
+    jz .decBracketCountBwd
+    jmp .skipBwd
+
+.decBracketCountBwd:
+    push 1
+    sub
+    jmp .skipBwd
+
+.skipBwdEnd:
+    drop
+    jmp .runLoopContinue
+
+.runLoopContinue:
+    push 1
+    add			; increase PP
+    jmp .runLoop	; continue with run
+.endProgram:	
+    end

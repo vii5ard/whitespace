@@ -87,9 +87,9 @@ var ws_ide = (function () {
         }
 
         for (var i = 1; i < execPath.length; i++) {
-          ws_ide.inputStream = ws_fs.openFile(ws_fs.getFile(execPath[i])).split('').concat([0]);
+          ws_ide.inputStream = ws_fs.openFile(ws_fs.getFile(execPath[i])).split('').concat([-1]);
         }
-        ws_ide.inputStream = src.split('').concat([0]);
+        ws_ide.inputStream = src.split('').concat([-1]);
 
       } else if (openFile.lang == "WS") {
         ws_ide.program = ws.compile(src);

@@ -114,6 +114,13 @@
     "origin": "example/lib/std.wsa",
     "author": "Vii5ard",
     "lang": "WSA"
+  },
+  "vm/bf.ws": {
+    "file": "example/vm/bf.ws",
+    "origin": "example/vm/bf.ws",
+    "author": "Vii5ard",
+    "lang": "WS"
   }
+
 
 }}
