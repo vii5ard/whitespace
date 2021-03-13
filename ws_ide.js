@@ -556,11 +556,13 @@ var ws_ide = (function () {
       return false; 
     },
 
-    handleUserInput: function (selector) {
+    handleUserInput: function (selector, code) {
+      code = code || '\n';
+
       var input = $(selector);
-      var val = input.val() + '\n';
-      ws_ide.inputStream = ws_ide.inputStream.concat(val.split(''));
-      printOutput(val);
+      var val = input.val();
+      ws_ide.inputStream = ws_ide.inputStream.concat(val.split('').concat(code));
+      printOutput(val + '\n');
       input.val('');
       this.continueRun();
       return false;
