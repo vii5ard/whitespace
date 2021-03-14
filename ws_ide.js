@@ -684,7 +684,7 @@ var ws_ide = (function () {
         logger.error(ws_ide.program.compileError)
         return;
       }
-      var fileName = "compile.ws";
+      var fileName = ws_ide.openFile.name.replace(/\.wsa$/, '.ws');
       if (!(fileName in ws_fs.files)) {
         createNewFile(fileName);
       }
