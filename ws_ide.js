@@ -134,10 +134,20 @@ var ws_ide = (function () {
     ws_ide.openFile.breakpoints = ws_ide.openFile.breakpoints || {}
   };
 
+  var updateEditorFileName = function(file) {
+    var prefix = '';
+    file = file || ws_ide.openFile;
+
+    if (!file.extFile) prefix = '(Local Storage) '
+    $('#panelMiddleLabel span').text(prefix + file.name);
+  }
+
   var updateEditor = function(evt) {
     updateOverlay();
 
     compileProgram();
+
+    updateEditorFileName();
   }
 
   var programSource = function (src) {
@@ -254,33 +264,28 @@ var ws_ide = (function () {
         default:
           line.addClass('fileTypeOther');
       }
-      if (!file.localStorage) {
-        var link = $('<a href="javascript: void(0);" onClick="ws_ide.loadFile(\'' + fileName + '\');"></a>')
-        link.html('<div class="ico"></div>' + $('<span></span>').text(fileName).html());
-        link.appendTo(line);
-      } else {
-        var link = $('<div><div class="ico"></div></div>');
-        link.click((function(fileName) {
-          return function() {
-            ws_ide.loadFile(fileName);
-            $(this).find('input').focus().select();
-          }
-        })(fileName));
-        var form = $('<form onsubmit="return false;"></form>');
-        var inp = $('<input type="text" class="userInput"></input>');
-        var nameChange = (function (fileName, id) {
-          return function () {
-            ws_ide.handleFileRename(fileName, id);
-          };
-        })(fileName, id);
-        inp.blur(nameChange);
-        inp.change(nameChange);
-        inp.val(file.name);
-        inp.appendTo(form);
+      var link = $('<div><div class="ico"></div></div>');
+      var form = $('<form onsubmit="return false;"></form>');
+      var inp = $('<input type="text" class="userInput"></input>');
+      var nameChange = (function (fileName, id) {
+        return function () {
+          ws_ide.handleFileRename(fileName, id);
+        };
+      })(fileName, id);
+      inp.change(nameChange);
+      inp.val(file.name);
+      inp.appendTo(form);
 
-        form.appendTo(link);
-        link.appendTo(line);
-      }
+      form.appendTo(link);
+      link.appendTo(line);
+
+      line.on('click', (function(fileName) {
+        return function(event) {
+          ws_ide.loadFile(fileName);
+          $(this).find('input').focus().select();
+        }
+      })(fileName));
+
       line.appendTo(fileList);
       
     }
@@ -289,7 +294,13 @@ var ws_ide = (function () {
   var storeSource = function () {
     var file = ws_ide.openFile;
     if (!file) return;
-    file.src = programSource();
+    var prog = programSource();
+	if (file.src && file.src != prog) {
+      file.changed = true;
+      file.extFile = false;
+      updateEditorFileName();
+    }
+    file.src = prog;
   };
 
   var showLang = function(lang) {
@@ -408,12 +419,13 @@ var ws_ide = (function () {
         return ret;
       });
 
-      ws_ide.loadFile("hworld.ws");
 
       updateFileList();
 
+      ws_ide.loadFile("hworld.ws");
+
       ws_ide.initEnv();
-      ws_ide.switchTab('a[href=#printTab]');
+      ws_ide.switchTab('a[href="#printTab"]');
 
       ws_ide.displayModal('#splashScreenModal');
     },
@@ -441,6 +453,10 @@ var ws_ide = (function () {
       var file = ws_fs.getFile(fileName);
       if (!file) return;
 
+      $('div.fileEntry input').filter(
+          function() { return $(this).val() === fileName; }
+      ).parents('div.fileEntry').addClass('emph');
+
       if (ws_ide.openFile) {
         if (ws_ide.defaultFile[ws_ide.defaultFile.length -1] != ws_ide.openFile.name) {
           ws_ide.defaultFile.push(ws_ide.openFile.name);
@@ -455,15 +471,7 @@ var ws_ide = (function () {
       ws_ide.openFile = file;
       ws_ide.loadSource(ws_fs.openFile(file));
       updateEditor();
-      $('#panelMiddleLabel span').text(file.file);
  
-
-      $('.localStorageButton').hide();
-
-      if (file.localStorage) {
-        $('.localStorageButton').show();
-      }
-
       showLang(file.lang || 'WS');
 
       ws_ide.initEnv();
@@ -606,10 +614,7 @@ var ws_ide = (function () {
 
     deleteFile: function () {
       var fileName = ws_ide.openFile.name;
-      if (!ws_fs.files[fileName] || 
-          !ws_fs.files[fileName].localStorage) {
-        return;
-      }
+      if (!ws_fs.files[fileName]) return;
       ws_fs.deleteFile(fileName);
       updateFileList();
       while (true) {
@@ -617,11 +622,19 @@ var ws_ide = (function () {
         fileName = ws_ide.defaultFile[ws_ide.defaultFile.length - 1];
         if (ws_fs.files[fileName]) {
           ws_ide.loadFile(fileName);
-          break;
+          return;
         } else {
           ws_ide.defaultFile.pop();
         }
       }
+
+      var files = $('div.fileEntry');
+      if (files.length > 0) {
+        ws_ide.loadFile($(files[0]).attr('title'));
+      } else {
+        ws_ide.newFile();
+      }
+
     },
 
     saveFile: function () {
@@ -629,19 +642,24 @@ var ws_ide = (function () {
 
       var file = ws_ide.openFile;
 
-      if (!file || !file.localStorage) return;
+      if (!file) return;
 
       if (typeof localStorage == "undefined") return;
 
       ws_fs.saveFile(file);
+
+      file.changed = false;
     },
 
     handleFileRename: function (fileName, id) {
       var input$ = $('#file_' + id + ' input');
-      ws_fs.rename(fileName, input$.val());
+      var newName = input$.val();
+      ws_fs.rename(fileName, newName);
       
       updateFileList();
       showLang(ws_ide.openFile.lang);
+
+      ws_ide.loadFile(newName);
     },
     displayModal: function(selector) {
       var selector$ = $(selector);

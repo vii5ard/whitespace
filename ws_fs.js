@@ -56,8 +56,8 @@ var ws_fs = function(metaFile) {
   var loadFiles = function() {
     var files = {};
 
-    loadFilesServer(files);
     loadFilesLocal(files);
+    loadFilesServer(files);
 
     return files;
   };
@@ -81,6 +81,7 @@ var ws_fs = function(metaFile) {
       var file = self.files[oldName];
 
       file.name = newName;
+      file.extFile = false;
 
 
       /* Update file language. */
@@ -120,7 +121,6 @@ var ws_fs = function(metaFile) {
       flush(self.files);
     },
     getFileNames: function(pattern) {
-      // if (self.fileNames) return self.fileNames;
       self.fileNames = [];
       for (fileName in self.files) {
         if (!pattern || fileName.match(pattern)) {
@@ -131,8 +131,11 @@ var ws_fs = function(metaFile) {
       return self.fileNames;
     },
     saveFile: function(file) {
-      self.files[file.name] = file;
-      flush(self.files);
+      if (!(file.name in self.files) || file.changed) { 
+        self.files[file.name] = file;
+        file.extFile = false;
+        flush(self.files);
+      }
     }
   };
 

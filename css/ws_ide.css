@@ -1,3 +1,26 @@
+div.ico {
+  margin-left: 2px;
+  margin-right: 2px;
+  vertical-align: top;
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  background: url('../img/icoset.png') 0 0 no-repeat;
+}
+
+div[title$=".ws"] div.ico {
+    background-position: -28px 0;
+}
+
+div[title$=".wsa"] div.ico {
+    background-position: -14px 0;
+}
+
+div[title$=".bf"] div.ico {
+    background-position: -42px 0;
+}
+
+
 body, input, textarea {
   font-size: 12px;
   font-family: monospace; 
@@ -202,25 +225,6 @@ div.panel div.label span {
 .fileEntry form {
   display: inline-block; 
   margin: 0;
-}
-
-.ico {
-  margin-left: 2px;
-  margin-right: 2px;
-  vertical-align: top;
-  display: inline-block;
-  width: 14px;
-  height: 14px;
-}
-
-.fileTypeWs .ico {
-  background: url('../img/icoset.png') 0 0 no-repeat;
-  background-position: 0 0
-}
-
-.fileTypeAsm .ico {
-  background: url('../img/icoset.png') no-repeat;
-  background-position: -15px 0
 }
 
 .buttonBar {
