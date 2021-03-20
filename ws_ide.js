@@ -72,13 +72,15 @@ var ws_ide = (function () {
     var errorDiv = $('#errorDiv');
     errorDiv.html('&nbsp;');
     try {
-      var ext = openFile.name.replace(/.*\.([^.]+)$/,'$1');
+      var ext = getExtension(openFile.name);
 
-      if (openFile.lang == "OTHER") {
-        var execPath = ws_ide.getExecPath(openFile.name);
+      var execPath = [];
+
+      if (!ext.match(/^wsa?$/i)) {
+        execPath = ws_ide.getExecPath(openFile.name);
       }
 
-      if (openFile.lang == "OTHER" && execPath.length > 0) {
+      if (execPath.length > 0) {
         if (showPath) logger.log('Executing VM: ' + execPath.join(' -> '));
         if (ws_ide.getExtension(execPath[0]) === 'ws') {
           ws_ide.program = ws.compile(ws_fs.openFile(ws_fs.getFile(execPath[0])));
@@ -91,10 +93,12 @@ var ws_ide = (function () {
         }
         ws_ide.inputStream = src.split('').concat([-1]);
 
-      } else if (openFile.lang == "WS") {
+      } else if (ext.match(/^ws$/i)) {
         ws_ide.program = ws.compile(src);
-      } else {
+      } else if (ext.match(/^wsa$/i)) {
         ws_ide.program = ws_asm.compile(src);
+      } else {
+        errorDiv.text("Unable to compile file with the extension.");
       }
       delete ws_ide.program.compileError;
     } catch (err) {
@@ -254,16 +258,6 @@ var ws_ide = (function () {
       var file = ws_fs.getFile(fileName);
       var line = $('<div id="file_'+ id + '" title="' + fileName + '"></div>');
       line.addClass('fileEntry');
-      switch (file.lang) {
-        case "WSA":
-          line.addClass('fileTypeAsm');
-          break;
-        case "WS":
-          line.addClass('fileTypeWs');
-          break;
-        default:
-          line.addClass('fileTypeOther');
-      }
       var link = $('<div><div class="ico"></div></div>');
       var form = $('<form onsubmit="return false;"></form>');
       var inp = $('<input type="text" class="userInput"></input>');
@@ -295,7 +289,7 @@ var ws_ide = (function () {
     var file = ws_ide.openFile;
     if (!file) return;
     var prog = programSource();
-	if (file.src && file.src != prog) {
+	if (file.src != prog) {
       file.changed = true;
       file.extFile = false;
       updateEditorFileName();
@@ -303,31 +297,43 @@ var ws_ide = (function () {
     file.src = prog;
   };
 
-  var showLang = function(lang) {
-    $('#btnRun').hide();
-    $('#filetype .btn').hide();
-    $('#filetype #lang_' + lang).show();
-    if (lang == "OTHER") {
-      $('#btnOptimize').hide();
-      $('#btnCompile').hide();
+  var programRunnable = function() {
+    var ext = getExtension(ws_ide.openFile.name);
+    if (ext.match(/^wsa?$/i)) return true;
+    if (ws_ide.getExecPath(ws_ide.openFile.name).length > 0) return true;
+    return false; 
+  }
 
-      if (ws_ide.getExecPath(ws_ide.openFile.name)) {
-        $('#btnRun').show();
-      } else {
-        $('#btnRun').hide();
-      }
-    }
-    if (lang == "WS") {
-      $('#btnOptimize').show();
+  var programCompilable = function() {
+    var ext = getExtension(ws_ide.openFile.name);
+    if (ext.match(/^wsa$/i)) return true;
+    return false; 
+  }
+
+  var programOptimizable = function() {
+    var ext = getExtension(ws_ide.openFile.name);
+    if (ext.match(/^ws$/i)) return true;
+    return false; 
+  }    
+
+  var showLang = function() {
+
+    if (programRunnable()) {
       $('#btnRun').show();
     } else {
-      $('#btnOptimize').hide();
+      $('#btnRub').hide();
     }
-    if (lang == "WSA") {
-      $('#btnRun').show();
+
+    if (programCompilable()) {
       $('#btnCompile').show();
     } else {
       $('#btnCompile').hide();
+    }
+
+    if (programOptimizable()) {
+      $('#btnOptimize').show();
+    } else {
+      $('#btnOptimize').hide();
     }
   };
 
@@ -378,7 +384,6 @@ var ws_ide = (function () {
       autohor: "",
       origin: "",
       src: "",
-      lang: "WS",
       localStorage: true
     };
     ws_fs.saveFile(file);
@@ -462,7 +467,7 @@ var ws_ide = (function () {
           ws_ide.defaultFile.push(ws_ide.openFile.name);
         }
       }
-      if (file.lang == 'WS' || file.file.match(/\.ws$/i)) {
+      if (file.file.match(/\.ws$/i)) {
         this.setHighlight(true);
       } else {
         this.setHighlight(false);
@@ -472,7 +477,7 @@ var ws_ide = (function () {
       ws_ide.loadSource(ws_fs.openFile(file));
       updateEditor();
  
-      showLang(file.lang || 'WS');
+      showLang();
 
       ws_ide.initEnv();
     },
@@ -657,7 +662,7 @@ var ws_ide = (function () {
       ws_fs.rename(fileName, newName);
       
       updateFileList();
-      showLang(ws_ide.openFile.lang);
+      showLang();
 
       ws_ide.loadFile(newName);
     },
@@ -677,12 +682,6 @@ var ws_ide = (function () {
       $('#fog').hide();
       $('#modal').hide();
       $('#modal .modalContent').hide();
-    },
-    setLang: function(lang) {
-      ws_ide.openFile.lang = lang;
-      showLang(lang);
-      updateFileList();
-      compileProgram();
     },
 
     toggleBreakpoint: function(ip) {
