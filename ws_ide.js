@@ -113,29 +113,32 @@ var ws_ide = (function () {
         throw err;
       }
     }
-    var disasmSrc = ws_ide.program.getAsmSrc();
-    for (var i in disasmSrc) {
-      var ln = disasmSrc[i];
-      var div = $('<div class="asmLine"></div>');
-      div.text(ln.str);
 
-      if (ln.IP != null) {
-        div.addClass('asmInstr');
-        div.attr('id', 'instr_' + ln.IP);
+    if (execPath.length == 0) {
+      var disasmSrc = ws_ide.program.getAsmSrc();
+      for (var i in disasmSrc) {
+        var ln = disasmSrc[i];
+        var div = $('<div class="asmLine"></div>');
+        div.text(ln.str);
 
-        if (ws_ide.openFile.breakpoints && ln.IP in ws_ide.openFile.breakpoints) {
-          div.addClass('breakpoint');
+        if (ln.IP != null) {
+          div.addClass('asmInstr');
+          div.attr('id', 'instr_' + ln.IP);
+
+          if (ws_ide.openFile.breakpoints && ln.IP in ws_ide.openFile.breakpoints) {
+            div.addClass('breakpoint');
+          }
+
+          div.click((function(ip) { 
+            return function () {ws_ide.toggleBreakpoint(ip);}
+           })(ln.IP));
+        } else {
+          div.addClass('asmLabel');
         }
-
-        div.click((function(ip) { 
-          return function () {ws_ide.toggleBreakpoint(ip);}
-         })(ln.IP));
-      } else {
-        div.addClass('asmLabel');
+        div.appendTo(disasm);
       }
-      div.appendTo(disasm);
+      ws_ide.openFile.breakpoints = ws_ide.openFile.breakpoints || {}
     }
-    ws_ide.openFile.breakpoints = ws_ide.openFile.breakpoints || {}
   };
 
   var updateEditorFileName = function(file) {
@@ -321,7 +324,7 @@ var ws_ide = (function () {
     if (programRunnable()) {
       $('#btnRun').show();
     } else {
-      $('#btnRub').hide();
+      $('#btnRun').hide();
     }
 
     if (programCompilable()) {
@@ -343,6 +346,8 @@ var ws_ide = (function () {
     $('#disasm .running').removeClass('running');
     var instLine = $('#disasm #instr_' + env.register.IP);
     var scroller = instLine.closest(".content");
+
+    if (instLine.length == 0) return;
 
     // Scroll to view
     if ((instLine.offset().top + instLine.height()) > scroller.offset().top + scroller.height() || instLine.offset().top < scroller.offset().top) {
@@ -453,6 +458,10 @@ var ws_ide = (function () {
     },
 
     loadFile: function(fileName) {
+      if (ws_ide.openFile && ws_ide.openFile.name === fileName) return;
+
+      ws_ide.stopProgram();
+
       storeSource();
       $('#fileList .fileEntry.emph').removeClass('emph');
       var file = ws_fs.getFile(fileName);
@@ -483,7 +492,10 @@ var ws_ide = (function () {
     },
 
     runProgram: function(debugMode, stepMode) {
-     ws_ide.animateRunning(true);
+      $('#btnRun').hide();
+      $('#btnStop').show();
+
+      ws_ide.animateRunning(true);
       try {
         if (!debugMode || !ws_ide.env.running) { 
           ws_ide.inputStream = [];
@@ -501,6 +513,8 @@ var ws_ide = (function () {
       } catch (err) {
         if (!err.program) {
           logger.error("Compile Error: " + err);
+          $('#btnRun').show();
+          $('#btnStop').hide();
         }
       }
     },
@@ -513,6 +527,8 @@ var ws_ide = (function () {
         if (!ws_ide.env.running) {
           cleanupDebug();
           ws_ide.stopAnimateRunning();
+          $('#btnRun').show();
+          $('#btnStop').hide();
         }
       } catch (err) {
         if (err == "SLEEP") {
@@ -524,12 +540,17 @@ var ws_ide = (function () {
 
           ws_ide.env.running = false;
           ws_ide.stopAnimateRunning();
+          $('#btnRun').show();
+          $('#btnStop').hide();
+
         }
       }
       updateMemoryTab(ws_ide.env);
     },
 
     stepProgram: function () {
+      $('#btnRun').show();
+      $('#btnStop').hide();
       if (!ws_ide.env.running) {
         ws_ide.runProgram(true, true);
       } else {
@@ -720,10 +741,15 @@ var ws_ide = (function () {
     },
     
     stopProgram: function() {
-      if (!ws_ide.env.running) {
-        return;
+      $('#btnRun').show();
+      $('#btnStop').hide();
+
+      if (ws_ide.env) {
+        if (!ws_ide.env.running) {
+          return;
+        }
+        ws_ide.env.running = false;
       }
-      ws_ide.env.running = false;
       cleanupDebug();
       ws_ide.stopAnimateRunning();
     },
@@ -742,7 +768,7 @@ var ws_ide = (function () {
     },
 
     stopAnimateRunning: function () {
-      ws_ide.animator = -1;
+     ws_ide.animator = -1;
     },
 
     displayHelp: function () {
