@@ -469,7 +469,7 @@ var  ws_asm  = (function() {
                 } else if (op.param == "LABEL") {
                   var instruction = new op.constr();
                   instruction.param = {
-                    token: labeler.getLabel(param.token), value: null 
+                    token: labeler.getLabel(param.token), value: null, label: param.token 
                   };
                   builder.pushInstruction(instruction); 
                 } else {
@@ -481,11 +481,12 @@ var  ws_asm  = (function() {
             } else if (token.token in builder.macros) {
            } else {
               throw "Unexpected token " + token.token;
-            }
+           }
+
          } catch (err) {
            if (typeof err == "string") {
              throw {
-               program: postProcess(builder),
+               program: null,
                line: meta.line,
                message: err + " at line " + meta.line + "." 
              };
@@ -497,13 +498,25 @@ var  ws_asm  = (function() {
 
       if (tokenError) {
         throw {
-          program: postProcess(builder),
+          program: null,
           line: tokenError.meta.line,
           message: tokenError.message
         }
       }
 
-      return postProcess(builder);
+      try {
+        var program = postProcess(builder);
+      } catch (err) {
+        if (typeof err === "string") {
+          throw {
+            message: err
+          }
+        } else {
+          throw err;
+        }
+      }
+
+      return program;
     },
   };
 

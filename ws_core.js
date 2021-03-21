@@ -474,7 +474,10 @@ ws = {
       env.register.IP = this.callableI;
     };
     this.postProcess = function(compiler) {
-        this.callableI = compiler.labels[this.param.token];
+      if (!(this.param.token in compiler.labels)) {
+        throw "Missing label " + this.param.label;
+      }
+       this.callableI = compiler.labels[this.param.token];
     };
     this.getAsm = asmWithLabelParam;
   },
@@ -484,7 +487,10 @@ ws = {
       env.register.IP = this.nextI;
     };
     this.postProcess = function(compiler) {
-      this.nextI = compiler.labels[this.param.token];
+      if (!(this.param.token in compiler.labels)) {
+        throw "Missing label " + this.param.label;
+      }
+     this.nextI = compiler.labels[this.param.token];
     };
     this.getAsm = asmWithLabelParam;
   },
@@ -499,6 +505,9 @@ ws = {
       }
     };
     this.postProcess = function(compiler) {
+      if (!(this.param.token in compiler.labels)) {
+        throw "Missing label " + this.param.label;
+      }
       this.successI = compiler.labels[this.param.token];
     };
      this.getAsm = asmWithLabelParam;
@@ -514,6 +523,9 @@ ws = {
       }
     }
     this.postProcess = function(compiler) {
+      if (!(this.param.token in compiler.labels)) {
+        throw "Missing label " + this.param.label;
+      }
       this.successI = compiler.labels[this.param.token];
     }
    this.getAsm = asmWithLabelParam;
@@ -562,7 +574,7 @@ ws.keywords = [
     { ws: '\t  \n',   mnemo: 'mul',      constr: ws.WsMultiplication, param: null,    optparam: 'NUMBER' },
     { ws: '\t \t ',   mnemo: 'div',      constr: ws.WsIntDivision,    param: null,    optparam: 'NUMBER' },
     { ws: '\t \t\t',  mnemo: 'mod',      constr: ws.WsModulo,         param: null,    optparam: 'NUMBER' },
-    { ws: '\t\t ',    mnemo: 'store',    constr: ws.WsHeapStore,      param: null,    optparam: 'NUMBER' },
+    { ws: '\t\t ',    mnemo: 'store',    constr: ws.WsHeapStore,      param: null },
     { ws: '\t\t\t',   mnemo: 'retrieve', constr: ws.WsHeapRetrieve,   param: null,    optparam: 'NUMBER' },
     { ws: '\n  ',     mnemo: 'label',    constr: ws.WsLabel,          param: "LABEL" },
     { ws: '\n \t',    mnemo: 'call',     constr: ws.WsCall,           param: "LABEL" },
@@ -573,8 +585,8 @@ ws.keywords = [
     { ws: '\n\n\n',   mnemo: 'end',      constr: ws.WsEndProgram,     param: null },
     { ws: '\t\n  ',   mnemo: 'printc',   constr: ws.WsPrintChar,      param: null },
     { ws: '\t\n \t',  mnemo: 'printi',   constr: ws.WsPrintNum,       param: null },
-    { ws: '\t\n\t ',  mnemo: 'readc',    constr: ws.WsReadChar,       param: null },
-    { ws: '\t\n\t\t', mnemo: 'readi',    constr: ws.WsReadNum,        param: null }
+    { ws: '\t\n\t ',  mnemo: 'readc',    constr: ws.WsReadChar,       param: null,    optparam: 'NUMBER' },
+    { ws: '\t\n\t\t', mnemo: 'readi',    constr: ws.WsReadNum,        param: null,    optparam: 'NUMBER' }
   ];
 
   for (var i in ws.keywords) {

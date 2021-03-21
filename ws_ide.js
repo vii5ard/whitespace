@@ -105,13 +105,11 @@ var ws_ide = (function () {
       if (ws_ide.program) {
         ws_ide.program.compileError = "Unknown compile error";
       }
+      errorDiv.text(err.message);
       if (err.program) {
-        errorDiv.text(err.message);
         ws_ide.program = err.program;
         ws_ide.program.compileError = err.message;
-      } else {
-        throw err;
-      }
+      } 
     }
 
     if (execPath.length == 0) {
