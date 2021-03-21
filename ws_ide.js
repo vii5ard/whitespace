@@ -456,20 +456,20 @@ var ws_ide = (function () {
     },
 
     loadFile: function(fileName) {
-      if (ws_ide.openFile && ws_ide.openFile.name === fileName) return;
-
-      ws_ide.stopProgram();
-
-      storeSource();
       $('#fileList .fileEntry.emph').removeClass('emph');
-      var file = ws_fs.getFile(fileName);
-      if (!file) return;
-
       $('div.fileEntry input').filter(
           function() { return $(this).val() === fileName; }
       ).parents('div.fileEntry').addClass('emph');
 
-      if (ws_ide.openFile) {
+    if (ws_ide.openFile && ws_ide.openFile.name === fileName) return;
+
+      ws_ide.stopProgram();
+
+      storeSource();
+     var file = ws_fs.getFile(fileName);
+      if (!file) return;
+
+       if (ws_ide.openFile) {
         if (ws_ide.defaultFile[ws_ide.defaultFile.length -1] != ws_ide.openFile.name) {
           ws_ide.defaultFile.push(ws_ide.openFile.name);
         }
@@ -680,10 +680,13 @@ var ws_ide = (function () {
       var newName = input$.val();
       ws_fs.rename(fileName, newName);
       
-      updateFileList();
-      showLang();
 
+      updateFileList();
       ws_ide.loadFile(newName);
+      showLang();
+      updateEditorFileName();
+
+      return false;
     },
     displayModal: function(selector) {
       var selector$ = $(selector);
