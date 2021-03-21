@@ -177,7 +177,7 @@ var  ws_asm  = (function() {
     }
 
     if (strArr.hasNext() && !strArr.peek().match(/\s|\n|;/)) {
-      throw "Illegal character";
+      throw "Invalid character in number format";
     }
     var data = parseInt(numStr);
     if (data == "NaN") {
@@ -308,7 +308,7 @@ var  ws_asm  = (function() {
       var next = strArr.peek();
       var token = null;
       try {
-        if (next == ';' || next == '#') {
+        if (next == ';' || next == '#' || (next == '-' && strArr.peek(1) == '-')) {
           token = parseLineComment(strArr);
         } else if (next == '{' && strArr.peek(1) == '-') {
           token = parseMultiLineComment(strArr);
@@ -324,7 +324,8 @@ var  ws_asm  = (function() {
            throw {
               tokens: tokens,
               meta: meta,
-              message: err
+              message: err + " at line " + meta.line,
+              line: meta.line
            }
         } else {
            throw err;
@@ -413,6 +414,16 @@ var  ws_asm  = (function() {
            if (token.type == "LABEL") {
              builder.labels[labeler.getLabel(token.token)] = builder.programStack.length;
              builder.asmLabels[labeler.getLabel(token.token)] = token.token;
+           } else if (token.op && token.op.constr == ws.WsLabel) {
+             var param = builder.tokens.shift();
+             if (!param) {
+               throw "Missing label";
+             }
+             if (param.type != "TOKEN") {
+               throw "Invalid label";
+             }
+             builder.labels[labeler.getLabel(param.token)] = builder.programStack.length;
+             builder.asmLabels[labeler.getLabel(param.token)] = param.token;
            } else if (token.token in builder.macros && checkMacroParams(token.token, builder)) {
               token.type = "MACRO"; // can be label in some cases
               var macro = builder.macros[token.token];
@@ -435,6 +446,11 @@ var  ws_asm  = (function() {
            } else if (token.type == "KEYWORD") {
               var op = token.op;
               var instruction = new op.constr();
+
+              if (op.optparam === 'NUMBER' && builder.tokens[0] && builder.tokens[0].type == op.optparam) {
+                pushInstruction(builder, ws.WsPush ,builder.tokens.shift().data);
+              } 
+
               if (op.param) {
                 var param = builder.tokens.shift();
                 if (!param) {
