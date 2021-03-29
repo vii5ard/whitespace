@@ -131,11 +131,9 @@ var ws_fs = function(metaFile) {
       return self.fileNames;
     },
     saveFile: function(file) {
-      if (!(file.name in self.files) || file.changed) { 
-        self.files[file.name] = file;
-        file.extFile = false;
-        flush(self.files);
-      }
+      self.files[file.name] = file;
+      file.extFile = false;
+      flush(self.files);
     }
   };
 

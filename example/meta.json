@@ -120,7 +120,11 @@
     "origin": "example/vm/bf.ws",
     "author": "Vii5ard",
     "lang": "WS"
+  },
+  "vm/bf.wsa": {
+    "file": "example/vm/bf.wsa",
+    "origin": "example/vm/bf.wsa",
+    "author": "Vii5ard"
   }
-
 
 }}

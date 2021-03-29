@@ -553,10 +553,11 @@ ws = {
       var ch = env.readChar();
       var addr = env.stackPop();
       if (typeof ch == "number") {
-        env.heap.store(addr, ch);
-      } else {
-        env.heap.store(addr, ch.charCodeAt(0));
+        var val = ch;
+      } else if (typeof ch == "string") {
+        var val = ch.charCodeAt(0);
       }
+      if (typeof val !== "undefined") env.heap.store(addr, val);
       env.register.IP++;
     };
     this.getAsm = asmWithNoParam;

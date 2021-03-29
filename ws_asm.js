@@ -396,17 +396,11 @@ var  ws_asm  = (function() {
         }
       }
       builder.asmLabeler = builder.asmLabeler || new ws_util.labelTransformer(function(counter, label) {
-        var num = counter;
-        if (!label.match(/^[._]/)) {
-          num = 0;
-          for (var i = 0; i < label.length; i++) {
-            num = num * 8 + label.charCodeAt(i);
-          }
-        }
-        return ws_util.getWsUnsignedNumber(num);
+        return ws_util.getWsUnsignedNumber(counter + Math.random()*10000000);
       });
 
       var labeler = builder.asmLabeler;
+
       while (builder.tokens.length > 0) {
          var token = builder.tokens.shift();
          var meta = token.meta;

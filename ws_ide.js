@@ -40,7 +40,7 @@ var ws_ide = (function () {
     return fn.replace(/.*\.([^.]+)$/,'$1');
   };
 
-  var getExecPath = function(fn, vms) {
+  getExecPath = function(fn, vms) {
     if (typeof vms == 'undefined') {
       var vms = ws_fs.getFileNames(/^vm\//);
     }
@@ -53,7 +53,7 @@ var ws_ide = (function () {
         if (vmExt === 'ws' || vmExt === 'wsa') {
           return [vms[i]];
         } else {
-          var subPath = getExecPath(vms[i], vms.slice(0,i-1).concat(vms.slice(i+1)));
+          var subPath = getExecPath(vms[i], vms.slice(0,i).concat(vms.slice(i+1)));
           if (subPath.length > 0) {
             return subPath.concat([vms[i]]);
           }
@@ -63,37 +63,45 @@ var ws_ide = (function () {
     return [];
   }
 
+  getCompilePath = function(fn, wcs) {
+    if (typeof wcs == 'undefined') {
+     var wcs = ws_fs.getFileNames(/^wc\/.*\.wsa?$/);
+    }
+
+    var ext = getExtension(fn);
+
+    for (var i = 0; i < wcs.length; i++) {
+      var expr = /^wc\/([^2]+)2(.+)\.wsa?$/;
+      if (!wcs[i].match(expr)) continue;
+      var e = {file: wcs[i]};
+
+      e.from = e.file.replace(expr, '$1');
+
+      if (e.from !== ext) continue; 
+
+      e.to = e.file.replace(expr, '$2');
+
+      if (e.to.match(/^wsa?$/)) return [e];
+      var subPath = getCompilePath(e.to, wcs.slice(0, i).concat(wcs.slice(i+1)));
+      if (subPath.length > 0) return subPath.concat([e]);
+    }
+    return [];
+  }
+
   var compileProgram = function(showPath) {
     var disasm = $('#disasm');
     disasm.html('');
 
     var openFile = ws_ide.openFile;
+    var ext = getExtension(openFile.name);
+
+    if (!ext.match(/^wsa?$/i)) return;
+
     var src = programSource();
     var errorDiv = $('#errorDiv');
     errorDiv.html('&nbsp;');
     try {
-      var ext = getExtension(openFile.name);
-
-      var execPath = [];
-
-      if (!ext.match(/^wsa?$/i)) {
-        execPath = ws_ide.getExecPath(openFile.name);
-      }
-
-      if (execPath.length > 0) {
-        if (showPath) logger.log('Executing VM: ' + execPath.join(' -> '));
-        if (ws_ide.getExtension(execPath[0]) === 'ws') {
-          ws_ide.program = ws.compile(ws_fs.openFile(ws_fs.getFile(execPath[0])));
-        } else {
-          ws_ide.program = ws_asm.compile(ws_fs.openFile(ws_fs.getFile(execPath[0])));
-        }
-
-        for (var i = 1; i < execPath.length; i++) {
-          ws_ide.inputStream = ws_fs.openFile(ws_fs.getFile(execPath[i])).split('').concat([-1]);
-        }
-        ws_ide.inputStream = src.split('').concat([-1]);
-
-      } else if (ext.match(/^ws$/i)) {
+      if (ext.match(/^ws$/i)) {
         ws_ide.program = ws.compile(src);
       } else if (ext.match(/^wsa$/i)) {
         ws_ide.program = ws_asm.compile(src);
@@ -112,7 +120,7 @@ var ws_ide = (function () {
       } 
     }
 
-    if (execPath.length == 0) {
+    if (ext.match(/^wsa?$/i)) {
       var disasmSrc = ws_ide.program.getAsmSrc();
       for (var i in disasmSrc) {
         var ln = disasmSrc[i];
@@ -144,6 +152,8 @@ var ws_ide = (function () {
     file = file || ws_ide.openFile;
 
     if (!file.extFile) prefix = '(Local Storage) '
+    if (file.changed) prefix += '*';
+
     $('#panelMiddleLabel span').text(prefix + file.name);
   }
 
@@ -290,8 +300,7 @@ var ws_ide = (function () {
     var file = ws_ide.openFile;
     if (!file) return;
     var prog = programSource();
-	if (file.src != prog) {
-      file.changed = true;
+	if (file.changed) {
       file.extFile = false;
       updateEditorFileName();
     }
@@ -308,6 +317,7 @@ var ws_ide = (function () {
   var programCompilable = function() {
     var ext = getExtension(ws_ide.openFile.name);
     if (ext.match(/^wsa$/i)) return true;
+    if (getCompilePath(ext).length > 0) return true;
     return false; 
   }
 
@@ -374,8 +384,9 @@ var ws_ide = (function () {
       fileName = 'New file ';
       var count = 1;
       while (true) {
-        if (!((fileName + count) in ws_fs.files)) {
-          fileName = fileName + count;
+        var fn = fileName + count + '.ws';
+        if (!(fn in ws_fs.files)) {
+          fileName = fn;
           break;
         }
         count++;
@@ -387,7 +398,8 @@ var ws_ide = (function () {
       autohor: "",
       origin: "",
       src: "",
-      localStorage: true
+      localStorage: true,
+      changed: false 
     };
     ws_fs.saveFile(file);
     
@@ -421,12 +433,18 @@ var ws_ide = (function () {
     },
     
     init: function() {
-      $('#srcInput').bind("input propertychange", updateEditor);
-      $('#srcInput').keydown(function(e){
+      var input = $('#srcInput');
+      input.bind("input paste keyup", function () {
+        ws_ide.openFile.src = this.value;
+        ws_ide.openFile.changed = true;
+        updateEditor();
+      });
+      input.bind("propretychange", updateEditor);
+
+      input.keydown(function(e){
         var ret=interceptTabs(e, this);
         return ret;
       });
-
 
       updateFileList();
 
@@ -466,7 +484,7 @@ var ws_ide = (function () {
       ws_ide.stopProgram();
 
       storeSource();
-     var file = ws_fs.getFile(fileName);
+      var file = ws_fs.getFile(fileName);
       if (!file) return;
 
        if (ws_ide.openFile) {
@@ -474,7 +492,7 @@ var ws_ide = (function () {
           ws_ide.defaultFile.push(ws_ide.openFile.name);
         }
       }
-      if (file.file.match(/\.ws$/i)) {
+      if (file.name.match(/.*\.ws$/i)) {
         this.setHighlight(true);
       } else {
         this.setHighlight(false);
@@ -492,6 +510,33 @@ var ws_ide = (function () {
     runProgram: function(debugMode, stepMode) {
       $('#btnRun').hide();
       $('#btnStop').show();
+
+      var ext = getExtension(ws_ide.openFile.name);
+      var execPath = [];
+      if (!ext.match(/^wsa?$/i)) {
+        execPath = ws_ide.getExecPath(ws_ide.openFile.name);
+      }
+
+      if (execPath.length > 0) {
+        logger.log('Executing VM: ' + execPath.join(' -> '));
+        if (ws_ide.getExtension(execPath[0]) === 'ws') {
+          ws_ide.program = ws.compile(ws_fs.openFile(ws_fs.getFile(execPath[0])));
+        } else {
+          ws_ide.program = ws_asm.compile(ws_fs.openFile(ws_fs.getFile(execPath[0])));
+        }
+
+        for (var i = 1; i < execPath.length; i++) {
+          ws_ide.inputStream = ws_fs.openFile(ws_fs.getFile(execPath[i])).split('').concat([null]);
+        }
+        ws_ide.inputStream = ws_ide.openFile.src.split('').concat([null]);
+
+        ws_ide.initEnv();
+        ws_ide.env.running = true;
+
+        ws_ide.animateRunning(true);
+        ws_ide.continueRun();
+        return;
+      }
 
       ws_ide.animateRunning(true);
       try {
@@ -589,11 +634,11 @@ var ws_ide = (function () {
     },
 
     handleUserInput: function (selector, code) {
-      code = code || '\n';
+      if (typeof code === 'undefined') code = '\n';
 
       var input = $(selector);
       var val = input.val();
-      ws_ide.inputStream = ws_ide.inputStream.concat(val.split('').concat(code));
+      ws_ide.inputStream = ws_ide.inputStream.concat(val.split('').concat([code]));
       printOutput(val + '\n');
       input.val('');
       this.continueRun();
@@ -673,6 +718,8 @@ var ws_ide = (function () {
       ws_fs.saveFile(file);
 
       file.changed = false;
+
+      updateEditorFileName();
     },
 
     handleFileRename: function (fileName, id) {
@@ -719,17 +766,63 @@ var ws_ide = (function () {
     },
 
     compileAsm: function() {
+      var ext = getExtension(ws_ide.openFile.name);
+      var compilePath = getCompilePath(ext);
+
+      if (!ext.match(/wsa$/) && compilePath.length == 0) {
+        logger.error("No way to compile program");
+        return;
+      }
+
+      if (compilePath.length > 0) {
+        if (ws_ide.getExtension(compilePath[0].file) === 'ws') {
+          ws_ide.program = ws.compile(ws_fs.openFile(ws_fs.getFile(compilePath[0].file)));
+        } else {
+          ws_ide.program = ws_asm.compile(ws_fs.openFile(ws_fs.getFile(compilePath[0].file)));
+        }
+
+        ws_ide.inputStream = [];
+        for (var i = 1; i < compilePath.length; i++) {
+          ws_ide.inputStream = ws_ide.inputStream.concat(ws_fs.openFile(ws_fs.getFile(compilePath[i].file)).split('').concat([null]));
+        }
+        ws_ide.inputStream = ws_ide.inputStream.concat(ws_ide.openFile.src.split('').concat([null]));
+        ws_ide.initEnv();
+        ws_ide.env.running = true;
+        var output = '';
+        ws_ide.env.print = function (m) {
+          output += m;
+        }
+
+        while (ws_ide.env.running) {
+          ws_ide.continueRun();
+        }
+
+        if (compilePath[0].to == 'ws') {
+          var wsSrc = output;
+        } else if (compilePath[0].to == 'wsa') {
+          console.log(output);
+          var wsSrc = ws_asm.compile(output).getWsSrc();
+        } else {
+          throw "Invalid compile result.";
+        }
+
+
+      } else {
+        var wsSrc = ws_ide.program.getWsSrc();
+      }
+
       if (ws_ide.program.compileError) {
         logger.error(ws_ide.program.compileError)
         return;
       }
-      var fileName = ws_ide.openFile.name.replace(/\.wsa$/, '.ws');
+
+      var fileName = ws_ide.openFile.name.replace(/\.[^.]*$/,'') + '.ws';
+
       if (!(fileName in ws_fs.files)) {
         createNewFile(fileName);
       }
       var file = ws_fs.getFile(fileName);
 
-      var wsSrc = ws_ide.program.getWsSrc();
       file.src = wsSrc;
 
       updateFileList();
