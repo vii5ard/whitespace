@@ -125,6 +125,31 @@
     "file": "example/vm/bf.wsa",
     "origin": "example/vm/bf.wsa",
     "author": "Vii5ard"
-  }
+  },
+  "vm/bf.ws": {
+    "file": "example/vm/bf.wsa",
+    "origin": "example/vm/bf.wsa",
+    "author": "Vii5ard"
+  },
+  "wc/bf2wsa.wsa": {
+    "file": "example/wc/bf2wsa.wsa",
+    "origin": "example/wc/bf2wsa.wsa",
+    "author": "Vii5ard"
+  },
+  "wc/bf2wsa.ws": {
+    "file": "example/wc/bf2wsa.ws",
+    "origin": "example/wc/bf2wsa.ws",
+    "author": "Vii5ard"
+  },
+  "hello.bf": {
+    "file": "example/hello.bf",
+    "origin": "https://en.wikipedia.org/wiki/Brainfuck",
+    "author": "?"
+  },
+  "rot13.bf": {
+    "file": "example/rot13.bf",
+    "origin": "https://en.wikipedia.org/wiki/Brainfuck",
+    "author": "?"
+ }
 
 }}

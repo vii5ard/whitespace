@@ -282,6 +282,18 @@ var ws_opt = (function() {
     }
   }
 
+  var consume2 = function(valueStack, i, fn) {
+    var newVal, a, b;
+    if (valueStack.length > 0) b = valueStack.pop();
+    if (valueStack.length > 0) a = valueStack.pop();
+
+    if (typeof a !== "undefined" && typeof a.value !== "undefined" && typeof b.value !== "undefined") {
+      var newVal = fn(a.value , b.value);
+    }
+
+    valueStack.push( {value: newVal, index:i });
+  }
+
   var self = {
     _shred: function(prog) {
       return shredProgram(prog);
