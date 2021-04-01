@@ -126,11 +126,6 @@
     "origin": "example/vm/bf.wsa",
     "author": "Vii5ard"
   },
-  "vm/bf.ws": {
-    "file": "example/vm/bf.wsa",
-    "origin": "example/vm/bf.wsa",
-    "author": "Vii5ard"
-  },
   "wc/bf2wsa.wsa": {
     "file": "example/wc/bf2wsa.wsa",
     "origin": "example/wc/bf2wsa.wsa",
