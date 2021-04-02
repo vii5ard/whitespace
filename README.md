@@ -6,6 +6,8 @@ Itself, and should not be taken too seriously (unless you want to contribute).
 
 
 Whitelips features:
+* Support for interpreters and compilers for other esoteric languages.
+* Brainfuck interpeter and compiler (Whitespace implementation).
 * Whitespace virtual machine,
 * Whitespace optimizer,
 * On-the-fly compilation,
