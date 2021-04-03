@@ -1,11 +1,13 @@
 # Whitelips IDE
 
 Whitelips is a development tool for [Whitespace programming language](http://compsoc.dur.ac.uk/whitespace/).
-The latest online version can be found at http://vii5ard.github.io/whitespace/ and the old version at http://whitespace.kauaveel.ee. This project started as a joke, like the language
-Itself, and should not be taken too seriously (unless you want to contribute).
+The latest online version can be found at http://vii5ard.github.io/whitespace/ . This project started as a joke, like the language
+itself, and should not be taken too seriously (unless you want to contribute).
 
 
 Whitelips features:
+* Support for interpreters and compilers for other esoteric languages.
+* Brainfuck interpeter and compiler (Whitespace implementation).
 * Whitespace virtual machine,
 * Whitespace optimizer,
 * On-the-fly compilation,
