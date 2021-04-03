@@ -10,7 +10,7 @@ var ws_util = (function () {
     },
 
     getWsSignedNumber: function (num) {
-      return ((num >= 0) ? ' ' : '\t') + this.getWsUnsignedNumber(Math.abs(num));
+      return ((num >= 0) ? ' ' : '\t') + (num == 0 ? '\n' : this.getWsUnsignedNumber(Math.abs(num)));
     },
 
     labelTransformer: function (labelGenerator) {

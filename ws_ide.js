@@ -800,7 +800,6 @@ var ws_ide = (function () {
         if (compilePath[0].to == 'ws') {
           var wsSrc = output;
         } else if (compilePath[0].to == 'wsa') {
-          console.log(output);
           var wsSrc = ws_asm.compile(output).getWsSrc();
         } else {
           throw "Invalid compile result.";

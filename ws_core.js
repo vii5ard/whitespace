@@ -105,7 +105,10 @@ ws = {
             callable.run(this);
             this.afterInstructionRun(this);
           }
-          (new ws.WsEndProgram).run(this); // If the program did not call "end" statement
+          if (this.running) {
+            (new ws.WsEndProgram).run(this); // If the program did not call "end" statement
+            throw "Program terminated without end instruction";
+          }
 	} catch (err) {
 	  if(err == "Break") {
             this.paused = true;
