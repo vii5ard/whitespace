@@ -133,6 +133,9 @@ ws = {
         this.callStack.push(this.register.IP);
       },
       closeFrame: function () {
+        if (this.callStack.length === 0) {
+          throw "user error (Can't do Return)"; // Original error message.
+        }
         this.register.IP = this.callStack.pop() + 1;
       },
       print: function (s) {
