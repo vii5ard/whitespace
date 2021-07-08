@@ -1,5 +1,9 @@
 var ws_util = (function () {
   return {
+    isLocalLabel: function (label) {
+      return label.match(/^\..*$/);
+    },
+
     getWsUnsignedNumber: function (num) {
       var result = "";
       while (num > 0) {

@@ -40,10 +40,14 @@ var  ws_asm  = (function() {
           var metaTypes = { "$number": "NUMBER", "$label": "TOKEN", "$string": "STRING" };
           var macroLabel = params[1].token.replace(/:$/, "");
           var closed = false;
+          var macroLabels = {};
+          
           var newMacro = {
             tokens: [],
             param: [],
             action: function (params, builder) {
+              builder.macroCallCounter = (builder.macroCallCounter || 0) + 1;
+              var macroId = builder.macroCallCounter;
               params[0].called = (params[0].called || 0) + 1
               if (params[0].called > 16) {
                 throw "Circular reference of macros";
@@ -52,10 +56,13 @@ var  ws_asm  = (function() {
               var toks = [];
               var pp = 1;
               for (var t in this.tokens) {
-                var token = this.tokens[t];
+                var token = Object.assign({}, this.tokens[t]);
                 if (token.token in metaTypes) {
                   toks.push(params[pp++]);
                 } else {
+                  if (token.token.match(/^\$\d+$/)) {
+                    token.token = ".__" + macroId + "__" + token.token + "__";
+                  }
                   toks.push(token);
                 }
               }
@@ -83,7 +90,6 @@ var  ws_asm  = (function() {
                 newMacro.param.push(metaTypes[token.token]);
               } 
             } 
-
             newMacro.tokens.push(token);
           }
           if (!closed) {
@@ -122,7 +128,7 @@ var  ws_asm  = (function() {
         action: function (params, builder) {
           throw "Can't redefine macro outside of a macro"
         }
-      }
+      },
     };
   }
 
@@ -272,9 +278,9 @@ var  ws_asm  = (function() {
       if(!next.match(/\s|\n|:|;/)) {
         throw "Illegal character";
       } else if (next == ':') {
-         strArr.getNext();
-         type = "LABEL";
-      } 
+        strArr.getNext();
+        type = "LABEL";
+      }
     }
 
     var op = null; 
@@ -286,6 +292,7 @@ var  ws_asm  = (function() {
         type = "MACRO";
       }
     }
+
     return {
       type: type,
       token: label,
@@ -396,18 +403,31 @@ var  ws_asm  = (function() {
         }
       }
       builder.asmLabeler = builder.asmLabeler || new ws_util.labelTransformer(function(counter, label) {
-        return ws_util.getWsUnsignedNumber(counter + Math.random()*10000000);
+        return ws_util.getWsUnsignedNumber(counter);
       });
 
       var labeler = builder.asmLabeler;
+
+      var parentLabel = "";
 
       while (builder.tokens.length > 0) {
          var token = builder.tokens.shift();
          var meta = token.meta;
          try {
            if (token.type == "LABEL") {
-             builder.labels[labeler.getLabel(token.token)] = builder.programStack.length;
-             builder.asmLabels[labeler.getLabel(token.token)] = token.token;
+             var label = token.token;
+             if (ws_util.isLocalLabel(label)) {
+               label = parentLabel + label;
+             } else {
+               parentLabel = label;
+             }
+
+             if (typeof builder.labels[labeler.getLabel(label)] === "number") {
+               throw "Multiple definitions of label " + label;
+             }
+
+             builder.labels[labeler.getLabel(label)] = builder.programStack.length;
+             builder.asmLabels[labeler.getLabel(label)] = label;
            } else if (token.op && token.op.constr == ws.WsLabel) {
              var param = builder.tokens.shift();
              if (!param) {
@@ -416,8 +436,14 @@ var  ws_asm  = (function() {
              if (param.type != "TOKEN") {
                throw "Invalid label";
              }
-             builder.labels[labeler.getLabel(param.token)] = builder.programStack.length;
-             builder.asmLabels[labeler.getLabel(param.token)] = param.token;
+
+             var label = param.token;
+             if (builder.labels[labeler.getLabel(label)]) {
+               throw "Multiple definitions of label " + label;
+             }
+
+             builder.labels[labeler.getLabel(label)] = builder.programStack.length;
+             builder.asmLabels[labeler.getLabel(label)] = label;
            } else if (token.token in builder.macros && checkMacroParams(token.token, builder)) {
               token.type = "MACRO"; // can be label in some cases
               var macro = builder.macros[token.token];
@@ -462,8 +488,11 @@ var  ws_asm  = (function() {
                   }
                 } else if (op.param == "LABEL") {
                   var instruction = new op.constr();
+                  var label = param.token;
+                  if (ws_util.isLocalLabel(label)) label = parentLabel + label;
+
                   instruction.param = {
-                    token: labeler.getLabel(param.token), value: null, label: param.token 
+                    token: labeler.getLabel(label), value: null, label: label
                   };
                   builder.pushInstruction(instruction); 
                 } else {
