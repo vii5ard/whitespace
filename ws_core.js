@@ -267,11 +267,10 @@ ws = {
         for (l in ln.labels) {
           var wsLabel = ln.labels[l];
           var label = this.asmLabels[wsLabel] || labler.getLabel(wsLabel);
-          labels += (labels ? "\n": "") + label + ":";
+
+          src.push({IP: null, str: label + ":"});
         }
-        if (labels) {
-          src.push({IP: null, str: labels});
-        }
+
         var instrStr = ln.mnemo;
         if (ln.param.label != null) {
           instrStr += " " + (this.asmLabels[ln.param.label] || labler.getLabel(ln.param.label));
