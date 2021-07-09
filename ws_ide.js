@@ -511,6 +511,8 @@ var ws_ide = (function () {
       $('#btnRun').hide();
       $('#btnStop').show();
 
+      ws_ide.saveFile();
+
       var ext = getExtension(ws_ide.openFile.name);
       var execPath = [];
       if (!ext.match(/^wsa?$/i)) {
@@ -766,6 +768,8 @@ var ws_ide = (function () {
     },
 
     compileAsm: function() {
+      ws_ide.saveFile();
+
       var ext = getExtension(ws_ide.openFile.name);
       var compilePath = getCompilePath(ext);
 
