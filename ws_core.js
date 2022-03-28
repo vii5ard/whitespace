@@ -16,7 +16,7 @@
       retrieve: function (addr) {
         var val = heapSpace[addr];
         if (typeof val == "undefined") {
-          return this.store(addr, 0);
+          return this.store(addr, 0n);
         }
         return val;
       },
@@ -47,7 +47,7 @@
         value = (value << 1) + {' ':0, '\t':1}[token];
       }
     }
-    return {token: paramStr, value: sign * value};
+    return {token: paramStr, value: BigInt(sign * value)};
   };
   var replaceLabelWS = function (label) {
     return label.replace(/ /g,'s').replace(/\t/g,'t');
@@ -124,13 +124,13 @@ ws = {
         if (this.register.SP <= 0) {
           throw "Stack underflow";
         }
-        return this.stack[--this.register.SP] || 0;
+        return this.stack[--this.register.SP] || 0n;
       },
       stackPeek: function () {
         if (this.register.SP <= 0) {
           throw "Stack underflow";
         }
-        return this.stack[this.register.SP - 1] || 0;
+        return this.stack[this.register.SP - 1] || 0n;
       },
       createFrame: function () {
         this.callStack.push(this.register.IP);
@@ -325,7 +325,7 @@ ws = {
 
   WsCopyNth: function() {
     this.run = function (env) {
-      var actualPos = env.register.SP - this.param.value - 1;
+      var actualPos = env.register.SP - Number(this.param.value) - 1;
       env.stackPush(env.stack[actualPos]);
       env.register.IP++;
     }
@@ -355,7 +355,7 @@ ws = {
   WsSlide: function() {
     this.run = function(env) {
       var top = env.stackPop();
-      env.register.SP -= this.param.value;
+      env.register.SP -= Number(this.param.value);
       env.stackPush(top);
       env.register.IP++;
     }
@@ -400,7 +400,7 @@ ws = {
     this.run = function (env) {
       var b = env.stackPop();
       var a = env.stackPop();
-      env.stackPush(Math.floor(a/b));
+      env.stackPush(a / b);
       env.register.IP++;
     };
     this.getAsm = asmWithNoParam;
@@ -410,7 +410,7 @@ ws = {
     this.run = function(env) {
      var b = env.stackPop();
      var a = env.stackPop();
-     env.stackPush(a%b);
+     env.stackPush(a % b);
      env.register.IP++;
     };
     this.getAsm = asmWithNoParam;
@@ -467,7 +467,7 @@ ws = {
   WsPrintChar: function() {
     this.run = function(env) {
       var ch = env.stackPop();
-      env.print(String.fromCharCode(ch));
+      env.print(String.fromCharCode(Number(ch & 0xffffffffn)));
       env.register.IP++;
     };
     this.getAsm = asmWithNoParam;
@@ -562,7 +562,9 @@ ws = {
       } else if (typeof ch == "string") {
         var val = ch.charCodeAt(0);
       }
-      if (typeof val !== "undefined") env.heap.store(addr, val);
+      if (typeof val !== "undefined") {
+        env.heap.store(addr, BigInt(val));
+      }
       env.register.IP++;
     };
     this.getAsm = asmWithNoParam;

@@ -6,19 +6,19 @@ var ws_util = (function () {
 
     getWsUnsignedNumber: function (num) {
       var result = "";
-      while (num > 0) {
-        result = ((num % 2) ? '\t' : ' ') + result;
-        num = Math.floor(num / 2);
+      while (num > 0n) {
+        result = ((num % 2n) ? '\t' : ' ') + result;
+        num = num / 2n;
       }
       return result + '\n';
     },
 
     getWsSignedNumber: function (num) {
-      return ((num >= 0) ? ' ' : '\t') + (num == 0 ? '\n' : this.getWsUnsignedNumber(Math.abs(num)));
+      return ((num >= 0n) ? ' ' : '\t') + (num == 0n ? '\n' : this.getWsUnsignedNumber(num < 0n ? -1n * num : num));
     },
 
     labelTransformer: function (labelGenerator) {
-      var length = 0;
+      var length = 0n;
       return {
         length: length,
         labels: {},

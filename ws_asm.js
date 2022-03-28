@@ -185,14 +185,14 @@ var  ws_asm  = (function() {
     if (strArr.hasNext() && !strArr.peek().match(/\s|\n|;/)) {
       throw "Invalid character in number format";
     }
-    var data = parseInt(numStr);
+    var data = BigInt(numStr);
     if (data == "NaN") {
       throw "Illegal number";
     }
     return {
       type: "NUMBER",
       token: numStr,
-      data: parseInt(numStr)
+      data: BigInt(numStr)
     }
   };
 
@@ -208,32 +208,32 @@ var  ws_asm  = (function() {
            chCode += ch;
            continue;
          } else {
-           result.push(parseInt(chCode));
+           result.push(BigInt(chCode));
            chCode = "";
          }
        }
        if (escape) {
           if (ch == 'n') {
-            result.push('\n'.charCodeAt(0));
+            result.push(BigInt('\n'.charCodeAt(0)));
           } else if (ch == 't') {
-            result.push('\t'.charCodeAt(0));
+            result.push(BigInt('\t'.charCodeAt(0)));
           } else if (ch.match(/[0-9]/)) {
             chCode += ch;
           } else {
-            result.push(ch.charCodeAt(0));
+            result.push(BigInt(ch.charCodeAt(0)));
           }
           escape = false;
        } else if (ch == '\\') {
          escape = true;
        } else {
-         result.push(ch.charCodeAt(0));
+         result.push(BigInt(ch.charCodeAt(0)));
        }
     }
     if (chCode) {
-      result.push(parseInt(chCode));
+      result.push(BigInt(chCode));
     }
     if (arr[0] == '"') {
-       result.push(0);
+       result.push(0n);
     }
     return result;
   }

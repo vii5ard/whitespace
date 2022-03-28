@@ -228,7 +228,7 @@ var ws_ide = (function () {
     if (typeof num == "NaN") {
       throw "Illegal number entered!";
     }
-    return num;
+    return BigInt(num);
   };
 
   var updateMemoryTab = function (env) {
