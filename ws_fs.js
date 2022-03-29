@@ -1,60 +1,61 @@
-var ws_fs = function(metaFile) {
-  var isValidFileName = function(fileName) {
-    return true && fileName.match(/^[a-zA-z0-9._() \/-]+$/);
+globalThis.ws_fs = function(metaFile) {
+  const isValidFileName = function (fileName) {
+    return fileName.match(/^[a-zA-z0-9._() \/-]+$/);
   };
 
-  var flush = function(files) {
-    var local = {files: {}};
-    for (var fileName in files) {
-      var file = files[fileName];
+  const flush = function (files) {
+    const local = {files: {}};
+    for (const fileName in files) {
+      const file = files[fileName];
       if (!file.extFile) {
         local.files[fileName] = file;
       }
     }
     localStorage.ws_fs = JSON.stringify(local);
-  }
+  };
 
-  var handleFiles = function(data, files, extFile) {
+  const handleFiles = function (data, files, extFile) {
+    let json;
     try {
-      var json = JSON.parse(data);
+      json = JSON.parse(data);
     } catch (err) {
       console.log("Unable to parse JSON: " + err);
     }
-    for (fileName in json.files) {
+    for (const fileName in json.files) {
       if (isValidFileName(fileName) && !(fileName in files)) {
-        var file = json.files[fileName];
+        const file = json.files[fileName];
         file.extFile = extFile;
         file.name = fileName;
         files[fileName] = file;
       }
-    } 
+    }
   };
- 
-  var loadFilesServer = function(files) {
+
+  const loadFilesServer = function (files) {
     $.ajax({
       url: metaFile,
       converters: {"text json": window.String},
       success: function (data) {
         handleFiles(data, files, true);
-     },
-     error: function(jqXHR, textStatus, errorThrown) {
-       console.log("Unable to read '" + metaFile + "': " + textStatus);
-     },
-     async: false      
+      },
+      error: function (jqXHR, textStatus, errorThrown) {
+        console.log("Unable to read '" + metaFile + "': " + textStatus);
+      },
+      async: false
     });
   };
 
-  var loadFilesLocal = function(files) {
+  const loadFilesLocal = function (files) {
     if (typeof localStorage == "undefined") {
       console.log("Local storage not supported!");
       return;
     }
-    var data = localStorage.ws_fs || "{}";
+    const data = localStorage.ws_fs || "{}";
     handleFiles(data, files, false);
-  }
+  };
 
-  var loadFiles = function() {
-    var files = {};
+  const loadFiles = function () {
+    const files = {};
 
     loadFilesLocal(files);
     loadFilesServer(files);
@@ -62,13 +63,13 @@ var ws_fs = function(metaFile) {
     return files;
   };
 
-  var self = {
+  const self = {
     files: loadFiles(),
-    getFile: function(fileName) {
+    getFile: function (fileName) {
       return self.files[fileName];
     },
-    rename: function(oldName, newName) {
-      if (oldName == newName) return;
+    rename: function (oldName, newName) {
+      if (oldName === newName) return;
       if (!(oldName in self.files) || newName in self.files) {
         console.log("Won't replace file!");
         return;
@@ -78,7 +79,7 @@ var ws_fs = function(metaFile) {
         return;
       }
       delete self.fileNames; // Empty cache
-      var file = self.files[oldName];
+      const file = self.files[oldName];
 
       file.name = newName;
       file.extFile = false;
@@ -94,14 +95,14 @@ var ws_fs = function(metaFile) {
       }
       self.files[newName] = file;
       delete self.files[oldName];
-      flush(self.files); 
+      flush(self.files);
     },
-    openFile: function(file) {
+    openFile: function (file) {
       if (file.src || !file.extFile) {
         return file.src;
       } else if (file.file) {
         $.ajax({
-          url:file.file,
+          url: file.file,
           async: false,
           success: function (data) {
             file.src = data;
@@ -115,12 +116,12 @@ var ws_fs = function(metaFile) {
         console.log("Unable to open file: '" + JSON.stringify(file));
       }
     },
-    deleteFile: function(fileName) {
+    deleteFile: function (fileName) {
       delete self.fileNames;
       delete self.files[fileName];
       flush(self.files);
     },
-    getFileNames: function(pattern) {
+    getFileNames: function (pattern) {
       self.fileNames = [];
       for (fileName in self.files) {
         if (!pattern || fileName.match(pattern)) {
@@ -130,7 +131,7 @@ var ws_fs = function(metaFile) {
       self.fileNames.sort();
       return self.fileNames;
     },
-    saveFile: function(file) {
+    saveFile: function (file) {
       self.files[file.name] = file;
       file.extFile = false;
       flush(self.files);

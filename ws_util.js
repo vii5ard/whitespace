@@ -1,11 +1,11 @@
-var ws_util = (function () {
+globalThis.ws_util = (function () {
   return {
     isLocalLabel: function (label) {
       return label.match(/^\..*$/);
     },
 
     getWsUnsignedNumber: function (num) {
-      var result = "";
+      let result = "";
       while (num > 0n) {
         result = ((num % 2n) ? '\t' : ' ') + result;
         num = num / 2n;
@@ -14,11 +14,11 @@ var ws_util = (function () {
     },
 
     getWsSignedNumber: function (num) {
-      return ((num >= 0n) ? ' ' : '\t') + (num == 0n ? '\n' : this.getWsUnsignedNumber(num < 0n ? -1n * num : num));
+      return ((num >= 0n) ? ' ' : '\t') + (num === 0n ? '\n' : this.getWsUnsignedNumber(num < 0n ? -1n * num : num));
     },
 
     labelTransformer: function (labelGenerator) {
-      var length = 0n;
+      let length = 0n;
       return {
         length: length,
         labels: {},
@@ -26,7 +26,7 @@ var ws_util = (function () {
           if (typeof label != "undefined" && label in this.labels) {
             return this.labels[label];
           } else {
-            var gen = labelGenerator(length++, label);
+            const gen = labelGenerator(length++, label);
             this.labels[label] = gen;
             return gen;
           }
@@ -48,8 +48,8 @@ var ws_util = (function () {
           return this.pos  < this.arr.length;
         },
         getNext: function  () {
-          var next = this.arr[this.pos++];
-          if (next == '\n') {
+          const next = this.arr[this.pos++];
+          if (next === '\n') {
             this.line++;
             this.col = 1;
           } else {
@@ -58,7 +58,7 @@ var ws_util = (function () {
           return next;
         },
         peek:  function (off)  {
-          var pos = this.pos + (off || 0);
+          const pos = this.pos + (off || 0);
           if (this.arr.length < pos) {
             return -1; // TODO! Any alternative that is not an exception?
           }

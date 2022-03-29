@@ -1,10 +1,10 @@
 (function() {
 
-  /* 
+  /*
    * Private interface
    */
-  var Heap = function () {
-    var heapSpace = {};
+  const Heap = function () {
+    const heapSpace = {};
     return {
       store: function (addr, val) {
         if (typeof addr == "undefined" || typeof val == "undefined") {
@@ -14,82 +14,78 @@
         return val;
       },
       retrieve: function (addr) {
-        var val = heapSpace[addr];
+        const val = heapSpace[addr];
         if (typeof val == "undefined") {
           return this.store(addr, 0n);
         }
         return val;
       },
-      toArray: function() {
+      toArray: function () {
         return heapSpace;
       }
     }
-  }
+  };
 
-  var sourceTokens = {' ':true, '\n': true, '\t':true};
+  const sourceTokens = {' ': true, '\n': true, '\t': true};
 
-  var isSource = function(token) {
+  const isSource = function (token) {
     return sourceTokens[token];
   };
 
-  var parseParam = function(tokenizer) {
-    var sign = 0;
-    var value = 0;
-    var paramStr = '';
+  const parseParam = function (tokenizer) {
+    let sign = 0;
+    let value = 0;
+    let paramStr = '';
     while (tokenizer.hasNext()) {
-      var token = tokenizer.getNext();
+      const token = tokenizer.getNext();
       if (!isSource(token)) continue;
       paramStr += token;
-      if (token == '\n') break;
+      if (token === '\n') break;
       if (!sign) {
-        sign = {' ':1, '\t':-1}[token];
+        sign = {' ': 1, '\t': -1}[token];
       } else {
-        value = (value << 1) + {' ':0, '\t':1}[token];
+        value = (value << 1) + {' ': 0, '\t': 1}[token];
       }
     }
     return {token: paramStr, value: BigInt(sign * value)};
   };
-  var replaceLabelWS = function (label) {
-    return label.replace(/ /g,'s').replace(/\t/g,'t');
-  }
-
-  var asmObject = function(labels, mnemo, paramVal, paramLabel) {
-    var replaceLabels = [];
-    for (var i in labels) {
+  const asmObject = function (labels, mnemo, paramVal, paramLabel) {
+    const replaceLabels = [];
+    for (const i in labels) {
       replaceLabels.push(labels[i]);
     }
     return {
-      labels:replaceLabels, 
-      mnemo:mnemo, 
-      param: {val:paramVal, label:paramLabel}
+      labels: replaceLabels,
+      mnemo: mnemo,
+      param: {val: paramVal, label: paramLabel}
     };
-  }
-  
-  var asmWithValueParam = function() {
-    return asmObject(this.labels, 
-                     this.mnemoCode, 
-                     this.param.value,
-                     null);
-  }
+  };
 
-  var asmWithLabelParam = function() {
-    return asmObject(this.labels, 
-                     this.mnemoCode,
-                     null, 
-                     this.param.token);
-  }
+  const asmWithValueParam = function () {
+    return asmObject(this.labels,
+        this.mnemoCode,
+        this.param.value,
+        null);
+  };
 
-  var asmWithNoParam = function () {
+  const asmWithLabelParam = function () {
+    return asmObject(this.labels,
+        this.mnemoCode,
+        null,
+        this.param.token);
+  };
+
+  const asmWithNoParam = function () {
     return asmObject(this.labels, this.mnemoCode, null);
-  }
+  };
 
   /*
    * Public interface
    */
-ws = {
+globalThis.ws = {
   env: function () {
-    var self = {
-      register: {IP:0, SP:0 },
+    return {
+      register: {IP: 0, SP: 0},
       stack: [],
       heap: new Heap(),
       callStack: [],
@@ -99,8 +95,8 @@ ws = {
         try {
           this.running = true;
           this.paused = false;
-          while (this.running && this.register.IP < program.programStack.length ) {
-            var callable = program.programStack[this.register.IP];
+          while (this.running && this.register.IP < program.programStack.length) {
+            const callable = program.programStack[this.register.IP];
             this.beforeInstructionRun(this);
             callable.run(this);
             this.afterInstructionRun(this);
@@ -109,13 +105,13 @@ ws = {
             (new ws.WsEndProgram).run(this); // If the program did not call "end" statement
             throw "Program terminated without end instruction";
           }
-	} catch (err) {
-	  if(err == "Break") {
+        } catch (err) {
+          if (err === "Break") {
             this.paused = true;
           } else {
-	    throw err;
-	  }
-	}
+            throw err;
+          }
+        }
       },
       stackPush: function (val) {
         this.stack[this.register.SP++] = val;
@@ -142,25 +138,23 @@ ws = {
         this.register.IP = this.callStack.pop() + 1;
       },
       print: function (s) {
-        console.error('Print unimplemented: ' + s); 
+        console.error('Print unimplemented: ' + s);
       },
-      println: function (s) {
-        this.print(s + '\n');
+      beforeInstructionRun: function (env) {
       },
-      beforeInstructionRun: function (env) {},
-      afterInstructionRun: function (env) {}
+      afterInstructionRun: function (env) {
+      }
     };
-    return self;
   },
 
   compile: function (fullSource) {
-    var builder = ws.programBuilder(fullSource);
-    var parser = instParser;
-    var tokenizer = new ws_util.StrArr(fullSource);
- 
-    var debugToken = '';
+    const builder = ws.programBuilder(fullSource);
+    const tokenizer = new ws_util.StrArr(fullSource);
+    let parser = instParser;
+
+    let debugToken = '';
     while (tokenizer.hasNext()) {
-      var token = tokenizer.getNext();
+      const token = tokenizer.getNext();
       if (!sourceTokens[token]) {
         continue;
       }
@@ -173,7 +167,7 @@ ws = {
         }
       }
       if (parser.instFn) {
-        var instruction = new parser.instFn();
+        const instruction = new parser.instFn();
         if (instruction.paramType != null) {
           instruction.param = parseParam(tokenizer);
           if (!instruction.param.token) {
@@ -201,9 +195,9 @@ ws = {
   },
 
   programBuilder: function (fullSource, master) {
-    var builder = {};
+    const builder = {};
 
-    for (var key in master) {
+    for (const key in master) {
       builder[key] = master[key];
     }
 
@@ -212,9 +206,9 @@ ws = {
     builder.labels = {};
     builder.asmLabels = builder.asmLabels || {};
     builder.getAsm = function () {
-      var asm = [];
-      for (var i in this.programStack) {
-        var inst = this.programStack[i];
+      const asm = [];
+      for (const i in this.programStack) {
+        const inst = this.programStack[i];
         asm.push(inst.getAsm());
       }
       return asm;
@@ -227,20 +221,20 @@ ws = {
         instruction.address = this.programStack.length;
         this.programStack.push(instruction);
       }
-      for (var l in instruction.labels) {
+      for (const l in instruction.labels) {
         this.labels[instruction.labels[l]] = instruction.address;
       }
     };
 
     builder.postProcess = function () {
-      for (var i in this.programStack) {
+      for (const i in this.programStack) {
         if (this.programStack[i].postProcess) {
           this.programStack[i].postProcess(this);
         }
       }
 
-      for (label in this.labels) {
-        var inst = this.programStack[this.labels[label]];
+      for (const label in this.labels) {
+        const inst = this.programStack[this.labels[label]];
         if (inst) {
           if (!inst.labels) inst.labels = [];
           if ($.inArray(label, inst.labels) < 0) {
@@ -248,7 +242,7 @@ ws = {
           }
         } else {
           // Label to void
-          var labelInst = new ws.WsLabel();
+          const labelInst = new ws.WsLabel();
           labelInst.address = this.programStack.length;
           labelInst.param = {token: label};
           this.programStack.push(labelInst);
@@ -258,22 +252,24 @@ ws = {
     };
 
     builder.getAsmSrc = function () {
-      var src = [];
-      var asm = this.getAsm();
-      var labler = new ws_util.labelTransformer(function (n, label) { return "label_" + n; } );
-      for (var i in asm) {
-        var ln = asm[i];
-        var labels = "";
-        for (l in ln.labels) {
-          var wsLabel = ln.labels[l];
-          var label = this.asmLabels[wsLabel] || labler.getLabel(wsLabel);
+      const src = [];
+      const asm = this.getAsm();
+      const labeler = new ws_util.labelTransformer(function (n, label) {
+        return "label_" + n;
+      });
+      for (const i in asm) {
+        const ln = asm[i];
+        const labels = "";
+        for (const l in ln.labels) {
+          const wsLabel = ln.labels[l];
+          const label = this.asmLabels[wsLabel] || labeler.getLabel(wsLabel);
 
           src.push({IP: null, str: label + ":"});
         }
 
-        var instrStr = ln.mnemo;
+        let instrStr = ln.mnemo;
         if (ln.param.label != null) {
-          instrStr += " " + (this.asmLabels[ln.param.label] || labler.getLabel(ln.param.label));
+          instrStr += " " + (this.asmLabels[ln.param.label] || labeler.getLabel(ln.param.label));
         }
         if (ln.param.val != null) {
           instrStr += " " + ln.param.val;
@@ -285,14 +281,14 @@ ws = {
     };
 
     builder.getWsSrc = function () {
-      var src = '';
-      for (var i in this.programStack) {
-        var inst = this.programStack[i];
-        for (l in inst.labels) {
+      let src = '';
+      for (const i in this.programStack) {
+        const inst = this.programStack[i];
+        for (const l in inst.labels) {
           src += '\n  ' + inst.labels[l];
         }
         src += inst.wsToken;
-        var par = inst.param;
+        const par = inst.param;
         if (par) {
           src += par.token;
         }   
@@ -325,7 +321,7 @@ ws = {
 
   WsCopyNth: function() {
     this.run = function (env) {
-      var actualPos = env.register.SP - Number(this.param.value) - 1;
+      const actualPos = env.register.SP - Number(this.param.value) - 1;
       env.stackPush(env.stack[actualPos]);
       env.register.IP++;
     }
@@ -334,9 +330,9 @@ ws = {
     
   WsSwapTop: function() {
     this.run = function (env) {
-      var last = env.register.SP - 1;
-      var tmp1 = env.stackPop();
-      var tmp2 = env.stackPop();
+      const last = env.register.SP - 1;
+      const tmp1 = env.stackPop();
+      const tmp2 = env.stackPop();
       env.stackPush(tmp1);
       env.stackPush(tmp2);
       env.register.IP++;
@@ -354,7 +350,7 @@ ws = {
 
   WsSlide: function() {
     this.run = function(env) {
-      var top = env.stackPop();
+      const top = env.stackPop();
       env.register.SP -= Number(this.param.value);
       env.stackPush(top);
       env.register.IP++;
@@ -368,8 +364,8 @@ ws = {
     
   WsAddition: function() {
     this.run = function(env) {
-      var b = env.stackPop();
-      var a = env.stackPop();
+      const b = env.stackPop();
+      const a = env.stackPop();
       env.stackPush(a+b);
       env.register.IP++;
     }
@@ -378,8 +374,8 @@ ws = {
 
   WsSubtraction: function() {
     this.run = function(env) {
-      var b = env.stackPop();
-      var a = env.stackPop();
+      const b = env.stackPop();
+      const a = env.stackPop();
       env.stackPush(a-b);
       env.register.IP++;
     };
@@ -388,8 +384,8 @@ ws = {
 
   WsMultiplication: function() {
     this.run = function(env) {
-      var b = env.stackPop();
-      var a = env.stackPop();
+      const b = env.stackPop();
+      const a = env.stackPop();
       env.stackPush(a*b);
       env.register.IP++;
     };
@@ -398,8 +394,8 @@ ws = {
 
   WsIntDivision: function() {
     this.run = function (env) {
-      var b = env.stackPop();
-      var a = env.stackPop();
+      const b = env.stackPop();
+      const a = env.stackPop();
       env.stackPush(a / b);
       env.register.IP++;
     };
@@ -408,10 +404,10 @@ ws = {
 
   WsModulo: function() {
     this.run = function(env) {
-     var b = env.stackPop();
-     var a = env.stackPop();
-     env.stackPush(a % b);
-     env.register.IP++;
+      const b = env.stackPop();
+      const a = env.stackPop();
+      env.stackPush(a % b);
+      env.register.IP++;
     };
     this.getAsm = asmWithNoParam;
   },
@@ -421,8 +417,8 @@ ws = {
    */
   WsHeapStore: function() {
     this.run = function (env) {
-      var value = env.stackPop();
-      var addr = env.stackPop();
+      const value = env.stackPop();
+      const addr = env.stackPop();
       env.heap.store(addr, value);
       env.register.IP++;
     };
@@ -431,7 +427,7 @@ ws = {
 
   WsHeapRetrieve: function() {
     this.run = function(env) {
-      var addr = env.stackPop();
+      const addr = env.stackPop();
       env.stackPush(env.heap.retrieve(addr));
       env.register.IP++;
     };
@@ -457,7 +453,7 @@ ws = {
 
   WsPrintNum: function() {
     this.run = function(env) {
-      var num = env.stackPop();
+      const num = env.stackPop();
       env.print(num);
       env.register.IP++;
     };
@@ -466,7 +462,7 @@ ws = {
 
   WsPrintChar: function() {
     this.run = function(env) {
-      var ch = env.stackPop();
+      const ch = env.stackPop();
       env.print(String.fromCharCode(Number(ch & 0xffffffffn)));
       env.register.IP++;
     };
@@ -502,7 +498,7 @@ ws = {
 
   WsJumpZ: function() {
     this.run = function(env) {
-      var top = env.stackPop();
+      const top = env.stackPop();
       if (top == 0) {
         env.register.IP = this.successI;
       } else {
@@ -520,7 +516,7 @@ ws = {
 
   WsJumpNeg: function() {
     this.run = function (env) {
-      var top = env.stackPop();
+      const top = env.stackPop();
       if (top < 0) {
         env.register.IP = this.successI;
       } else {
@@ -545,8 +541,8 @@ ws = {
 
   WsReadNum: function() {
     this.run = function (env) {
-      var num = env.readNum();
-      var addr = env.stackPop();
+      const num = env.readNum();
+      const addr = env.stackPop();
       env.heap.store(addr, num);
       env.register.IP++;
     }
@@ -555,12 +551,13 @@ ws = {
 
   WsReadChar: function() {
     this.run = function (env) {
-      var ch = env.readChar();
-      var addr = env.stackPop();
+      let val;
+      const ch = env.readChar();
+      const addr = env.stackPop();
       if (typeof ch == "number") {
-        var val = ch;
+        val = ch;
       } else if (typeof ch == "string") {
-        var val = ch.charCodeAt(0);
+        val = ch.charCodeAt(0);
       }
       if (typeof val !== "undefined") {
         env.heap.store(addr, BigInt(val));
@@ -570,7 +567,7 @@ ws = {
     this.getAsm = asmWithNoParam;
   }
 }
-ws.keywords = [
+globalThis.ws.keywords = [
     { ws: '  ',       mnemo: 'push',     constr: ws.WsPush,           param: "NUMBER" },
     { ws: ' \n ',     mnemo: 'dup',      constr: ws.WsDouble,         param: null },
     { ws: ' \t ',     mnemo: 'copy',     constr: ws.WsCopyNth,        param: "NUMBER" },
@@ -597,25 +594,24 @@ ws.keywords = [
     { ws: '\t\n\t\t', mnemo: 'readi',    constr: ws.WsReadNum,        param: null,    optparam: 'NUMBER' }
   ];
 
-  for (var i in ws.keywords) {
-    var keyword = ws.keywords[i];
-    var constr = keyword.constr;
+  for (const i in ws.keywords) {
+    const keyword = ws.keywords[i];
+    const constr = keyword.constr;
     constr.prototype.mnemoCode = keyword.mnemo;
     constr.prototype.paramType = keyword.param;
   }
 
 
-
-  var InstParser = function() {
+  const InstParser = function () {
     this.instFn = null;
     this.cont = [];
-    this.addInstruction = function(keySeqStr, instFn) {
-      var instP = this
-      var keySeq = keySeqStr.split('');
-      for (k in keySeq) {
-        var key = keySeq[k]
+    this.addInstruction = function (keySeqStr, instFn) {
+      let instP = this;
+      const keySeq = keySeqStr.split('');
+      for (const k in keySeq) {
+        const key = keySeq[k];
         if (!(key in instP.cont)) {
-          instP.cont[key] = new InstParser(); 
+          instP.cont[key] = new InstParser();
         }
         instP = instP.cont[key];
       }
@@ -623,12 +619,12 @@ ws.keywords = [
       instP.instFn = instFn;
     }
   };
- 
-  var instParser = new InstParser();
 
-  for (var i in ws.keywords) {
-    var keyword = ws.keywords[i];
-    var constr = keyword.constr;
+  const instParser = new InstParser();
+
+  for (const i in ws.keywords) {
+    const keyword = ws.keywords[i];
+    const constr = keyword.constr;
     instParser.addInstruction(keyword.ws, constr);
   }
 

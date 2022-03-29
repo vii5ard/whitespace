@@ -1,15 +1,15 @@
-var  ws_asm  = (function() {
-  var builtinMacros = function() {
+globalThis.ws_asm  = (function() {
+  const builtinMacros = function () {
     return {
-      "include": { 
+      "include": {
         param: ["STRING"],
         action: function (params, builder) {
-          var param = params[1];
-         
-          var fileName = param.token;
+          const param = params[1];
+
+          let fileName = param.token;
           fileName = fileName.slice(1, fileName.length - 1);
           if (!(fileName in builder.includes)) {
-            var file = ws_fs.getFile(fileName);
+            const file = ws_fs.getFile(fileName);
             if (!file) {
               throw "File not found: '" + fileName + "'.";
             }
@@ -17,9 +17,9 @@ var  ws_asm  = (function() {
             builder.includes[fileName] = ws_fs.openFile(file);
 
             if (builder.includes[fileName]) {
-              var srcArr = new ws_util.StrArr(builder.includes[fileName]);
+              const srcArr = new ws_util.StrArr(builder.includes[fileName]);
               try {
-                var ext = ws_asm.compile(builder.includes[fileName], builder);
+                const ext = ws_asm.compile(builder.includes[fileName], builder);
                 builder.externals.push(ext);
               } catch (err) {
                 if (err.program) {
@@ -37,26 +37,26 @@ var  ws_asm  = (function() {
       "macro": {
         param: ["LABEL"],
         action: function (params, builder) {
-          var metaTypes = { "$number": "NUMBER", "$label": "TOKEN", "$string": "STRING" };
-          var macroLabel = params[1].token.replace(/:$/, "");
-          var closed = false;
-          var macroLabels = {};
-          
-          var newMacro = {
+          const metaTypes = {"$number": "NUMBER", "$label": "TOKEN", "$string": "STRING"};
+          const macroLabel = params[1].token.replace(/:$/, "");
+          let closed = false;
+          const macroLabels = {};
+
+          const newMacro = {
             tokens: [],
             param: [],
             action: function (params, builder) {
               builder.macroCallCounter = (builder.macroCallCounter || 0) + 1;
-              var macroId = builder.macroCallCounter;
+              const macroId = builder.macroCallCounter;
               params[0].called = (params[0].called || 0) + 1
               if (params[0].called > 16) {
                 throw "Circular reference of macros";
-              } 
+              }
 
-              var toks = [];
-              var pp = 1;
-              for (var t in this.tokens) {
-                var token = Object.assign({}, this.tokens[t]);
+              const toks = [];
+              let pp = 1;
+              for (const t in this.tokens) {
+                const token = Object.assign({}, this.tokens[t]);
                 if (token.token in metaTypes) {
                   toks.push(params[pp++]);
                 } else {
@@ -66,30 +66,30 @@ var  ws_asm  = (function() {
                   toks.push(token);
                 }
               }
-             
+
               builder.tokens = toks.concat(builder.tokens);
             }
           };
           while (true) {
-            var token = builder.tokens.shift();
+            const token = builder.tokens.shift();
             if (!token) {
               break;
             }
-            if (token.type == "MACRO") {
-              if (token.token == "$$") {
+            if (token.type === "MACRO") {
+              if (token.token === "$$") {
                 closed = true;
                 break;
               }
-              if (token.token == "include") {
-                // do nothing 
-              } else if (token.token == "$redef") {
+              if (token.token === "include") {
+                // do nothing
+              } else if (token.token === "$redef") {
                 params[1].type = "MACRO";
                 newMacro.tokens.push(params[1]);
                 continue;
               } else if (token.token in metaTypes) {
                 newMacro.param.push(metaTypes[token.token]);
-              } 
-            } 
+              }
+            }
             newMacro.tokens.push(token);
           }
           if (!closed) {
@@ -130,23 +130,23 @@ var  ws_asm  = (function() {
         }
       },
     };
-  }
+  };
 
-  var mnemo = (function () {
-    var mnemoCodes = {};
+  const mnemo = (function () {
+    const mnemoCodes = {};
     // Collect keywords
-    for (var i in ws.keywords) {
-      var keyword = ws.keywords[i];
+    for (const i in ws.keywords) {
+      const keyword = ws.keywords[i];
       mnemoCodes[keyword.mnemo] = keyword;
     }
 
     return mnemoCodes;
-  })(); 
+  })();
 
-  var parseWhitespace = function  (strArr) {
-    var  space =  "";
-    while (strArr.hasNext()  && strArr.peek().match(/[ \t\n\r]/)) {
-      space  += strArr.getNext();
+  const parseWhitespace = function (strArr) {
+    let space = "";
+    while (strArr.hasNext() && strArr.peek().match(/[ \t\n\r]/)) {
+      space += strArr.getNext();
     }
     return {
       type: "SPACE",
@@ -154,19 +154,19 @@ var  ws_asm  = (function() {
     };
   };
 
-  var parseLineComment = function (strArr) {
-    var  comment  = "";
+  const parseLineComment = function (strArr) {
+    let comment = "";
     do {
       comment += strArr.getNext();
-    } while  (strArr.hasNext() && strArr.peek() != '\n');
+    } while (strArr.hasNext() && strArr.peek() != '\n');
     return {
       type: "COMMENT",
       token: comment
     };
   };
 
-  var parseMultiLineComment = function(strArr) {
-    var comment = "";
+  const parseMultiLineComment = function (strArr) {
+    let comment = "";
     do {
       comment += strArr.getNext();
     } while (strArr.hasNext() && !comment.match(/{-[\s\S]*-}/));
@@ -174,117 +174,120 @@ var  ws_asm  = (function() {
       type: "COMMENT",
       token: comment
     };
-  }
+  };
 
-  var parseNumber = function(strArr) {
-    var  numStr = "";
-    while  (strArr.hasNext() && (numStr + strArr.peek()).match(/^[+-]?\d*$/)) {
-      numStr +=  strArr.getNext();
+  const parseNumber = function (strArr) {
+    let numStr = "";
+    while (strArr.hasNext() && (numStr + strArr.peek()).match(/^[+-]?\d*$/)) {
+      numStr += strArr.getNext();
     }
 
     if (strArr.hasNext() && !strArr.peek().match(/\s|\n|;/)) {
       throw "Invalid character in number format";
     }
-    var data = BigInt(numStr);
-    if (data == "NaN") {
+
+    try {
+      const data = BigInt(numStr);
+      return {
+        type: "NUMBER",
+        token: numStr,
+        data: data
+      }
+    } catch (err) {
       throw "Illegal number";
     }
-    return {
-      type: "NUMBER",
-      token: numStr,
-      data: BigInt(numStr)
-    }
+
   };
 
-  var getStringArray = function(str) {
-    var arr = str.split('');
-    var result = [];
-    var escape = false;
-    var chCode = "";
-    for (var i = 1; i < arr.length - 1 ; i++) {
-       var ch = arr[i];
-       if (chCode) {
-         if (ch.match(/[0-9]/)) {
-           chCode += ch;
-           continue;
-         } else {
-           result.push(BigInt(chCode));
-           chCode = "";
-         }
-       }
-       if (escape) {
-          if (ch == 'n') {
-            result.push(BigInt('\n'.charCodeAt(0)));
-          } else if (ch == 't') {
-            result.push(BigInt('\t'.charCodeAt(0)));
-          } else if (ch.match(/[0-9]/)) {
-            chCode += ch;
-          } else {
-            result.push(BigInt(ch.charCodeAt(0)));
-          }
-          escape = false;
-       } else if (ch == '\\') {
-         escape = true;
-       } else {
-         result.push(BigInt(ch.charCodeAt(0)));
-       }
+  const getStringArray = function (str) {
+    const arr = str.split('');
+    const result = [];
+    let escape = false;
+    let chCode = "";
+    for (let i = 1; i < arr.length - 1; i++) {
+      const ch = arr[i];
+      if (chCode) {
+        if (ch.match(/[0-9]/)) {
+          chCode += ch;
+          continue;
+        } else {
+          result.push(BigInt(chCode));
+          chCode = "";
+        }
+      }
+      if (escape) {
+        if (ch === 'n') {
+          result.push(BigInt('\n'.charCodeAt(0)));
+        } else if (ch === 't') {
+          result.push(BigInt('\t'.charCodeAt(0)));
+        } else if (ch.match(/[0-9]/)) {
+          chCode += ch;
+        } else {
+          result.push(BigInt(ch.charCodeAt(0)));
+        }
+        escape = false;
+      } else if (ch === '\\') {
+        escape = true;
+      } else {
+        result.push(BigInt(ch.charCodeAt(0)));
+      }
     }
     if (chCode) {
       result.push(BigInt(chCode));
     }
-    if (arr[0] == '"') {
-       result.push(0n);
+    if (arr[0] === '"') {
+      result.push(0n);
     }
     return result;
-  }
+  };
 
-  var parseString = function(strArr) {
-     var line = strArr.line;
-     var col = strArr.col;
+  const parseString = function (strArr) {
+    const line = strArr.line;
+    const col = strArr.col;
 
-     var strEnd = strArr.peek();
-     var str = strArr.getNext();
-     while (strArr.hasNext() && (escape || strArr.peek() != strEnd)) {
-       if (strArr.peek() == '\\') {
-         escape = true;
-       } else {
-         escape = false;
-       }
-       if (strArr.peek() == '\n' && !escape) {
-         throw "Unexpected end of line";
-       }
-       str += strArr.getNext();
-     }
-     if (!strArr.hasNext || strArr.peek() != strEnd) {
-        throw "Unterminated string";
-     } else {
-       str += strArr.getNext();
-     }
-     return {
-       type: "STRING",
-       token: str
-     };
-  }
+    const strEnd = strArr.peek();
+    let str = strArr.getNext();
+    while (strArr.hasNext() && (escape || strArr.peek() != strEnd)) {
+      if (strArr.peek() == '\\') {
+        escape = true;
+      } else {
+        escape = false;
+      }
+      if (strArr.peek() == '\n' && !escape) {
+        throw "Unexpected end of line";
+      }
+      str += strArr.getNext();
+    }
+    if (!strArr.hasNext || strArr.peek() != strEnd) {
+      throw "Unterminated string";
+    } else {
+      str += strArr.getNext();
+    }
+    return {
+      type: "STRING",
+      token: str
+    };
+  };
 
-  var parseLabel = function(strArr, builder) {
-    var  label = "";
-    while  (strArr.hasNext() && strArr.peek().match(/[0-9a-zA-Z_$.]/)) {
-      label +=  strArr.getNext();
+  const parseLabel = function (strArr, builder) {
+    let label = "";
+    while (strArr.hasNext() && strArr.peek().match(/[0-9a-zA-Z_$.]/)) {
+      label += strArr.getNext();
     }
 
-    var type = "TOKEN";
+    let type = "TOKEN";
     if (strArr.hasNext()) {
-      var next = strArr.peek();
-      if(!next.match(/\s|\n|:|;/)) {
+      const next = strArr.peek();
+      if (!next.match(/\s|\n|:|;/)) {
         throw "Illegal character";
-      } else if (next == ':') {
+      } else if (next === ':') {
         strArr.getNext();
         type = "LABEL";
       }
     }
 
-    var op = null; 
-    if (type == "TOKEN") {
+    let op = null;
+    if (type === "TOKEN") {
       if (label in mnemo) {
         type = "KEYWORD";
         op = mnemo[label];
@@ -301,25 +304,25 @@ var  ws_asm  = (function() {
 
   };
 
-  var getTokens = function(strArr, builder) {
-    var tokens = [];
+  const getTokens = function (strArr, builder) {
+    const tokens = [];
     while (strArr.hasNext()) {
       if (parseWhitespace(strArr).token) {
         continue;
       }
-      var meta = {
+      const meta = {
         line: strArr.line,
         col: strArr.col
       };
 
-      var next = strArr.peek();
-      var token = null;
+      const next = strArr.peek();
+      let token = null;
       try {
-        if (next == ';' || next == '#' || (next == '-' && strArr.peek(1) == '-')) {
+        if (next === ';' || next === '#' || (next === '-' && strArr.peek(1) === '-')) {
           token = parseLineComment(strArr);
-        } else if (next == '{' && strArr.peek(1) == '-') {
+        } else if (next === '{' && strArr.peek(1) === '-') {
           token = parseMultiLineComment(strArr);
-        } else if (next.match(/\"|\'/)) {
+        } else if (next.match(/["']/)) {
           token = parseString(strArr);
         } else if (next.match(/[-+\d]/)) {
           token = parseNumber(strArr);
@@ -328,55 +331,55 @@ var  ws_asm  = (function() {
         }
       } catch (err) {
         if (typeof err == "string") {
-           throw {
-              tokens: tokens,
-              meta: meta,
-              message: err + " at line " + meta.line,
-              line: meta.line
-           }
+          throw {
+            tokens: tokens,
+            meta: meta,
+            message: err + " at line " + meta.line,
+            line: meta.line
+          }
         } else {
-           throw err;
+          throw err;
         }
       }
 
       token.meta = meta;
 
-      if (token.type == "STRING") {
+      if (token.type === "STRING") {
         token.data = getStringArray(token.token);
       }
-      if (token.type != "COMMENT") {
+      if (token.type !== "COMMENT") {
         tokens.push(token);
       }
     }
     return tokens;
-  }  
+  };
 
-  var pushInstruction = function(builder, constr, paramNumber) {
-    var instruction = new constr();
+  const pushInstruction = function (builder, constr, paramNumber) {
+    const instruction = new constr();
     if (typeof paramNumber != "undefined" && paramNumber != null) {
-      instruction.param = { token: ws_util.getWsSignedNumber(paramNumber), value: paramNumber };
+      instruction.param = {token: ws_util.getWsSignedNumber(paramNumber), value: paramNumber};
     }
     builder.pushInstruction(instruction);
-  }
+  };
 
-  var postProcess = function(builder) {
+  const postProcess = function (builder) {
     while (builder.externals.length > 0) {
-      var ext = builder.externals.shift();
-      for (var i in ext.programStack) {
-        var inst = ext.programStack[i];
+      const ext = builder.externals.shift();
+      for (const i in ext.programStack) {
+        const inst = ext.programStack[i];
         builder.pushInstruction(inst);
-      } 
+      }
     }
     return builder.postProcess();
   };
 
-  var checkMacroParams = function (token, builder) {
-    var macro = builder.macros[token];
+  const checkMacroParams = function (token, builder) {
+    const macro = builder.macros[token];
     if (typeof macro.action == "function") {
-      var n = 0;
-      for (var p in macro.param) {
-        var paramType = macro.param[p];
-        var parToken = builder.tokens[n++];
+      let n = 0;
+      for (const p in macro.param) {
+        const paramType = macro.param[p];
+        const parToken = builder.tokens[n++];
         if (!parToken || parToken.type != paramType) {
           return false;
         }
@@ -387,8 +390,9 @@ var  ws_asm  = (function() {
 
   return {
     compile: function (str, master) {
-      var strArr = new ws_util.StrArr(str);
-      var builder = ws.programBuilder(str, master);
+      const strArr = new ws_util.StrArr(str);
+      const builder = ws.programBuilder(str, master);
+      let tokenError;
       builder.macros = builder.macros || builtinMacros();
       builder.includes = builder.includes || {};
       builder.externals = builder.externals || [];
@@ -397,7 +401,7 @@ var  ws_asm  = (function() {
       } catch (err) {
         if (err.tokens) {
           builder.tokens = err.tokens;
-          var tokenError = err;
+          tokenError = err;
         } else {
           throw err;
         }
@@ -406,16 +410,16 @@ var  ws_asm  = (function() {
         return ws_util.getWsUnsignedNumber(counter);
       });
 
-      var labeler = builder.asmLabeler;
+      const labeler = builder.asmLabeler;
 
-      var parentLabel = "";
+      let parentLabel = "";
 
       while (builder.tokens.length > 0) {
-         var token = builder.tokens.shift();
-         var meta = token.meta;
-         try {
-           if (token.type == "LABEL") {
-             var label = token.token;
+        const token = builder.tokens.shift();
+        const meta = token.meta;
+        try {
+           if (token.type === "LABEL") {
+             let label = token.token;
              if (ws_util.isLocalLabel(label)) {
                label = parentLabel + label;
              } else {
@@ -429,7 +433,7 @@ var  ws_asm  = (function() {
              builder.labels[labeler.getLabel(label)] = builder.programStack.length;
              builder.asmLabels[labeler.getLabel(label)] = label;
            } else if (token.op && token.op.constr == ws.WsLabel) {
-             var param = builder.tokens.shift();
+             const param = builder.tokens.shift();
              if (!param) {
                throw "Missing label";
              }
@@ -437,7 +441,7 @@ var  ws_asm  = (function() {
                throw "Invalid label";
              }
 
-             var label = param.token;
+             const label = param.token;
              if (builder.labels[labeler.getLabel(label)]) {
                throw "Multiple definitions of label " + label;
              }
@@ -445,14 +449,14 @@ var  ws_asm  = (function() {
              builder.labels[labeler.getLabel(label)] = builder.programStack.length;
              builder.asmLabels[labeler.getLabel(label)] = label;
            } else if (token.token in builder.macros && checkMacroParams(token.token, builder)) {
-              token.type = "MACRO"; // can be label in some cases
-              var macro = builder.macros[token.token];
-              if (typeof macro.action == "function") {
-                var params = [token];
-                for (var p in macro.param) {
-                  var paramType = macro.param[p];
-                  var parToken = builder.tokens.shift();
-                  if (!parToken || parToken.type != paramType) {
+             token.type = "MACRO"; // can be label in some cases
+             const macro = builder.macros[token.token];
+             if (typeof macro.action == "function") {
+               const params = [token];
+               for (const p in macro.param) {
+                 const paramType = macro.param[p];
+                 const parToken = builder.tokens.shift();
+                 if (!parToken || parToken.type != paramType) {
                     throw "Expected " + paramType;
                   } else {
                     params.push(parToken);
@@ -463,51 +467,50 @@ var  ws_asm  = (function() {
                 throw "Unimplemented macro type " + typeof macro.action;
               }
  
-           } else if (token.type == "KEYWORD") {
-              var op = token.op;
-              var instruction = new op.constr();
+           } else if (token.type === "KEYWORD") {
+             const op = token.op;
+             let instruction = new op.constr();
 
-              if (op.optparam === 'NUMBER' && builder.tokens[0] && builder.tokens[0].type == op.optparam) {
+             if (op.optparam === 'NUMBER' && builder.tokens[0] && builder.tokens[0].type == op.optparam) {
                 pushInstruction(builder, ws.WsPush ,builder.tokens.shift().data);
-              } 
+             }
 
-              if (op.param) {
-                var param = builder.tokens.shift();
-                if (!param) {
+             if (op.param) {
+               const param = builder.tokens.shift();
+               if (!param) {
                   throw "Parameter expected";
-                }
-                if (op.param == "NUMBER") {
-                  if (param.type == "NUMBER") {
+               }
+               if (op.param === "NUMBER") {
+                  if (param.type === "NUMBER") {
                     pushInstruction(builder, op.constr, param.data);
                   } else if (instruction instanceof ws.WsPush && param.type == "STRING") {
-                    for (var i = param.data.length -1 ; i >= 0; i--) {
+                    for (let i = param.data.length -1 ; i >= 0; i--) {
                       pushInstruction(builder, op.constr, param.data[i]);
                     }
                   } else {
                     throw "Unexpected token " + param.token;
                   }
-                } else if (op.param == "LABEL") {
-                  var instruction = new op.constr();
-                  var label = param.token;
-                  if (ws_util.isLocalLabel(label)) label = parentLabel + label;
+               } else if (op.param === "LABEL") {
+                 instruction = new op.constr();
+                 let label = param.token;
+                 if (ws_util.isLocalLabel(label)) label = parentLabel + label;
 
-                  instruction.param = {
-                    token: labeler.getLabel(label), value: null, label: label
-                  };
-                  builder.pushInstruction(instruction); 
-                } else {
-                  throw "Unsupported parameter type " + op.param + " (should never happen)."
-                }
-              } else {
+                 instruction.param = {
+                   token: labeler.getLabel(label), value: null, label: label
+                 };
+                 builder.pushInstruction(instruction);
+               } else {
+                 throw "Unsupported parameter type " + op.param + " (should never happen)."
+               }
+             } else {
                 pushInstruction(builder, op.constr);
-              }
-            } else if (token.token in builder.macros) {
+             }
+           } else if (token.token in builder.macros) {
            } else {
               throw "Unexpected token " + token.token;
            }
-
          } catch (err) {
-           if (typeof err == "string") {
+           if (typeof err === "string") {
              throw {
                program: null,
                line: meta.line,
@@ -528,7 +531,7 @@ var  ws_asm  = (function() {
       }
 
       try {
-        var program = postProcess(builder);
+         return postProcess(builder);
       } catch (err) {
         if (typeof err === "string") {
           throw {
@@ -538,8 +541,6 @@ var  ws_asm  = (function() {
           throw err;
         }
       }
-
-      return program;
     },
   };
 
