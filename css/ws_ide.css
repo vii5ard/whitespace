@@ -20,6 +20,10 @@ div[title$=".bf"] div.ico {
     background-position: -42px 0;
 }
 
+div[title$=".mal"] div.ico {
+  background-position: 0 -14px;
+}
+
 
 body, input, textarea {
   font-size: 12px;

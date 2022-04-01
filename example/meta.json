@@ -145,6 +145,35 @@
     "file": "example/rot13.bf",
     "origin": "https://en.wikipedia.org/wiki/Brainfuck",
     "author": "?"
- }
-
+ },
+  "vm/mal.wsa": {
+    "file": "example/vm/mal.wsa",
+    "origin": "example/vm/mal.wsa",
+    "author": "Vii5ard"
+  },
+  "vm/mal.ws": {
+    "file": "example/vm/mal.ws",
+    "origin": "example/vm/mal.ws",
+    "author": "Vii5ard"
+  },
+  "hello.mal": {
+    "file": "example/hello.mal",
+    "origin": "https://en.wikipedia.org/wiki/Malbolge",
+    "author": "?"
+  },
+  "hello2.mal": {
+    "file": "example/hello2.mal",
+    "origin": "https://github.com/nstarke/malbolge-examples",
+    "author": "?"
+  },
+  "cat.mal": {
+    "file": "example/cat.mal",
+    "origin": "https://esolangs.org/wiki/Malbolge",
+    "author": "?"
+  },
+  "99bottles.mal": {
+    "file": "example/99bottles.mal",
+    "origin": "http://99-bottles-of-beer.net/language-malbolge-995.html",
+    "author": "Hisashi Iizawa"
+  }
 }}

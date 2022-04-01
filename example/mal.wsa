@@ -1,0 +1,453 @@
+include "lib/std.wsa"
+include "malbolge/crazy.wsa"
+
+call init_cypher_table
+
+call read_program
+; Save the data area address
+dup
+push 60003
+swap
+store
+
+call mem_init
+drop
+call interpret
+
+end
+
+interpret:
+	call getInstruction
+	call executeInstruction
+	call encryptInstruction
+	call incC
+	call incD
+
+	jmp interpret
+
+encryptInstruction:
+	call getEncryptable
+	dup
+	call mem_retrieve
+	mod 94
+	add 70000
+	retrieve
+
+	call mem_store
+
+	ret
+
+executeInstruction:
+	; Store the address to be encrypted afterwards
+	call getC
+	call setEncryptable
+
+	dup
+	sub 4
+	jz .inst4
+
+	dup
+	sub 5
+	jz .inst5
+
+	dup
+	sub 23
+	jz .inst23
+
+	dup
+	sub 39
+	jz .inst39
+
+	dup
+	sub 40
+	jz .inst40
+
+	dup
+	sub 62
+	jz .inst62
+
+	dup
+	sub 68
+	jz .inst68
+
+	dup
+	sub 81
+	jz .inst81
+
+	jmp .endRunInstruction
+
+.inst4:							; C = [D]
+	call getDerefD
+	call setC
+
+	; Encrypt the innocent instruction just prior to the one it jumped to
+	call getC
+	sub 1
+	call setEncryptable
+
+	jmp .endRunInstruction
+
+.inst5:							; print (A%256)
+	call getA
+	mod 256
+	printc
+	jmp .endRunInstruction
+
+.inst23:						; A = INPUT
+	push 60000
+	readc
+	jmp .endRunInstruction
+
+.inst39:						; A = [D] = ROTATE_RIGHT([D])
+	call getDerefD
+	call rotate_right
+	dup
+	call setDerefD
+	call setA
+
+	jmp .endRunInstruction
+
+.inst40:						; D = [D]
+	call getDerefD
+	call setD
+	jmp .endRunInstruction
+
+.inst62:						; A = [D] = CRAZY_OP(A, [D])
+
+	call getDerefD
+	call getA
+	call malbolge_crazy
+	dup
+	call setDerefD
+	call setA
+	jmp .endRunInstruction
+
+.inst81:					; STOP
+	jmp .stop
+
+.inst68:					; NOP
+.endRunInstruction:
+	; NOP
+	drop
+	ret
+
+.stop:
+	nl
+	end
+
+getInstruction:
+	call getC
+	call getDerefC
+	add
+	mod 94
+	ret
+
+getEncryptable:
+	push 60004
+	retrieve
+	ret
+setEncryptable:
+	push 60004
+	swap
+	store
+	ret
+
+getA:
+	push 60000
+	retrieve
+	ret
+
+setA:
+	push 60000
+	swap
+	store
+	ret
+
+getC:
+	push 60001
+	retrieve
+	ret
+setC:
+	push 60001
+	swap
+	store
+	ret
+getDerefC:
+	call getC
+	call mem_retrieve
+	ret
+
+setDerefC:
+	call getC
+	swap
+	call mem_store
+	ret
+incC:
+	call getC
+	add 1
+	mod 59049
+	call setC
+	ret
+
+getD:
+	push 60002
+	retrieve
+	ret
+setD:
+	push 60002
+	swap
+	store
+	ret
+getDerefD:
+	call getD
+	call mem_retrieve
+	ret
+
+setDerefD:
+	call getD
+	swap
+	call mem_store
+	ret
+incD:
+	call getD
+	add 1
+	mod 59049
+	call setD
+	ret
+
+read_program:
+	push 0	; input address
+
+	; Read input loop
+	.loop:
+		; Make sure the program fits into memory
+		dup
+		push 59048
+		swap
+		sub
+		jn program_too_large
+
+		; Write 0 to the reading pointer...
+		dup
+		push 0
+		store
+
+		; ...replace it with the input ...
+		dup
+		readc
+
+		; ...reread the value ...
+		dup
+		retrieve
+		dup
+
+		; ... if still 0 then this means EOF
+		jz .done
+
+
+		; Ignore space
+		dup
+
+		push ' '
+		sub
+		jz .loop
+
+		; Ignore tab
+		dup
+		push '\t'
+		sub
+		jz .loop
+
+		; Ignore newline
+		dup
+		push '\n'
+		sub
+		jz .loop
+
+		copy 1
+		swap
+		call mem_store
+
+		; Increment destination address
+		add 1
+
+		jmp .loop
+	.done:
+		drop
+		ret
+
+mem_init:
+	push 12
+.loopActual:
+	dup
+	jz .doneActual
+
+	copy 1					; Copy the address
+	dup
+	sub 1
+	call mem_retrieve
+
+	copy 1
+	sub 2
+	call mem_retrieve
+	call malbolge_crazy
+
+	call mem_store
+
+	sub 1
+	swap
+	add 1
+	swap
+
+	jmp .loopActual
+.doneActual:
+	drop
+	ret
+
+mem_store:
+	add 1
+	store
+
+	ret
+
+mem_retrieve:
+	dup
+	retrieve
+	dup
+	jz .uninitialized
+	sub 1
+	slide 1
+	ret
+
+.uninitialized:
+	drop
+	push 60003
+	retrieve
+	sub
+	mod 12
+	push 60003
+	retrieve
+	add
+	retrieve
+	sub 1
+	ret
+
+
+
+program_too_large:
+	prints "Program too lagre"
+	end
+
+init_cypher_table:
+	push 98
+	push 115
+	push 106
+	push 124
+	push 56
+	push 47
+	push 48
+	push 95
+	push 73
+	push 61
+	push 94
+	push 118
+	push 54
+	push 66
+	push 67
+	push 49
+	push 65
+	push 79
+	push 104
+	push 70
+	push 50
+	push 55
+	push 83
+	push 74
+	push 112
+	push 33
+	push 85
+	push 62
+	push 59
+	push 81
+	push 43
+	push 76
+	push 100
+	push 51
+	push 92
+	push 37
+	push 91
+	push 44
+	push 110
+	push 90
+	push 45
+	push 72
+	push 41
+	push 80
+	push 87
+	push 123
+	push 52
+	push 101
+	push 119
+	push 40
+	push 36
+	push 114
+	push 102
+	push 121
+	push 116
+	push 113
+	push 103
+	push 38
+	push 93
+	push 122
+	push 53
+	push 64
+	push 105
+	push 34
+	push 71
+	push 63
+	push 35
+	push 58
+	push 78
+	push 107
+	push 111
+	push 69
+	push 82
+	push 125
+	push 108
+	push 68
+	push 120
+	push 126
+	push 88
+	push 39
+	push 75
+	push 77
+	push 42
+	push 89
+	push 117
+	push 96
+	push 99
+	push 97
+	push 86
+	push 84
+	push 46
+	push 60
+	push 109
+	push 57
+
+	push 70000
+.loop:
+	dup
+	push 70093
+	swap
+	sub
+	jn .end
+
+	dup
+	copy 2
+	store
+	slide 1
+	add 1
+	jmp .loop
+.end:
+	drop
+	ret

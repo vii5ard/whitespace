@@ -432,12 +432,12 @@ globalThis.ws_asm  = (function() {
 
              builder.labels[labeler.getLabel(label)] = builder.programStack.length;
              builder.asmLabels[labeler.getLabel(label)] = label;
-           } else if (token.op && token.op.constr == ws.WsLabel) {
+           } else if (token.op && token.op.constr === ws.WsLabel) {
              const param = builder.tokens.shift();
              if (!param) {
                throw "Missing label";
              }
-             if (param.type != "TOKEN") {
+             if (param.type !== "TOKEN") {
                throw "Invalid label";
              }
 
