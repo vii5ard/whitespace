@@ -95,7 +95,7 @@ You really need to enable javascript or sth!
             <div class="tabLabels">
               <div id="tabLabelPrint" class="btn">
                 <a href="#printTab"
-                     onclick="return ws_ide.switchTab(this);">Output</a>
+                     onclick="return ws_ide.switchTab(this);">Input/Output</a>
               </div>
               <div id="tabLabelConsole" class="btn">
                 <a href="#consoleTab"
@@ -104,6 +104,10 @@ You really need to enable javascript or sth!
               <div class="btn">
                 <a href="#memoryTab"
                      onclick="return ws_ide.switchTab(this);">Memory</a>
+              </div>
+              <div class="btn">
+                  <a href="#aboutTab"
+                     onclick="return ws_ide.switchTab(this);">About</a>
               </div>
             </div>
             <div class="allTabs">
@@ -152,6 +156,13 @@ You really need to enable javascript or sth!
                   </div>
                 </div>
               </div>
+              <div id="aboutTab"
+                     class="tabContent">
+                    <div class="buttonBar">
+                    </div>
+                    <div id="aboutArea"
+                         class="outputArea"></div>
+                </div>
             </div>
           </div>
         </div>

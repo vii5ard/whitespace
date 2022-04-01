@@ -22,7 +22,7 @@ globalThis.ws_fs = function(metaFile) {
       console.log("Unable to parse JSON: " + err);
     }
     for (const fileName in json.files) {
-      if (isValidFileName(fileName) && !(fileName in files)) {
+      if (isValidFileName(fileName)/* && !(fileName in files)*/) {
         const file = json.files[fileName];
         file.extFile = extFile;
         file.name = fileName;

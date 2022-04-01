@@ -504,6 +504,8 @@ globalThis.ws_ide = (function () {
         this.setHighlight(false);
       }
 
+      $('#aboutArea').html(file.about || '');
+
       ws_ide.openFile = file;
       ws_ide.loadSource(ws_fs.openFile(file));
       updateEditor();

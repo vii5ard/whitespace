@@ -1,179 +1,122 @@
 {"files": {
   "hworld.ws": {
     "file":"example/hworld.ws",
-    "author": "?",
-    "origin": "http://compsoc.dur.ac.uk/whitespace/examples.php",
-    "lang": "WS"
-  },
-  "nerd.ws": {
-    "name":"Hello Nerd",
-    "file":"example/nerd.ws",
-    "author":"Vii5ard",
-    "origin":"example/nerd.ws",
-    "lang": "WS"
+    "about": "This program is the original example hello world program downloaded from <a href=\"http://compsoc.dur.ac.uk/whitespace/examples.php\">http://compsoc.dur.ac.uk/whitespace/examples.php</a>"
   },
   "nerd.wsa": {
     "file":"example/nerd.wsa",
-    "author":"Vii5ard",
-    "origin":"example/nerd.wsa",
-    "lang": "WSA"
+    "about": "A simple example how to use the built-in Whitespace assembly language."
   },
   "hmacro.wsa": {
     "file":"example/hmacro.wsa",
-    "author":"Vii5ard",
-    "origin":"example/hmacro.wsa",
-    "lang":"WSA"
+    "about": "An example how to use the standard library in the build-in Whitespace assembly language."
   },
   "name.ws": {
     "file":"example/name.ws",
-    "author": "?",
-    "origin": "http://compsoc.dur.ac.uk/whitespace/name.ws",
-    "lang": "WS"
+    "about": "This program will ask the users name and will display a personalized greeting. Downloaded from <a href=\"http://compsoc.dur.ac.uk/whitespace/name.ws\">http://compsoc.dur.ac.uk/whitespace/name.ws</a>."
   },
   "count.ws": {
     "file":"example/count.ws",
-    "author": "?",
-    "origin": "https://github.com/hostilefork/whitespacers/tree/master/examples/count.ws",
-    "lang": "WS"
+    "about": "Will count to 10. Downloaded from <a href=\"https://github.com/hostilefork/whitespacers/tree/master/examples/count.ws\">https://github.com/hostilefork/whitespacers/tree/master/examples/count.ws</a>"
   },
   "quine.ws": {
     "file":"example/quine.ws",
-    "author": "Benjamin Lerman",
-    "origin": "http://compsoc.dur.ac.uk/whitespace/contrib.php",
-    "lang": "WS"
+    "about": "This quine is written by Benjamin Lerman and was downloaded from <a href=\"http://compsoc.dur.ac.uk/whitespace/contrib.php\">http://compsoc.dur.ac.uk/whitespace/contrib.php</a>."
   },
   "fibonacci.ws": {
     "name":"Fibonacci",
     "file":"example/fibonacci.ws",
-    "author": "Chris Morris",
-    "origin":"https://github.com/hostilefork/whitespacers/blob/master/examples/fibonacci.ws",
-    "lang": "WS"
+    "about": "This Fibonacci calculator is written by Chris Morris and it was downloaded from <a href=\"https://github.com/hostilefork/whitespacers/blob/master/examples/fibonacci.ws\">https://github.com/hostilefork/whitespacers/blob/master/examples/fibonacci.ws</a>"
   },
   "calc.ws": {
     "file":"example/calc.ws",
-    "author": "?",
-    "origin":"https://github.com/hostilefork/whitespacers/blob/master/examples/calc.ws",
-    "lang": "WS"
+    "about": "This program was downloaded from <a href=\"https://github.com/hostilefork/whitespacers/blob/master/examples/calc.ws\">https://github.com/hostilefork/whitespacers/blob/master/examples/calc.ws</a>."
   },
   "hanoi.ws": {
     "file":"example/hanoi.ws",
-    "author": "?",
-    "origin": "https://github.com/hostilefork/whitespacers/blob/master/examples/hanoi.ws",
-    "lang": "WS"
+    "about": "This program was downloaded from <a href=\"https://github.com/hostilefork/whitespacers/blob/master/examples/hanoi.ws\">https://github.com/hostilefork/whitespacers/blob/master/examples/hanoi.ws</a>."
   },
   "quine-2.ws": {
     "file":"example/quine-2.ws",
-    "author": "Benjamin Lerman",
-    "origin":"http://compsoc.dur.ac.uk/whitespace/quine-2.ws",
-    "lang": "WS"
+    "about": "This quine is written by Benjamin Lerman and was downloaded from <a href=\"http://compsoc.dur.ac.uk/whitespace/quine-2.ws\">http://compsoc.dur.ac.uk/whitespace/quine-2.ws</a>."
   },
   "bf.wsa": {
     "file": "example/bf.wsa",
-    "origin": "example/bf.wsa",
-    "autohor": "Vii5ard",
-    "lang": "WSA"
-  },
-  "bf.ws": {
-    "file": "example/bf.ws",
-    "origin": "example/bf.ws",
-    "author": "Vii5ard",
-    "lang": "WS"
+    "about": "A Brainfuck interpreter written in Whitespace."
   },
   "collatz.wsa": {
     "file": "example/collatz.wsa",
-    "origin": "example/collatz.wsa",
-    "author": "Vii5ard",
-    "lang": "WSA"
+    "about": "Will output a Collaz sequence starting from a user provided number."
   },
   "lib/math.wsa": {
     "file": "example/lib/math.wsa",
-    "origin": "example/lib/math.wsa",
-    "author": "Vii5ard",
-    "lang": "WSA"
+    "about": "Whitespace assembly library containing methods such as: pow, abs, max, min, sign, gcd, lcm, sqrt, neg, shr, shl."
   },
   "lib/string.wsa": {
     "file": "example/lib/string.wsa",
-    "origin": "example/lib/string.wsa",
-    "author": "Vii5ard",
-    "lang": "WSA"
+    "about": "Whitespace assembly library containing string manipulation functions: <br> * prints - print the string<br> * printMem - prints out a memory area with given length<br> * nl - print a newline character<br> * storeStr - store string at a given address<br> * printHeap - print the contents of the heap<br> * printStack - print the contents of the stack. "
   },
   "lib/alias.wsa": {
     "file": "example/lib/alias.wsa",
-    "origin": "example/lib/alias.wsa",
-    "author": "Vii5ard",
-    "lang": "WSA"
+    "about": "Contains aliases for compatibility with other Whitespace assembly languages."
   },
   "lib/rot13.wsa": {
     "file": "example/lib/rot13.wsa",
-    "origin": "example/lib/rot13.wsa",
-    "author": "Vii5ard",
-    "lang": "WSA"
+    "about": "Contains the rot13 function."
   },
   "lib/std.wsa": {
     "file": "example/lib/std.wsa",
-    "origin": "example/lib/std.wsa",
-    "author": "Vii5ard",
-    "lang": "WSA"
+    "about": "The standard library for the built-in Whitespace assembly. This file includes the whole library - do not worry, the optimizer will remove all unused code."
   },
   "vm/bf.ws": {
     "file": "example/vm/bf.ws",
-    "origin": "example/vm/bf.ws",
-    "author": "Vii5ard",
-    "lang": "WS"
+    "about": "A Brainfuck interpreter written compiled into Whitespace. To run a Brainfuck program open one and hit the run button."
+
   },
   "vm/bf.wsa": {
     "file": "example/vm/bf.wsa",
-    "origin": "example/vm/bf.wsa",
-    "author": "Vii5ard"
+    "about": "A Brainfuck interpreter written in Whitespace assembly. To run a Brainfuck program open one and hit the run button."
   },
   "wc/bf2wsa.wsa": {
     "file": "example/wc/bf2wsa.wsa",
-    "origin": "example/wc/bf2wsa.wsa",
-    "author": "Vii5ard"
+    "about": "Brainfuck to Whitespace assembly compiler written in Whitespace assembly. Just open a Brainfuck file and hit the compile button - the assembly is turned into Whitespace automatically."
+
   },
   "wc/bf2wsa.ws": {
     "file": "example/wc/bf2wsa.ws",
-    "origin": "example/wc/bf2wsa.ws",
-    "author": "Vii5ard"
+    "about": "Brainfuck to Whitespace assembly compiler compiled into Whitespace. Just open a Brainfuck file and hit the compile button - the assembly is turned into Whitespace automatically."
   },
   "hello.bf": {
     "file": "example/hello.bf",
-    "origin": "https://en.wikipedia.org/wiki/Brainfuck",
-    "author": "?"
+    "about": "Hello world Brainfuck implementation downloaded from <a href=\"https://en.wikipedia.org/wiki/Brainfuck\">https://en.wikipedia.org/wiki/Brainfuck</a>"
   },
   "rot13.bf": {
     "file": "example/rot13.bf",
-    "origin": "https://en.wikipedia.org/wiki/Brainfuck",
-    "author": "?"
+    "about": "Rot13 Brainfuck implementation downloaded from <a href=\"https://en.wikipedia.org/wiki/Brainfuck\">https://en.wikipedia.org/wiki/Brainfuck</a>"
  },
   "vm/mal.wsa": {
     "file": "example/vm/mal.wsa",
-    "origin": "example/vm/mal.wsa",
-    "author": "Vii5ard"
+    "about": "A Malbolge interpreter written in Whitespace assembly. Inorder to run a Malbolge program open one (with .mal extension) in the editor and hit the run button. By default the compiled version is preferred by the IDE - if you want to to run specifically the assembly version then simply delete the compiled file."
   },
   "vm/mal.ws": {
     "file": "example/vm/mal.ws",
-    "origin": "example/vm/mal.ws",
-    "author": "Vii5ard"
+    "about": "A compiled interpreter written in Malbolge. Inorder to run a Malbolge program open one (with .mal extension) in the editor and hit the run button."
   },
   "hello.mal": {
     "file": "example/hello.mal",
-    "origin": "https://en.wikipedia.org/wiki/Malbolge",
-    "author": "?"
+    "about": "A hello world implementation in Malbolge. Downloaded from <a href=\"https://github.com/nstarke/malbolge-examples\">https://github.com/nstarke/malbolge-examples</a>"
+
   },
   "hello2.mal": {
     "file": "example/hello2.mal",
-    "origin": "https://github.com/nstarke/malbolge-examples",
-    "author": "?"
+    "about": "A shorter version of hello world implementation in Malbolge. Downloaded from <a href=\"https://github.com/nstarke/malbolge-examples\">https://github.com/nstarke/malbolge-examples</a>"
   },
   "cat.mal": {
     "file": "example/cat.mal",
-    "origin": "https://esolangs.org/wiki/Malbolge",
-    "author": "?"
+    "about": "A cat program in Malbolge (this one does not stop on EOF; one which does is several orders of magnitude more complex)<br>Downloaded from <a href=\"https://esolangs.org/wiki/Malbolge\">https://esolangs.org/wiki/Malbolge</a>."
   },
   "99bottles.mal": {
     "file": "example/99bottles.mal",
-    "origin": "http://99-bottles-of-beer.net/language-malbolge-995.html",
-    "author": "Hisashi Iizawa"
+    "about": "This Malbolge program is written by Hisashi Iizawa and was downloaded from <a href=\"http://99-bottles-of-beer.net/language-malbolge-995.html\">http://99-bottles-of-beer.net/language-malbolge-995.html</a>.<br><br> Running this huge Malbolge program using the interpreter written in Whitespace will take a long time, but eventually it will output the lyrics to the song 99 Bottles of Beer. This program was of great help in testing the interpreter - thank you!."
   }
 }}
