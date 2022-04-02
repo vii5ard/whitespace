@@ -241,6 +241,8 @@ globalThis.ws_ide = (function () {
   };
 
   const updateMemoryTab = function (env) {
+    if (!$('#memoryArea').is(':visible') || !env) return;
+
     $('#stackSpan').html('[' + env.stack.slice(0,env.register.SP).join(', ') + ']');
     const heapArr = [];
     const heap = env.heap.toArray();
@@ -252,23 +254,18 @@ globalThis.ws_ide = (function () {
  
   const afterInstructionRun = function(env) {
     env.runCount++;
-    if (env.runCount > 100) { // TODO - find a better solution
+    const now = Date.now();
+    if (!env.lastSleep || (now - env.lastSleep > 300)) {
+      env.lastSleep = now;
       throw "SLEEP";
     }
     if (env.debug) {
       updateMemoryTab(env);
     }
   };
-
-  const stupidHash = function (str) {
-    return btoa(str).replace(/[^a-zA-Z0-9]/g, '_'); 
-  };
-
   const updateFileList = function () {
     const fileList = $('#fileList');
     fileList.find('.fileEntry').remove();
-
-
     const sortedFileNames = ws_fs.getFileNames();
 
     let id = 0;
@@ -639,6 +636,8 @@ globalThis.ws_ide = (function () {
       tab.show();
 
       resizeUserInput(); // FIXME: Actually only needed when user input displayed
+      updateMemoryTab(ws_ide.env);
+
 
       return false;
     },
