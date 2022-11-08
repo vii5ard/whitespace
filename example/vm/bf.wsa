@@ -110,6 +110,7 @@
     retrieve
     push 1
     add
+    mod 256
     store
     jmp .runLoopContinue
 
@@ -132,6 +133,8 @@
     retrieve
     push 1
     sub
+    add 256
+    mod 256
     store
     jmp .runLoopContinue
 
@@ -363,3 +366,4 @@
     jmp .runLoop	; continue with run
 .endProgram:	
     end
+
