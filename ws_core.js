@@ -342,7 +342,7 @@ globalThis.ws = {
 
   WsDropTop: function() {
     this.run = function (env) {
-      env.register.SP--;
+      env.stackPop();
       env.register.IP++;
     }
     this.getAsm = asmWithNoParam;

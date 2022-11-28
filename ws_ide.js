@@ -120,10 +120,7 @@ globalThis.ws_ide = (function () {
         ws_ide.program.compileError = "Unknown compile error";
       }
       errorDiv.text(err.message);
-      if (err.program) {
-        ws_ide.program = err.program;
-        ws_ide.program.compileError = err.message;
-      }
+      return;
     }
 
     if (ext.match(/^wsa?$/i)) {
@@ -455,6 +452,7 @@ globalThis.ws_ide = (function () {
       ws_ide.switchTab('a[href="#printTab"]');
 
       ws_ide.displayModal('#splashScreenModal');
+      ws_ide.updateSnake();
     },
 
     initEnv: function () {
@@ -527,9 +525,23 @@ globalThis.ws_ide = (function () {
       if (execPath.length > 0) {
         logger.log('Executing VM: ' + execPath.join(' -> '));
         if (ws_ide.getExtension(execPath[0]) === 'ws') {
-          ws_ide.program = ws.compile(ws_fs.openFile(ws_fs.getFile(execPath[0])));
+          try {
+            ws_ide.program = ws.compile(ws_fs.openFile(ws_fs.getFile(execPath[0])));
+          } catch (err) {
+            logger.error("Whitespace interpreter chain (" + execPath.join("->") + ") Error: " + (err.message || err));
+            $('#btnRun').show();
+            $('#btnStop').hide();
+            return;
+          }
         } else {
-          ws_ide.program = ws_asm.compile(ws_fs.openFile(ws_fs.getFile(execPath[0])));
+          try {
+            ws_ide.program = ws_asm.compile(ws_fs.openFile(ws_fs.getFile(execPath[0])));
+          } catch (err) {
+            logger.error("Assembly interpreter chain (" + execPath.join("->") + "error: " + (err.message || err));
+            $('#btnRun').show();
+            $('#btnStop').hide();
+            return;
+          }
         }
 
         for (let i = 1; i < execPath.length; i++) {
@@ -859,21 +871,18 @@ globalThis.ws_ide = (function () {
       ws_ide.stopAnimateRunning();
     },
 
-    animateRunning: function (resume) {
+    animateRunning: function () {
+      $('#animDiv').show();
+    },
+    updateSnake: function (resume) {
       const ad = $('#animDiv');
-      if (ws_ide.animator < 0 && resume) {
-        ws_ide.animator = 0;
-      } else if (ws_ide.animator < 0) {
-        ad.html('&nbsp;');
-        return;
-      }
       ad.text(ws_ide.animation[ws_ide.animator]);
       ws_ide.animator = (ws_ide.animator + 1) % ws_ide.animation.length;
-      setTimeout(ws_ide.animateRunning, 150);
+      setTimeout(ws_ide.updateSnake, 150);
     },
 
     stopAnimateRunning: function () {
-      ws_ide.animator = -1;
+      $('#animDiv').hide();
     },
 
     displayHelp: function () {
