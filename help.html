@@ -59,13 +59,46 @@ this has never been a goal.
   swap        - swap two topmost stack elements.
   drop        - discards the topmost stack value.
   slide    $n - keeps the topmost element, and deletes the next $n elements.
-  add         -
-  sub         -
-  mul         -
-  div         -
-  mod         -
-  store       -
-  retrieve    -
+  add         - consume the two topmost elements and push their sum.
+                +---+
+                | b |
+                +---+  ==> +-------+
+                | a |      | a + b |
+                +---+      +-------+
+  sub         - subrtact the topmost value from the next one and push the result back.
+                +---+
+                | b |
+                +---+  ==> +-------+
+                | a |      | a - b |
+                +---+      +-------+
+  mul         - consume and multiply the two topmost elements and push the result back.
+                +---+
+                | b |
+                +---+  ==> +-------+
+                | a |      | a * b |
+                +---+      +-------+
+  div         - Divide the second value by the topmost element and push the value back.
+                +---+
+                | b |
+                +---+  ==> +-------+
+                | a |      | a / b |
+                +---+      +-------+
+  mod         - Calculate the module and push the result back.
+                +---+
+                | b |
+                +---+  ==> +---------+
+                | a |      | a mod b |
+                +---+      +---------+
+  store       - store the topmost element in heap at the location specified by the next element in the stack.
+                +---+
+                | b |
+                +---+  ==>                heap[a] = b
+                | a |                 
+                +---+      +---+
+  retrieve    - retrieve value from the heap at the location specified by the stacks topmost element.
+                +---+      +---------+
+                | a |  ==> | heap[a] |           
+                +---+      +---------+
   label    $l -
   call     $l -
   jmp      $l -
