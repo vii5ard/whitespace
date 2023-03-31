@@ -181,29 +181,13 @@ globalThis.ws_ide = (function () {
     }
   };
 
-  const resizeUserInput = function() {
-    const input = $('#userInput');
-    const form = input.closest('form');
-    const container = form.parent();
-    input.width(0);
-    input.width(container.width() - (input.position().left - container.position().left));
-  }
-
   const printOutput = function(str) {
     if (typeof str != "string") {
       str = "" + str;
     }
     const printArea = $('#printArea');
-    const arr = str.split('\n');
-    let last = printArea.find('span:last');
-    for (let i = 0; i < arr.length; i++) {
-      const ln = arr[i];
-      if (i !== 0) {
-        last.after('<br><span style="display:inline-block; min-height:13px" autocomplete="off"></span>');
-        last = printArea.find('span:last');
-      }
-      last.html(last.html() + ln);
-    }
+    printArea.text(printArea.text() + str);
+
     let outputArea = printArea.closest('.outputArea');
     outputArea.scrollTop(outputArea[0].scrollHeight);
 
@@ -211,14 +195,13 @@ globalThis.ws_ide = (function () {
     if (!tabLabel.is('.activeTab')) {
       tabLabel.addClass('emph');
     }
-    resizeUserInput();
   };
 
   const readChar = function() {
     if (ws_ide.inputStream.length > 0) {
       return ws_ide.inputStream.shift();
     } else {
-      ws_ide.focusUserInput('#userInput');
+      ws_ide.focusUserInput('#printArea');
       throw "IOWait";
     }
   }
@@ -420,7 +403,6 @@ globalThis.ws_ide = (function () {
     inputStream: [],
     inputStreamPtr: 0,
     animator: 0,
-//    animation: ['-', '\\', '|', '/'],
     animation: ['.oO0 ', ' .oO0', '  .o0', '   .0', '    0', '   0O', '  00o', ' 0Oo.', '0Oo. ', '0o.  ', '0.   ', '0    ', 'O0   ', 'oO0  ',],
     defaultFile: [],
     highlightSourceWs: function (src) {
@@ -432,7 +414,9 @@ globalThis.ws_ide = (function () {
     },
 
     init: function () {
+      let userInput = '';
       const input = $('#srcInput');
+      const printArea = $('#printArea');
       input.bind("input paste keyup", function () {
         ws_ide.openFile.src = this.value;
         ws_ide.openFile.changed = true;
@@ -442,6 +426,37 @@ globalThis.ws_ide = (function () {
 
       input.keydown(function (e) {
         return interceptTabs(e, this);
+      });
+
+      printArea.bind("paste", (e) => {
+        let pastedData = e.originalEvent.clipboardData.getData('text');
+        let printArea = $('#printArea');
+        printArea.text(printArea.text() + pastedData);
+      });
+
+
+      printArea.keydown((e) => {
+        if (e.ctrlKey || e.metaKey) return;
+        const txt = printArea.text();
+
+        if (e.key && e.key.length == 1) {
+          printArea.text(txt + e.key);
+          userInput += e.key;
+        } else if (e.key == 'Backspace') {
+          if (txt && txt.length > 0 && txt.slice(-1) != '\n') {
+            printArea.text(txt.slice(0, -1));
+            userInput.slice(0, -1);
+          }
+        } else if (e.key == 'Enter') {
+          printArea.text(txt + '\n');
+          ws_ide.handleUserInput(null, userInput + '\n');
+          userInput = '';
+        }
+
+        // Scroll to view
+        const outputArea = printArea.closest('.outputArea');
+        outputArea.scrollTop(outputArea[0].scrollHeight);
+
       });
 
       updateFileList();
@@ -511,6 +526,7 @@ globalThis.ws_ide = (function () {
     },
 
     runProgram: function (debugMode, stepMode) {
+      userInput = '';
       $('#btnRun').hide();
       $('#btnStop').show();
 
@@ -647,7 +663,6 @@ globalThis.ws_ide = (function () {
       tab.closest(".allTabs").find(".tabContent:visible").not(tabSelector).hide();
       tab.show();
 
-      resizeUserInput(); // FIXME: Actually only needed when user input displayed
       updateMemoryTab(ws_ide.env);
 
 
@@ -657,11 +672,7 @@ globalThis.ws_ide = (function () {
     handleUserInput: function (selector, code) {
       if (typeof code === 'undefined') code = '\n';
 
-      const input = $(selector);
-      const val = input.val();
-      ws_ide.inputStream = ws_ide.inputStream.concat(val.split('').concat([code]));
-      printOutput(val + '\n');
-      input.val('');
+      ws_ide.inputStream = ws_ide.inputStream.concat(code.split(''));
       this.continueRun();
       return false;
     },

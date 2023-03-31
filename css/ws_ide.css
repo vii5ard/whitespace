@@ -114,17 +114,28 @@ textarea.inputBox {
 }
 
 .outputText {
-  font-size: 0;
-}
-
-.outputText form {
+  width: inherit;
+  height: inherit;
   display: inline-block;
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: none;
+  border: none;
 }
 
-.outputText span{
-  font-size: 12px;
-  white-space: pre;
-  word-break: none;
+.outputText:focus {
+  outline: none;
+}
+.outputText:focus:after {
+  content: '_';
+  animation: blink 1s infinite; 
+}
+
+@keyframes blink {
+    0% {opacity: 1;}
+    1% {opacity: 0;}
+    50% {opacity: 0;}
+    51% {opacity: 1;}
 }
 
 .consoleText {
@@ -150,7 +161,7 @@ textarea.inputBox {
   outline: none;
   margin: 0px;
   padding: 0px;
-  width: 100%;
+  width: 1px;
 }
 
 #panels {

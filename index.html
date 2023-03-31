@@ -120,16 +120,9 @@ You really need to enable javascript or sth!
                      onclick="return ws_ide.handleUserInput('#userInput', null);">[EOF]</a></span>
                 </div>
                 <div class="outputArea"
-                     onclick="ws_ide.focusUserInput('#userInput')">
+                     onclick="ws_ide.focusUserInput('#printArea')">
                   <div id="printArea"
-                       class="outputText">
-                    <span></span>
-                    <form onsubmit="return ws_ide.handleUserInput('#userInput');" autocomplete="off">
-                      <input type="text"
-                            id="userInput"
-                            class="userInput" style="height:13px">
-                    </form>
-                  </div>
+                       class="outputText" tabindex="0"></div>
                 </div>
               </div>
               <div id="consoleTab"
