@@ -198,10 +198,10 @@ globalThis.ws_ide = (function () {
   };
 
   const readChar = function() {
+    ws_ide.focusUserInput('#printArea');
     if (ws_ide.inputStream.length > 0) {
       return ws_ide.inputStream.shift();
     } else {
-      ws_ide.focusUserInput('#printArea');
       throw "IOWait";
     }
   }
@@ -429,9 +429,19 @@ globalThis.ws_ide = (function () {
       });
 
       printArea.bind("paste", (e) => {
-        let pastedData = e.originalEvent.clipboardData.getData('text');
-        let printArea = $('#printArea');
-        printArea.text(printArea.text() + pastedData);
+        const pastedData = e.originalEvent.clipboardData.getData('text');
+        let lines = (userInput + pastedData).split('\n').map(x => x + '\n');
+        userInput = '';
+
+        if (lines[lines.length - 1] == '\n') lines.pop()
+        else lines[lines.length -1] = lines[lines.length - 1].slice(0, -1);
+
+        for (let i = 0; i < lines.length; i++) {
+          let line = lines[i];
+          printArea.text(printArea.text() + line);
+          if (line.slice(-1) == '\n') ws_ide.handleUserInput(null, line);
+          else userInput = line;
+        }
       });
 
 
