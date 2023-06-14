@@ -196,7 +196,6 @@ globalThis.ws_asm  = (function() {
     } catch (err) {
       throw "Illegal number";
     }
-
   };
 
   const getStringArray = function (str) {
@@ -301,7 +300,6 @@ globalThis.ws_asm  = (function() {
       token: label,
       op: op
     };
-
   };
 
   const getTokens = function (strArr, builder) {
@@ -418,108 +416,107 @@ globalThis.ws_asm  = (function() {
         const token = builder.tokens.shift();
         const meta = token.meta;
         try {
-           if (token.type === "LABEL") {
-             let label = token.token;
-             if (ws_util.isLocalLabel(label)) {
-               label = parentLabel + label;
-             } else {
-               parentLabel = label;
-             }
+          if (token.type === "LABEL") {
+            let label = token.token;
+            if (ws_util.isLocalLabel(label)) {
+              label = parentLabel + label;
+            } else {
+              parentLabel = label;
+            }
 
-             if (typeof builder.labels[labeler.getLabel(label)] === "number") {
-               throw "Multiple definitions of label " + label;
-             }
+            if (typeof builder.labels[labeler.getLabel(label)] === "number") {
+              throw "Multiple definitions of label " + label;
+            }
 
-             builder.labels[labeler.getLabel(label)] = builder.programStack.length;
-             builder.asmLabels[labeler.getLabel(label)] = label;
-           } else if (token.op && token.op.constr === ws.WsLabel) {
-             const param = builder.tokens.shift();
-             if (!param) {
-               throw "Missing label";
-             }
-             if (param.type !== "TOKEN") {
-               throw "Invalid label";
-             }
+            builder.labels[labeler.getLabel(label)] = builder.programStack.length;
+            builder.asmLabels[labeler.getLabel(label)] = label;
+          } else if (token.op && token.op.constr === ws.WsLabel) {
+            const param = builder.tokens.shift();
+            if (!param) {
+              throw "Missing label";
+            }
+            if (param.type !== "TOKEN") {
+              throw "Invalid label";
+            }
 
-             const label = param.token;
-             if (builder.labels[labeler.getLabel(label)]) {
-               throw "Multiple definitions of label " + label;
-             }
+            const label = param.token;
+            if (builder.labels[labeler.getLabel(label)]) {
+              throw "Multiple definitions of label " + label;
+            }
 
-             builder.labels[labeler.getLabel(label)] = builder.programStack.length;
-             builder.asmLabels[labeler.getLabel(label)] = label;
-           } else if (token.token in builder.macros && checkMacroParams(token.token, builder)) {
-             token.type = "MACRO"; // can be label in some cases
-             const macro = builder.macros[token.token];
-             if (typeof macro.action == "function") {
-               const params = [token];
-               for (const p in macro.param) {
-                 const paramType = macro.param[p];
-                 const parToken = builder.tokens.shift();
-                 if (!parToken || parToken.type != paramType) {
-                    throw "Expected " + paramType;
-                  } else {
-                    params.push(parToken);
-                  }
+            builder.labels[labeler.getLabel(label)] = builder.programStack.length;
+            builder.asmLabels[labeler.getLabel(label)] = label;
+          } else if (token.token in builder.macros && checkMacroParams(token.token, builder)) {
+            token.type = "MACRO"; // can be label in some cases
+            const macro = builder.macros[token.token];
+            if (typeof macro.action == "function") {
+              const params = [token];
+              for (const p in macro.param) {
+                const paramType = macro.param[p];
+                const parToken = builder.tokens.shift();
+                if (!parToken || parToken.type != paramType) {
+                  throw "Expected " + paramType;
+                } else {
+                  params.push(parToken);
                 }
-                macro.action(params, builder);
-              } else {
-                throw "Unimplemented macro type " + typeof macro.action;
               }
- 
-           } else if (token.type === "KEYWORD") {
-             const op = token.op;
-             let instruction = new op.constr();
+              macro.action(params, builder);
+            } else {
+              throw "Unimplemented macro type " + typeof macro.action;
+            }
+          } else if (token.type === "KEYWORD") {
+            const op = token.op;
+            let instruction = new op.constr();
 
-             if (op.optparam === 'NUMBER' && builder.tokens[0] && builder.tokens[0].type == op.optparam) {
-                pushInstruction(builder, ws.WsPush ,builder.tokens.shift().data);
-             }
+            if (op.optparam === 'NUMBER' && builder.tokens[0] && builder.tokens[0].type == op.optparam) {
+              pushInstruction(builder, ws.WsPush, builder.tokens.shift().data);
+            }
 
-             if (op.param) {
-               const param = builder.tokens.shift();
-               if (!param) {
-                  throw "Parameter expected";
-               }
-               if (op.param === "NUMBER") {
-                  if (param.type === "NUMBER") {
-                    pushInstruction(builder, op.constr, param.data);
-                  } else if (instruction instanceof ws.WsPush && param.type == "STRING") {
-                    for (let i = param.data.length -1 ; i >= 0; i--) {
-                      pushInstruction(builder, op.constr, param.data[i]);
-                    }
-                  } else {
-                    throw "Unexpected token " + param.token;
+            if (op.param) {
+              const param = builder.tokens.shift();
+              if (!param) {
+                throw "Parameter expected";
+              }
+              if (op.param === "NUMBER") {
+                if (param.type === "NUMBER") {
+                  pushInstruction(builder, op.constr, param.data);
+                } else if (instruction instanceof ws.WsPush && param.type == "STRING") {
+                  for (let i = param.data.length - 1; i >= 0; i--) {
+                    pushInstruction(builder, op.constr, param.data[i]);
                   }
-               } else if (op.param === "LABEL") {
-                 instruction = new op.constr();
-                 let label = param.token;
-                 if (ws_util.isLocalLabel(label)) label = parentLabel + label;
+                } else {
+                  throw "Unexpected token " + param.token;
+                }
+              } else if (op.param === "LABEL") {
+                instruction = new op.constr();
+                let label = param.token;
+                if (ws_util.isLocalLabel(label)) label = parentLabel + label;
 
-                 instruction.param = {
-                   token: labeler.getLabel(label), value: null, label: label
-                 };
-                 builder.pushInstruction(instruction);
-               } else {
-                 throw "Unsupported parameter type " + op.param + " (should never happen)."
-               }
-             } else {
-                pushInstruction(builder, op.constr);
-             }
-           } else if (token.token in builder.macros) {
-           } else {
-              throw "Unexpected token " + token.token;
-           }
-         } catch (err) {
-           if (typeof err === "string") {
-             throw {
-               program: null,
-               line: meta.line,
-               message: err + " at line " + meta.line + "." 
-             };
-           } else {
-             throw err;
-           }
-         }
+                instruction.param = {
+                  token: labeler.getLabel(label), value: null, label: label
+                };
+                builder.pushInstruction(instruction);
+              } else {
+                throw "Unsupported parameter type " + op.param + " (should never happen)."
+              }
+            } else {
+              pushInstruction(builder, op.constr);
+            }
+          } else if (token.token in builder.macros) {
+          } else {
+            throw "Unexpected token " + token.token;
+          }
+        } catch (err) {
+          if (typeof err === "string") {
+            throw {
+              program: null,
+              line: meta.line,
+              message: err + " at line " + meta.line + "."
+            };
+          } else {
+            throw err;
+          }
+        }
       }
 
       if (tokenError) {
@@ -531,7 +528,7 @@ globalThis.ws_asm  = (function() {
       }
 
       try {
-         return postProcess(builder);
+        return postProcess(builder);
       } catch (err) {
         if (typeof err === "string") {
           throw {
@@ -543,6 +540,4 @@ globalThis.ws_asm  = (function() {
       }
     },
   };
-
 })();
-

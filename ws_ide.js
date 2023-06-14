@@ -63,7 +63,7 @@ globalThis.ws_ide = (function () {
           if (subPath.length > 0) {
             return subPath.concat([vms[i]]);
           }
-        } 
+        }
       }
     }
     return [];
@@ -83,7 +83,7 @@ globalThis.ws_ide = (function () {
 
       e.from = e.file.replace(expr, '$1');
 
-      if (e.from !== ext) continue; 
+      if (e.from !== ext) continue;
 
       e.to = e.file.replace(expr, '$2');
 
@@ -177,7 +177,7 @@ globalThis.ws_ide = (function () {
     } else {
       const ret = ws_ide.loadSource(src);
       updateEditor();
-     return ret;
+      return ret;
     }
   };
 
@@ -228,7 +228,7 @@ globalThis.ws_ide = (function () {
     while (true) {
       const ch = readChar();
       if (ch == '\n') break;
-      numStr += ch; 
+      numStr += ch;
     }
     try {
       return BigInt(numStr);
@@ -248,7 +248,7 @@ globalThis.ws_ide = (function () {
     }
     $('#heapSpan').html('{\t' + heapArr.join(',\t') + '}');
   }
- 
+
   const afterInstructionRun = function(env) {
     env.runCount++;
     const now = Date.now();
@@ -295,7 +295,6 @@ globalThis.ws_ide = (function () {
       })(fileName));
 
       line.appendTo(fileList);
-      
     }
   };
 
@@ -320,7 +319,6 @@ globalThis.ws_ide = (function () {
     const ext = getExtension(ws_ide.openFile.name);
     if (ext.match(/^wsa$/i)) return true;
     return getCompilePath(ext).length > 0;
-
   }
 
   const programOptimizable = function() {
@@ -428,7 +426,6 @@ globalThis.ws_ide = (function () {
           .replace(/([ ]+)/g, '<span class="spaces">\$1</span>')
           .replace(/(\t+)/g, '<span class="tabs">\$1</span>')
           .replace(/#/g, ' ');
-
     },
 
     init: function () {
@@ -604,7 +601,6 @@ globalThis.ws_ide = (function () {
           ws_ide.stopAnimateRunning();
           $('#btnRun').show();
           $('#btnStop').hide();
-
         }
       }
       updateMemoryTab(ws_ide.env);
@@ -649,7 +645,6 @@ globalThis.ws_ide = (function () {
 
       resizeUserInput(); // FIXME: Actually only needed when user input displayed
       updateMemoryTab(ws_ide.env);
-
 
       return false;
     },
@@ -724,7 +719,6 @@ globalThis.ws_ide = (function () {
       } else {
         ws_ide.newFile();
       }
-
     },
 
     saveFile: function () {
@@ -747,7 +741,6 @@ globalThis.ws_ide = (function () {
       const input$ = $('#file_' + id + ' input');
       const newName = input$.val();
       ws_fs.rename(fileName, newName);
-
 
       updateFileList();
       ws_ide.loadFile(newName);
@@ -828,8 +821,6 @@ globalThis.ws_ide = (function () {
         } else {
           throw "Invalid compile result.";
         }
-
-
       } else {
         wsSrc = ws_ide.program.getWsSrc();
       }
@@ -854,7 +845,6 @@ globalThis.ws_ide = (function () {
 
     downloadFile: function () {
       window.open('data:text/plain;base64,' + btoa(ws_ide.openFile.src), '_download');
-
     },
 
     stopProgram: function () {
@@ -898,11 +888,8 @@ globalThis.ws_ide = (function () {
 
     getExecPath: getExecPath,
     getExtension: getExtension
-
   };
   $(self.init);
 
   return self;
 })();
-
-

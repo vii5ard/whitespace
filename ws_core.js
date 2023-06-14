@@ -178,7 +178,7 @@ globalThis.ws = {
           }
         }
         builder.pushInstruction(instruction);
-       // Reset parser
+        // Reset parser
         parser = instParser;
         debugToken='';
       }
@@ -276,7 +276,7 @@ globalThis.ws = {
         }
         src.push({IP:i, str: instrStr});
       }
-     
+
       return src;
     };
 
@@ -291,15 +291,15 @@ globalThis.ws = {
         const par = inst.param;
         if (par) {
           src += par.token;
-        }   
-      }   
+        }
+      }
       return src;
     }
     return builder;
   },
- 
- 
-  /* 
+
+
+  /*
    * Stack manipulation object constructors
    */
 
@@ -327,7 +327,7 @@ globalThis.ws = {
     }
     this.getAsm = asmWithValueParam;
   },
-    
+
   WsSwapTop: function() {
     this.run = function (env) {
       const last = env.register.SP - 1;
@@ -357,11 +357,11 @@ globalThis.ws = {
     }
     this.getAsm = asmWithValueParam;
   },
-    
+
   /*
    * Arithmetic object constructors
    */
-    
+
   WsAddition: function() {
     this.run = function(env) {
       const b = env.stackPop();
@@ -412,7 +412,7 @@ globalThis.ws = {
     this.getAsm = asmWithNoParam;
   },
 
-  /* 
+  /*
    * Heap operation object constructors
    */
   WsHeapStore: function() {
@@ -433,7 +433,7 @@ globalThis.ws = {
     };
     this.getAsm = asmWithNoParam;
   },
-    
+
   /*
    * Flowcontrol
    */
@@ -478,7 +478,7 @@ globalThis.ws = {
       if (!(this.param.token in compiler.labels)) {
         throw "Missing label " + this.param.label;
       }
-       this.callableI = compiler.labels[this.param.token];
+      this.callableI = compiler.labels[this.param.token];
     };
     this.getAsm = asmWithLabelParam;
   },
@@ -491,7 +491,7 @@ globalThis.ws = {
       if (!(this.param.token in compiler.labels)) {
         throw "Missing label " + this.param.label;
       }
-     this.nextI = compiler.labels[this.param.token];
+      this.nextI = compiler.labels[this.param.token];
     };
     this.getAsm = asmWithLabelParam;
   },
@@ -511,7 +511,7 @@ globalThis.ws = {
       }
       this.successI = compiler.labels[this.param.token];
     };
-     this.getAsm = asmWithLabelParam;
+    this.getAsm = asmWithLabelParam;
   },
 
   WsJumpNeg: function() {
@@ -529,7 +529,7 @@ globalThis.ws = {
       }
       this.successI = compiler.labels[this.param.token];
     }
-   this.getAsm = asmWithLabelParam;
+    this.getAsm = asmWithLabelParam;
   },
 
   WsReturn: function() {
@@ -567,7 +567,8 @@ globalThis.ws = {
     this.getAsm = asmWithNoParam;
   }
 }
-globalThis.ws.keywords = [
+
+  globalThis.ws.keywords = [
     { ws: '  ',       mnemo: 'push',     constr: ws.WsPush,           param: "NUMBER" },
     { ws: ' \n ',     mnemo: 'dup',      constr: ws.WsDouble,         param: null },
     { ws: ' \t ',     mnemo: 'copy',     constr: ws.WsCopyNth,        param: "NUMBER" },
@@ -627,5 +628,4 @@ globalThis.ws.keywords = [
     const constr = keyword.constr;
     instParser.addInstruction(keyword.ws, constr);
   }
-
 })();
