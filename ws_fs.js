@@ -84,7 +84,6 @@ globalThis.ws_fs = function(metaFile) {
       file.name = newName;
       file.extFile = false;
 
-
       /* Update file language. */
       if (file.name.match(/\.ws$/)) {
         file.lang = "WS";

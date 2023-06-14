@@ -71,7 +71,6 @@
   "vm/bf.ws": {
     "file": "example/vm/bf.ws",
     "about": "A Brainfuck interpreter written compiled into Whitespace. To run a Brainfuck program open one and hit the run button."
-
   },
   "vm/bf.wsa": {
     "file": "example/vm/bf.wsa",
@@ -80,7 +79,6 @@
   "wc/bf2wsa.wsa": {
     "file": "example/wc/bf2wsa.wsa",
     "about": "Brainfuck to Whitespace assembly compiler written in Whitespace assembly. Just open a Brainfuck file and hit the compile button - the assembly is turned into Whitespace automatically."
-
   },
   "wc/bf2wsa.ws": {
     "file": "example/wc/bf2wsa.ws",
@@ -105,7 +103,6 @@
   "hello.mal": {
     "file": "example/hello.mal",
     "about": "A hello world implementation in Malbolge. Downloaded from <a target=\"_blank\" href=\"https://github.com/nstarke/malbolge-examples\">https://github.com/nstarke/malbolge-examples</a>"
-
   },
   "hello2.mal": {
     "file": "example/hello2.mal",

@@ -45,7 +45,6 @@ globalThis.ws_opt = (function() {
           ignorePieceEnd = true;
         }
       }
-
     }
     pieces.push(makePiece(currentStack, !ignorePieceEnd));
     return {
@@ -190,7 +189,6 @@ globalThis.ws_opt = (function() {
             !target.recursion // TODO! recursion messes up a lot
         ) {
           inlinePiece(target, shred);
-
 
           let retLabel = null;
 
