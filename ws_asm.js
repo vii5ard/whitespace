@@ -494,6 +494,7 @@ globalThis.ws_asm  = (function() {
               pushInstruction(builder, op.constr);
             }
           } else if (token.token in builder.macros) {
+            throw "Incorrect argument types for macro " + token.token;
           } else {
             throw "Unexpected token " + token.token;
           }
