@@ -375,8 +375,6 @@ globalThis.ws_ide = (function () {
     const file = {
       name: fileName,
       file: "<localStorage>",
-      autohor: "",
-      origin: "",
       src: "",
       localStorage: true,
       changed: false
@@ -399,7 +397,6 @@ globalThis.ws_ide = (function () {
   const self = {
     files: {},
     inputStream: [],
-    inputStreamPtr: 0,
     animator: 0,
     animation: ['.oO0 ', ' .oO0', '  .o0', '   .0', '    0', '   0O', '  00o', ' 0Oo.', '0Oo. ', '0o.  ', '0.   ', '0    ', 'O0   ', 'oO0  ',],
     defaultFile: [],

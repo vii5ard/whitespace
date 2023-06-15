@@ -40,7 +40,6 @@ globalThis.ws_asm  = (function() {
           const metaTypes = {"$number": "NUMBER", "$label": "TOKEN", "$string": "STRING"};
           const macroLabel = params[1].token.replace(/:$/, "");
           let closed = false;
-          const macroLabels = {};
 
           const newMacro = {
             tokens: [],
@@ -241,11 +240,9 @@ globalThis.ws_asm  = (function() {
   };
 
   const parseString = function (strArr) {
-    const line = strArr.line;
-    const col = strArr.col;
-
     const strEnd = strArr.peek();
     let str = strArr.getNext();
+    let escape = false;
     while (strArr.hasNext() && (escape || strArr.peek() != strEnd)) {
       if (strArr.peek() == '\\') {
         escape = true;
