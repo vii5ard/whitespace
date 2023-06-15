@@ -122,7 +122,7 @@ globalThis.ws_fs = function(metaFile) {
     },
     getFileNames: function (pattern) {
       self.fileNames = [];
-      for (fileName in self.files) {
+      for (const fileName in self.files) {
         if (!pattern || fileName.match(pattern)) {
           self.fileNames.push(fileName);
         }
