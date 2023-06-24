@@ -23,7 +23,7 @@ globalThis.ws_util = (function () {
         length: length,
         labels: {},
         getLabel: function (label) {
-          if (typeof label != "undefined" && label in this.labels) {
+          if (label != null && label in this.labels) {
             return this.labels[label];
           } else {
             const gen = labelGenerator(length++, label);

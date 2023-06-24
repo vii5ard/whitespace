@@ -47,7 +47,7 @@ globalThis.ws_ide = (function () {
   };
 
   getExecPath = function(fn, vms) {
-    if (typeof vms == 'undefined') {
+    if (typeof vms === 'undefined') {
       vms = ws_fs.getFileNames(/^vm\//);
     }
 
@@ -70,7 +70,7 @@ globalThis.ws_ide = (function () {
   }
 
   getCompilePath = function(fn, wcs) {
-    if (typeof wcs == 'undefined') {
+    if (typeof wcs === 'undefined') {
       wcs = ws_fs.getFileNames(/^wc\/.*\.wsa?$/);
     }
 
@@ -171,7 +171,7 @@ globalThis.ws_ide = (function () {
 
   const programSource = function (src) {
     const srcInput = $('#srcInput');
-    if (typeof src == "undefined") {
+    if (typeof src === "undefined") {
       return srcInput.val();
     } else {
       const ret = ws_ide.loadSource(src);
@@ -181,7 +181,7 @@ globalThis.ws_ide = (function () {
   };
 
   const printOutput = function(str) {
-    if (typeof str != "string") {
+    if (typeof str !== "string") {
       str = "" + str;
     }
     const printArea = $('#printArea');
@@ -209,7 +209,7 @@ globalThis.ws_ide = (function () {
     let numStr = "";
     while (true) {
       const ch = readChar();
-      if (ch == '\n') break;
+      if (ch === '\n') break;
       numStr += ch;
     }
     try {
@@ -744,7 +744,7 @@ globalThis.ws_ide = (function () {
 
       if (!file) return;
 
-      if (typeof localStorage == "undefined") return;
+      if (typeof localStorage === "undefined") return;
 
       ws_fs.saveFile(file);
 
@@ -802,7 +802,7 @@ globalThis.ws_ide = (function () {
       const ext = getExtension(ws_ide.openFile.name);
       const compilePath = getCompilePath(ext);
 
-      if (!/wsa$/.test(ext) && compilePath.length == 0) {
+      if (!/wsa$/.test(ext) && compilePath.length === 0) {
         logger.error("No way to compile program");
         return;
       }
