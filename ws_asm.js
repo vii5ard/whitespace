@@ -303,48 +303,30 @@ globalThis.ws_asm  = (function() {
   };
 
   const getTokens = function (strArr, builder) {
-    const tokens = [];
     let prevSpace = true;
     while (strArr.hasNext()) {
       if (parseWhitespace(strArr).token) {
         prevSpace = true;
         continue;
       }
-      const meta = {
-        line: strArr.line,
-        col: strArr.col
-      };
 
-      const next = strArr.peek();
       let token = null;
-      try {
-        if (next === ';' || next === '#' || (next === '-' && strArr.peek(1) === '-')) {
-          token = parseLineComment(strArr);
-        } else if (next === '{' && strArr.peek(1) === '-') {
-          token = parseMultiLineComment(strArr);
-        } else if (/["']/.test(next)) {
-          token = parseString(strArr);
-        } else if (/[-+\d]/.test(next)) {
-          token = parseNumber(strArr);
-        } else if (/[a-zA-Z_$.]/.test(next)) {
-          token = parseLabel(strArr, builder);
-        } else {
-          throw "Illegal character: '" + next + "'";
-        }
-      } catch (err) {
-        if (typeof err === "string") {
-          throw {
-            tokens: tokens,
-            meta: meta,
-            message: err + " on line " + meta.line,
-            line: meta.line,
-            col: meta.col
-          };
-        } else {
-          throw err;
-        }
+      builder.pos = strArr.pos();
+      const next = strArr.peek();
+      if (next === ';' || next === '#' || (next === '-' && strArr.peek(1) === '-')) {
+        token = parseLineComment(strArr);
+      } else if (next === '{' && strArr.peek(1) === '-') {
+        token = parseMultiLineComment(strArr);
+      } else if (/["']/.test(next)) {
+        token = parseString(strArr);
+      } else if (/[-+\d]/.test(next)) {
+        token = parseNumber(strArr);
+      } else if (/[a-zA-Z_$.]/.test(next)) {
+        token = parseLabel(strArr, builder);
+      } else {
+        throw "Illegal character: '" + next + "'";
       }
-      token.meta = meta;
+      token.pos = builder.pos;
 
       if (token.type === "COMMENT") {
         prevSpace = true;
@@ -352,21 +334,14 @@ globalThis.ws_asm  = (function() {
       }
 
       if (!prevSpace) {
-        const err = "Missing space between " + tokens[tokens.length-1].token + " and " + token.token;
-        throw {
-          tokens: tokens,
-          meta: meta,
-          message: err + " on line " + meta.line,
-          line: meta.line,
-          col: meta.col
-        };
+        const prev = builder.tokens[builder.tokens.length-1];
+        throw "Missing space between " + prev.token + " and " + token.token;
       }
       // Implicit space after :
       prevSpace = token.type === "LABEL";
 
-      tokens.push(token);
+      builder.tokens.push(token);
     }
-    return tokens;
   };
 
   const pushInstruction = function (builder, constr, numberArg) {
@@ -409,15 +384,18 @@ globalThis.ws_asm  = (function() {
       builder.macros = builder.macros || builtinMacros();
       builder.includes = builder.includes || {};
       builder.externals = builder.externals || [];
+      builder.tokens = [];
+      builder.pos = strArr.pos();
       try {
-        builder.tokens = getTokens(strArr, builder);
+        getTokens(strArr, builder);
       } catch (err) {
-        if (err.tokens) {
-          builder.tokens = err.tokens;
-          tokenError = err;
-        } else {
-          throw err;
-        }
+        tokenError = {
+          tokens: builder.tokens,
+          pos: builder.pos,
+          message: `${err} at ${builder.pos.line}:${builder.pos.col}`,
+          line: builder.pos.line,
+          col: builder.pos.col
+        };
       }
       builder.asmLabeler = builder.asmLabeler || ws_util.labelTransformer(function(counter, label) {
         return ws_util.getWsUnsignedNumber(counter);
@@ -429,7 +407,7 @@ globalThis.ws_asm  = (function() {
 
       while (builder.tokens.length > 0) {
         const token = builder.tokens.shift();
-        const meta = token.meta;
+        const pos = token.pos;
         try {
           if (token.type === "LABEL" || (token.op && token.op.constr === ws.WsLabel)) {
             let labelAsm;
@@ -526,8 +504,8 @@ globalThis.ws_asm  = (function() {
           if (typeof err === "string") {
             throw {
               program: null,
-              line: meta.line,
-              message: err + " at line " + meta.line
+              line: pos.line,
+              message: `${err} at ${pos.line}:${pos.col}`
             };
           } else {
             throw err;
@@ -538,7 +516,7 @@ globalThis.ws_asm  = (function() {
       if (tokenError) {
         throw {
           program: null,
-          line: tokenError.meta.line,
+          line: tokenError.pos.line,
           message: tokenError.message
         };
       }

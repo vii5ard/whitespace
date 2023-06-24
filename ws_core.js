@@ -169,7 +169,7 @@ globalThis.ws = {
       if (!parser) {
         throw {
           program: builder.postProcess(),
-          message: 'Unexpected token at line ' + tokenizer.line + ':' + tokenizer.col + ' - ' + debugToken
+          message: `Unexpected token ${debugToken} at ${tokenizer.line}:${tokenizer.col}`
         };
       }
       if (parser.instFn) {

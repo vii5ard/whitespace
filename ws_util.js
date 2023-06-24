@@ -41,14 +41,17 @@ globalThis.ws_util = (function () {
     StrArr: function(str) {
       return {
         arr: [...str],
-        pos: 0,
+        offset: 0,
         line: 1,
         col: 1,
-        hasNext: function  () {
-          return this.pos  < this.arr.length;
+        pos: function () {
+          return { line: this.line, col: this.col };
         },
-        getNext: function  () {
-          const next = this.arr[this.pos++];
+        hasNext: function () {
+          return this.offset < this.arr.length;
+        },
+        getNext: function () {
+          const next = this.arr[this.offset++];
           if (next === '\n') {
             this.line++;
             this.col = 1;
@@ -57,12 +60,9 @@ globalThis.ws_util = (function () {
           }
           return next;
         },
-        peek:  function (off)  {
-          const pos = this.pos + (off || 0);
-          if (this.arr.length < pos) {
-            return -1; // TODO! Any alternative that is not an exception?
-          }
-          return this.arr[pos];
+        peek: function (seek) {
+          const offset = this.offset + (seek || 0);
+          return this.arr[offset];
         }
       };
     }
