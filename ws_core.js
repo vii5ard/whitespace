@@ -50,9 +50,9 @@
     return {token: paramStr, value: BigInt(sign * value)};
   };
   const asmObject = function (labels, mnemo, paramVal, paramLabel) {
-    const replaceLabels = [];
-    for (const i in labels) {
-      replaceLabels.push(labels[i]);
+    let replaceLabels = [];
+    if (labels != null) {
+      replaceLabels = labels.slice(0);
     }
     return {
       labels: replaceLabels,
@@ -195,48 +195,42 @@ globalThis.ws = {
   },
 
   programBuilder: function (fullSource, master) {
-    const builder = {};
-
-    for (const key in master) {
-      builder[key] = master[key];
-    }
-
+    const builder = Object.assign({}, master);
     builder.source = fullSource;
     builder.programStack = [];
     builder.labels = {};
     builder.asmLabels = builder.asmLabels || {};
     builder.getAsm = function () {
       const asm = [];
-      for (const i in this.programStack) {
-        const inst = this.programStack[i];
+      for (const inst of this.programStack) {
         asm.push(inst.getAsm());
       }
       return asm;
     };
 
     builder.pushInstruction = function (instruction) {
+      instruction.labels = instruction.labels || [];
       if (instruction.apply) {
         instruction.apply(this);
       } else {
         instruction.address = this.programStack.length;
         this.programStack.push(instruction);
       }
-      for (const l in instruction.labels) {
-        this.labels[instruction.labels[l]] = instruction.address;
+      for (const label of instruction.labels) {
+        this.labels[label] = instruction.address;
       }
     };
 
     builder.postProcess = function () {
-      for (const i in this.programStack) {
-        if (this.programStack[i].postProcess) {
-          this.programStack[i].postProcess(this);
+      for (const inst of this.programStack) {
+        if (inst.postProcess) {
+          inst.postProcess(this);
         }
       }
 
       for (const label in this.labels) {
         const inst = this.programStack[this.labels[label]];
         if (inst) {
-          if (!inst.labels) inst.labels = [];
           if ($.inArray(label, inst.labels) < 0) {
             inst.labels.push(label);
           }
@@ -245,6 +239,7 @@ globalThis.ws = {
           const labelInst = new ws.WsLabel();
           labelInst.address = this.programStack.length;
           labelInst.param = {token: label};
+          labelInst.labels = [];
           this.programStack.push(labelInst);
         }
       }
@@ -260,10 +255,8 @@ globalThis.ws = {
       for (const i in asm) {
         const ln = asm[i];
         const labels = "";
-        for (const l in ln.labels) {
-          const wsLabel = ln.labels[l];
+        for (const wsLabel of ln.labels) {
           const label = this.asmLabels[wsLabel] || labeler.getLabel(wsLabel);
-
           src.push({IP: null, str: label + ":"});
         }
 
@@ -282,10 +275,9 @@ globalThis.ws = {
 
     builder.getWsSrc = function () {
       let src = '';
-      for (const i in this.programStack) {
-        const inst = this.programStack[i];
-        for (const l in inst.labels) {
-          src += '\n  ' + inst.labels[l];
+      for (const inst of this.programStack) {
+        for (const label of inst.labels) {
+          src += '\n  ' + label;
         }
         src += inst.wsToken;
         const par = inst.param;
@@ -595,8 +587,7 @@ globalThis.ws = {
     { ws: '\t\n\t\t', mnemo: 'readi',    constr: ws.WsReadNum,        param: null,    optparam: 'NUMBER' }
   ];
 
-  for (const i in ws.keywords) {
-    const keyword = ws.keywords[i];
+  for (const keyword of ws.keywords) {
     const constr = keyword.constr;
     constr.prototype.mnemoCode = keyword.mnemo;
     constr.prototype.paramType = keyword.param;
@@ -606,26 +597,22 @@ globalThis.ws = {
   const InstParser = function () {
     this.instFn = null;
     this.cont = [];
-    this.addInstruction = function (keySeqStr, instFn) {
+    this.addInstruction = function (keySeq, instFn) {
       let instP = this;
-      const keySeq = keySeqStr.split('');
-      for (const k in keySeq) {
-        const key = keySeq[k];
+      for (const key of keySeq.split('')) {
         if (!(key in instP.cont)) {
           instP.cont[key] = new InstParser();
         }
         instP = instP.cont[key];
       }
-      instFn.prototype.wsToken = keySeqStr;
+      instFn.prototype.wsToken = keySeq;
       instP.instFn = instFn;
     }
   };
 
   const instParser = new InstParser();
 
-  for (const i in ws.keywords) {
-    const keyword = ws.keywords[i];
-    const constr = keyword.constr;
-    instParser.addInstruction(keyword.ws, constr);
+  for (const keyword of ws.keywords) {
+    instParser.addInstruction(keyword.ws, keyword.constr);
   }
 })();
