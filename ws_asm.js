@@ -11,7 +11,7 @@ globalThis.ws_asm  = (function() {
           if (!(fileName in builder.includes)) {
             const file = ws_fs.getFile(fileName);
             if (!file) {
-              throw "File not found: '" + fileName + "'.";
+              throw "File not found: '" + fileName + "'";
             }
 
             builder.includes[fileName] = ws_fs.openFile(file);
@@ -510,7 +510,7 @@ globalThis.ws_asm  = (function() {
                   throw "Expected label argument";
                 }
               } else {
-                throw "Unsupported argument type " + op.param + " (should never happen)."
+                throw "Unsupported argument type " + op.param + " (should never happen)"
               }
             } else {
               pushInstruction(builder, op.constr);
@@ -525,7 +525,7 @@ globalThis.ws_asm  = (function() {
             throw {
               program: null,
               line: meta.line,
-              message: err + " at line " + meta.line + "."
+              message: err + " at line " + meta.line
             };
           } else {
             throw err;

@@ -112,7 +112,7 @@ globalThis.ws_ide = (function () {
       } else if (/^wsa$/i.test(ext)) {
         ws_ide.program = ws_asm.compile(src);
       } else {
-        errorDiv.text("Unable to compile file with the extension.");
+        errorDiv.text("Unable to compile file with extension '" + ext + "'");
       }
       delete ws_ide.program.compileError;
     } catch (err) {
@@ -214,7 +214,7 @@ globalThis.ws_ide = (function () {
     }
     try {
       return BigInt(numStr);
-    } catch (e) {
+    } catch (err) {
       throw "Invalid number format: " + numStr.trim();
     }
   };
@@ -831,7 +831,7 @@ globalThis.ws_ide = (function () {
         } else if (compilePath[0].to === 'wsa') {
           wsSrc = ws_asm.compile(output).getWsSrc();
         } else {
-          throw "Invalid compile result.";
+          throw "Invalid compile result";
         }
       } else {
         wsSrc = ws_ide.program.getWsSrc();
