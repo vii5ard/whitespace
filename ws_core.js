@@ -7,7 +7,7 @@
     const heapSpace = {};
     return {
       store: function (addr, val) {
-        if (typeof addr == "undefined" || typeof val == "undefined") {
+        if (addr == null || val == null) {
           throw "Heap store invoked with undefined address or value";
         }
         heapSpace[addr] = val;
@@ -15,7 +15,7 @@
       },
       retrieve: function (addr) {
         const val = heapSpace[addr];
-        if (typeof val == "undefined") {
+        if (typeof val === "undefined") {
           return this.store(addr, 0n);
         }
         return val;
@@ -491,7 +491,7 @@ globalThis.ws = {
   WsJumpZ: function() {
     this.run = function(env) {
       const top = env.stackPop();
-      if (top == 0) {
+      if (top === 0n) {
         env.register.IP = this.successI;
       } else {
         env.register.IP++;
@@ -546,9 +546,9 @@ globalThis.ws = {
       let val;
       const ch = env.readChar();
       const addr = env.stackPop();
-      if (typeof ch == "number") {
+      if (typeof ch === "number") {
         val = ch;
-      } else if (typeof ch == "string") {
+      } else if (typeof ch === "string") {
         val = ch.charCodeAt(0);
       }
       if (typeof val !== "undefined") {

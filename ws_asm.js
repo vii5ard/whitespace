@@ -156,7 +156,7 @@ globalThis.ws_asm  = (function() {
     let comment = "";
     do {
       comment += strArr.getNext();
-    } while (strArr.hasNext() && strArr.peek() != '\n');
+    } while (strArr.hasNext() && strArr.peek() !== '\n');
     return {
       type: "COMMENT",
       token: comment
@@ -324,7 +324,7 @@ globalThis.ws_asm  = (function() {
           token = parseLabel(strArr, builder);
         }
       } catch (err) {
-        if (typeof err == "string") {
+        if (typeof err === "string") {
           throw {
             tokens: tokens,
             meta: meta,
@@ -350,7 +350,7 @@ globalThis.ws_asm  = (function() {
 
   const pushInstruction = function (builder, constr, numberArg) {
     const instruction = new constr();
-    if (typeof numberArg != "undefined" && numberArg != null) {
+    if (numberArg != null) {
       instruction.arg = {token: ws_util.getWsSignedNumber(numberArg), value: numberArg};
     }
     builder.pushInstruction(instruction);
@@ -368,11 +368,11 @@ globalThis.ws_asm  = (function() {
 
   const checkMacroArgs = function (token, builder) {
     const macro = builder.macros[token];
-    if (typeof macro.action == "function") {
+    if (typeof macro.action === "function") {
       let n = 0;
       for (const paramType of macro.params) {
         const arg = builder.tokens[n++];
-        if (!arg || arg.type != paramType) {
+        if (!arg || arg.type !== paramType) {
           return false;
         }
       }
@@ -443,11 +443,11 @@ globalThis.ws_asm  = (function() {
           } else if (token.token in builder.macros && checkMacroArgs(token.token, builder)) {
             token.type = "MACRO"; // can be label in some cases
             const macro = builder.macros[token.token];
-            if (typeof macro.action == "function") {
+            if (typeof macro.action === "function") {
               const args = [token];
               for (const paramType of macro.params) {
                 const arg = builder.tokens.shift();
-                if (!arg || arg.type != paramType) {
+                if (!arg || arg.type !== paramType) {
                   throw "Expected " + paramType + " argument";
                 } else {
                   args.push(arg);
@@ -473,7 +473,7 @@ globalThis.ws_asm  = (function() {
               if (op.param === "NUMBER") {
                 if (arg.type === "NUMBER") {
                   pushInstruction(builder, op.constr, arg.data);
-                } else if (instruction instanceof ws.WsPush && arg.type == "STRING") {
+                } else if (instruction instanceof ws.WsPush && arg.type === "STRING") {
                   for (let i = arg.data.length - 1; i >= 0; i--) {
                     pushInstruction(builder, op.constr, arg.data[i]);
                   }

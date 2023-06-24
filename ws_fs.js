@@ -46,7 +46,7 @@ globalThis.ws_fs = function(metaFile) {
   };
 
   const loadFilesLocal = function (files) {
-    if (typeof localStorage == "undefined") {
+    if (typeof localStorage === "undefined") {
       console.log("Local storage not supported!");
       return;
     }
