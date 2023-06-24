@@ -474,7 +474,7 @@ globalThis.ws = {
     };
     this.postProcess = function(compiler) {
       if (!(this.arg.token in compiler.labels)) {
-        throw "Missing label " + this.arg.label;
+        throw `Missing label: ${this.arg.label}`;
       }
       this.callableI = compiler.labels[this.arg.token];
     };
@@ -487,7 +487,7 @@ globalThis.ws = {
     };
     this.postProcess = function(compiler) {
       if (!(this.arg.token in compiler.labels)) {
-        throw "Missing label " + this.arg.label;
+        throw `Missing label: ${this.arg.label}`;
       }
       this.nextI = compiler.labels[this.arg.token];
     };
@@ -505,7 +505,7 @@ globalThis.ws = {
     };
     this.postProcess = function(compiler) {
       if (!(this.arg.token in compiler.labels)) {
-        throw "Missing label " + this.arg.label;
+        throw `Missing label: ${this.arg.label}`;
       }
       this.successI = compiler.labels[this.arg.token];
     };
@@ -523,7 +523,7 @@ globalThis.ws = {
     };
     this.postProcess = function(compiler) {
       if (!(this.arg.token in compiler.labels)) {
-        throw "Missing label " + this.arg.label;
+        throw `Missing label: ${this.arg.label}`;
       }
       this.successI = compiler.labels[this.arg.token];
     };

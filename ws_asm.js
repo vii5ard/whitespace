@@ -11,7 +11,7 @@ globalThis.ws_asm  = (function() {
           if (!(fileName in builder.includes)) {
             const file = ws_fs.getFile(fileName);
             if (!file) {
-              throw "File not found: '" + fileName + "'";
+              throw `File not found: '${fileName}'`;
             }
 
             builder.includes[fileName] = ws_fs.openFile(file);
@@ -24,10 +24,9 @@ globalThis.ws_asm  = (function() {
               } catch (err) {
                 if (err.program) {
                   builder.externals.push(err.program);
-                  console.warn("Broken include '" + fileName + "': " + err.message);
+                  console.warn(`Broken include '${fileName}': ${err.message}`);
                 } else {
-                  console.error(err);
-                  throw "Unknown error loading '" + fileName + "'";
+                  throw `Error while compiling '${fileName}': ${err.message}`;
                 }
               }
             }
@@ -324,7 +323,7 @@ globalThis.ws_asm  = (function() {
       } else if (/[a-zA-Z_$.]/.test(next)) {
         token = parseLabel(strArr, builder);
       } else {
-        throw "Illegal character: '" + next + "'";
+        throw `Illegal character: '${next}'`;
       }
       token.pos = builder.pos;
 
@@ -335,7 +334,7 @@ globalThis.ws_asm  = (function() {
 
       if (!prevSpace) {
         const prev = builder.tokens[builder.tokens.length-1];
-        throw "Missing space between " + prev.token + " and " + token.token;
+        throw `Missing space between ${prev.token} and ${token.token}`;
       }
       // Implicit space after :
       prevSpace = token.type === "LABEL";
@@ -431,7 +430,7 @@ globalThis.ws_asm  = (function() {
 
             const label = labeler.getLabel(labelAsm);
             if (typeof builder.labels[label] === "number") {
-              throw "Multiple definitions of label " + labelAsm;
+              throw `Multiple definitions of label ${labelAsm}`;
             }
 
             builder.labels[label] = builder.programStack.length;
@@ -444,14 +443,14 @@ globalThis.ws_asm  = (function() {
               for (const paramType of macro.params) {
                 const arg = builder.tokens.shift();
                 if (!arg || arg.type !== paramType) {
-                  throw "Expected " + paramType + " argument";
+                  throw `Expected ${paramType} argument`;
                 } else {
                   args.push(arg);
                 }
               }
               macro.action(args, builder);
             } else {
-              throw "Unimplemented macro type " + typeof macro.action;
+              throw `Unimplemented macro type ${typeof macro.action}`;
             }
           } else if (token.type === "KEYWORD") {
             const op = token.op;
@@ -474,7 +473,7 @@ globalThis.ws_asm  = (function() {
                     pushInstruction(builder, op.constr, arg.data[i]);
                   }
                 } else {
-                  throw "Unexpected token " + arg.token;
+                  throw `Unexpected token: ${arg.token}`;
                 }
               } else if (op.param === "LABEL") {
                 if (arg.type === "TOKEN" || arg.type === "MACRO" || arg.type === "KEYWORD" || arg.type === "NUMBER") {
@@ -490,15 +489,15 @@ globalThis.ws_asm  = (function() {
                   throw "Expected label argument";
                 }
               } else {
-                throw "Unsupported argument type " + op.param + " (should never happen)"
+                throw `Unsupported argument type ${op.param} (should never happen)`
               }
             } else {
               pushInstruction(builder, op.constr);
             }
           } else if (token.token in builder.macros) {
-            throw "Incorrect argument types for macro " + token.token;
+            throw `Incorrect argument types for macro ${token.token}`;
           } else {
-            throw "Unexpected token " + token.token;
+            throw `Unexpected token: ${token.token}`;
           }
         } catch (err) {
           if (typeof err === "string") {

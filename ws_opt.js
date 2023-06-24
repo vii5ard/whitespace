@@ -61,7 +61,7 @@ globalThis.ws_opt = (function() {
         if (inst instanceof ws.WsJump || inst instanceof ws.WsJumpZ || inst instanceof ws.WsJumpNeg || inst instanceof ws.WsCall) {
           const target = shred.labelMap[inst.arg.token];
           if (typeof target === "undefined") {
-            throw "Undefined target in piece " + pieceNr;
+            throw `Undefined target in piece ${pieceNr}`;
           }
           if (target !== pieceNr) {
             if (inst instanceof ws.WsCall) {
