@@ -54,7 +54,7 @@ globalThis.ws_ide = (function () {
     const ext = getExtension(fn);
 
     for (let i = 0; i < vms.length; i++) {
-      if (vms[i].match('^vm/' + ext + '\\..*')) {
+      if (new RegExp('^vm/' + ext + '\\..*').test(vms[i])) {
         const vmExt = getExtension(vms[i]);
         if (vmExt === 'ws' || vmExt === 'wsa') {
           return [vms[i]];
@@ -78,7 +78,7 @@ globalThis.ws_ide = (function () {
 
     for (let i = 0; i < wcs.length; i++) {
       const expr = /^wc\/([^2]+)2(.+)\.wsa?$/;
-      if (!wcs[i].match(expr)) continue;
+      if (!expr.test(wcs[i])) continue;
       const e = {file: wcs[i]};
 
       e.from = e.file.replace(expr, '$1');
@@ -87,7 +87,7 @@ globalThis.ws_ide = (function () {
 
       e.to = e.file.replace(expr, '$2');
 
-      if (e.to.match(/^wsa?$/)) return [e];
+      if (/^wsa?$/.test(e.to)) return [e];
       const subPath = getCompilePath(e.to, wcs.slice(0, i).concat(wcs.slice(i + 1)));
       if (subPath.length > 0) return subPath.concat([e]);
     }
@@ -101,15 +101,15 @@ globalThis.ws_ide = (function () {
     const openFile = ws_ide.openFile;
     const ext = getExtension(openFile.name);
 
-    if (!ext.match(/^wsa?$/i)) return;
+    if (!/^wsa?$/i.test(ext)) return;
 
     const src = programSource();
     const errorDiv = $('#errorDiv');
     errorDiv.html('&nbsp;');
     try {
-      if (ext.match(/^ws$/i)) {
+      if (/^ws$/i.test(ext)) {
         ws_ide.program = ws.compile(src);
-      } else if (ext.match(/^wsa$/i)) {
+      } else if (/^wsa$/i.test(ext)) {
         ws_ide.program = ws_asm.compile(src);
       } else {
         errorDiv.text("Unable to compile file with the extension.");
@@ -123,7 +123,7 @@ globalThis.ws_ide = (function () {
       return;
     }
 
-    if (ext.match(/^wsa?$/i)) {
+    if (/^wsa?$/i.test(ext)) {
       const disasmSrc = ws_ide.program.getAsmSrc();
       for (const i in disasmSrc) {
         const ln = disasmSrc[i];
@@ -294,19 +294,19 @@ globalThis.ws_ide = (function () {
 
   const programRunnable = function() {
     const ext = getExtension(ws_ide.openFile.name);
-    if (ext.match(/^wsa?$/i)) return true;
+    if (/^wsa?$/i.test(ext)) return true;
     return ws_ide.getExecPath(ws_ide.openFile.name).length > 0;
   }
 
   const programCompilable = function() {
     const ext = getExtension(ws_ide.openFile.name);
-    if (ext.match(/^wsa$/i)) return true;
+    if (/^wsa$/i.test(ext)) return true;
     return getCompilePath(ext).length > 0;
   }
 
   const programOptimizable = function() {
     const ext = getExtension(ws_ide.openFile.name);
-    return !!ext.match(/^ws$/i);
+    return /^ws$/i.test(ext);
   }
 
   const showLang = function() {
@@ -512,7 +512,7 @@ globalThis.ws_ide = (function () {
           ws_ide.defaultFile.push(ws_ide.openFile.name);
         }
       }
-      if (file.name.match(/.*\.ws$/i)) {
+      if (/.*\.ws$/i.test(file.name)) {
         this.setHighlight(true);
       } else {
         this.setHighlight(false);
@@ -538,7 +538,7 @@ globalThis.ws_ide = (function () {
 
       const ext = getExtension(ws_ide.openFile.name);
       let execPath = [];
-      if (!ext.match(/^wsa?$/i)) {
+      if (!/^wsa?$/i.test(ext)) {
         execPath = ws_ide.getExecPath(ws_ide.openFile.name);
       }
 
@@ -804,7 +804,7 @@ globalThis.ws_ide = (function () {
       const ext = getExtension(ws_ide.openFile.name);
       const compilePath = getCompilePath(ext);
 
-      if (!ext.match(/wsa$/) && compilePath.length == 0) {
+      if (!/wsa$/.test(ext) && compilePath.length == 0) {
         logger.error("No way to compile program");
         return;
       }

@@ -1,6 +1,6 @@
 globalThis.ws_fs = function(metaFile) {
   const isValidFileName = function (fileName) {
-    return fileName.match(/^[a-zA-z0-9._() \/-]+$/);
+    return /^[a-zA-z0-9._() \/-]+$/.test(fileName);
   };
 
   const flush = function (files) {
@@ -85,9 +85,9 @@ globalThis.ws_fs = function(metaFile) {
       file.extFile = false;
 
       /* Update file language. */
-      if (file.name.match(/\.ws$/)) {
+      if (/\.ws$/.test(file.name)) {
         file.lang = "WS";
-      } else if (file.name.match(/\.wsa$/)) {
+      } else if (/\.wsa$/.test(file.name)) {
         file.lang = "WSA";
       } else {
         file.lang = "OTHER";
@@ -123,7 +123,7 @@ globalThis.ws_fs = function(metaFile) {
     getFileNames: function (pattern) {
       self.fileNames = [];
       for (const fileName in self.files) {
-        if (!pattern || fileName.match(pattern)) {
+        if (!pattern || pattern.test(fileName)) {
           self.fileNames.push(fileName);
         }
       }

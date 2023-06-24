@@ -1,7 +1,7 @@
 globalThis.ws_util = (function () {
   return {
     isLocalLabel: function (label) {
-      return label.match(/^\..*$/);
+      return /^\..*$/.test(label);
     },
 
     getWsUnsignedNumber: function (num) {
