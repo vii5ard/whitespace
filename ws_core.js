@@ -138,7 +138,13 @@ globalThis.ws = {
         this.register.IP = this.callStack.pop() + 1;
       },
       print: function (s) {
-        console.error('Print unimplemented: ' + s);
+        throw 'Print unimplemented';
+      },
+      readChar: function () {
+        throw 'Read char unimplemented';
+      },
+      readNum: function () {
+        throw 'Read num unimplemented';
       },
       beforeInstructionRun: function (env) {
       },

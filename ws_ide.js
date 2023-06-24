@@ -215,7 +215,7 @@ globalThis.ws_ide = (function () {
     try {
       return BigInt(numStr);
     } catch (e) {
-      throw "Illegal number entered!";
+      throw "Invalid number format: " + numStr.trim();
     }
   };
 

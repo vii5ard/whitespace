@@ -158,8 +158,76 @@ if (optimize) {
   program = ws_opt.optimize(program);
 }
 
+const run = function (program) {
+  const env = ws.env();
+
+  let buffer = '';
+  process.stdin.setEncoding('utf8');
+
+  const continueRun = function () {
+    try {
+      env.runProgram(program);
+      // Exit, so that it doesn't wait for stdin
+      process.exit();
+    } catch (err) {
+      if (err === 'IOWait') {
+        // Do nothing; continueRun will be called when IO is ready
+      } else {
+        abort(`Runtime error: ${err}`, 1);
+      }
+    }
+  };
+
+  env.print = function (val) {
+    process.stdout.write(val.toString());
+  };
+
+  const read = function () {
+    process.stdin.once('data', function (data) {
+      if (env.running) {
+        buffer += data.toString('utf8');
+        continueRun();
+      }
+    });
+    throw 'IOWait';
+  };
+
+  env.readChar = function () {
+    if (buffer !== '') {
+      const ch = Array.from(buffer)[0];
+      const codepoint = buffer.codePointAt(0);
+      if (codepoint == null || 0xd800 <= codepoint && codepoint <= 0xdfff) {
+        if (buffer.length > ch.length) {
+          throw 'Invalid UTF-8 byte sequence';
+        }
+        // Read other surrogate half
+      } else {
+        buffer = buffer.slice(ch.length);
+        return ch;
+      }
+    }
+    read();
+  };
+
+  env.readNum = function () {
+    const i = buffer.indexOf('\n');
+    if (i >= 0) {
+      const line = buffer.slice(0, i);
+      buffer = buffer.slice(i + 1);
+      try {
+        return BigInt(line);
+      } catch (err) {
+        throw `Invalid number format: ${line.trim()}`;
+      }
+    }
+    read();
+  };
+
+  continueRun();
+};
+
 if (mode === 'run') {
-  process.stdout.write('TODO\n');
+  run(program);
 } else if (mode === 'asm') {
   process.stdout.write(program.getWsSrc());
 } else if (mode === 'disasm') {
