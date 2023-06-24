@@ -59,7 +59,7 @@ globalThis.ws_asm  = (function() {
                 if (token.token in metaTypes) {
                   toks.push(params[pp++]);
                 } else {
-                  if (token.token.match(/^\$\d+$/)) {
+                  if (/^\$\d+$/.test(token.token)) {
                     token.token = ".__" + macroId + "__" + token.token + "__";
                   }
                   toks.push(token);
@@ -144,7 +144,7 @@ globalThis.ws_asm  = (function() {
 
   const parseWhitespace = function (strArr) {
     let space = "";
-    while (strArr.hasNext() && strArr.peek().match(/[ \t\n\r]/)) {
+    while (strArr.hasNext() && /[ \t\n\r]/.test(strArr.peek())) {
       space += strArr.getNext();
     }
     return {
@@ -168,7 +168,7 @@ globalThis.ws_asm  = (function() {
     let comment = "";
     do {
       comment += strArr.getNext();
-    } while (strArr.hasNext() && !comment.match(/{-[\s\S]*-}/));
+    } while (strArr.hasNext() && !/{-[\s\S]*-}/.test(comment));
     return {
       type: "COMMENT",
       token: comment
@@ -177,11 +177,11 @@ globalThis.ws_asm  = (function() {
 
   const parseNumber = function (strArr) {
     let numStr = "";
-    while (strArr.hasNext() && (numStr + strArr.peek()).match(/^[+-]?\d*$/)) {
+    while (strArr.hasNext() && /^[+-]?\d*$/.test(numStr + strArr.peek())) {
       numStr += strArr.getNext();
     }
 
-    if (strArr.hasNext() && !strArr.peek().match(/\s|\n|;/)) {
+    if (strArr.hasNext() && !/\s|\n|;/.test(strArr.peek())) {
       throw "Invalid character in number format";
     }
 
@@ -205,7 +205,7 @@ globalThis.ws_asm  = (function() {
     for (let i = 1; i < arr.length - 1; i++) {
       const ch = arr[i];
       if (chCode) {
-        if (ch.match(/[0-9]/)) {
+        if (/[0-9]/.test(ch)) {
           chCode += ch;
           continue;
         } else {
@@ -218,7 +218,7 @@ globalThis.ws_asm  = (function() {
           result.push(BigInt('\n'.charCodeAt(0)));
         } else if (ch === 't') {
           result.push(BigInt('\t'.charCodeAt(0)));
-        } else if (ch.match(/[0-9]/)) {
+        } else if (/[0-9]/.test(ch)) {
           chCode += ch;
         } else {
           result.push(BigInt(ch.charCodeAt(0)));
@@ -267,14 +267,14 @@ globalThis.ws_asm  = (function() {
 
   const parseLabel = function (strArr, builder) {
     let label = "";
-    while (strArr.hasNext() && strArr.peek().match(/[0-9a-zA-Z_$.]/)) {
+    while (strArr.hasNext() && /[0-9a-zA-Z_$.]/.test(strArr.peek())) {
       label += strArr.getNext();
     }
 
     let type = "TOKEN";
     if (strArr.hasNext()) {
       const next = strArr.peek();
-      if (!next.match(/\s|\n|:|;/)) {
+      if (!/\s|\n|:|;/.test(next)) {
         throw "Illegal character";
       } else if (next === ':') {
         strArr.getNext();
@@ -317,9 +317,9 @@ globalThis.ws_asm  = (function() {
           token = parseLineComment(strArr);
         } else if (next === '{' && strArr.peek(1) === '-') {
           token = parseMultiLineComment(strArr);
-        } else if (next.match(/["']/)) {
+        } else if (/["']/.test(next)) {
           token = parseString(strArr);
-        } else if (next.match(/[-+\d]/)) {
+        } else if (/[-+\d]/.test(next)) {
           token = parseNumber(strArr);
         } else {
           token = parseLabel(strArr, builder);
