@@ -231,7 +231,7 @@ globalThis.ws = {
       for (const label in this.labels) {
         const inst = this.programStack[this.labels[label]];
         if (inst) {
-          if ($.inArray(label, inst.labels) < 0) {
+          if (inst.labels.indexOf(label) < 0) {
             inst.labels.push(label);
           }
         } else {
