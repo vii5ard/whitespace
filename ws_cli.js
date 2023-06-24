@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const fs = require('fs');
 const path = require('path');
 const process = require('process');
@@ -11,8 +13,8 @@ const usage = `Usage: ws_cli.js [options] [--] <file>
 
 Modes:
   --run, -r      Interpret the program (default)
-  --asm, -a      Assemble the program to Whitespace
-  --disasm, -d   Disassemble the program to Whitespace assembly
+  --ws, -w       Dump the program as Whitespace
+  --wsa, -a      Dump the program as Whitespace assembly
 
 Options:
   --opt, -o      Optimize the program
@@ -36,10 +38,10 @@ for (let i = 2; i < process.argv.length; i++) {
   // Long options
   if (arg === '--run') {
     setMode('run');
-  } else if (arg === '--asm') {
-    setMode('asm');
-  } else if (arg === '--disasm') {
-    setMode('disasm');
+  } else if (arg === '--ws') {
+    setMode('ws');
+  } else if (arg === '--wsa') {
+    setMode('wsa');
   } else if (arg === '--opt') {
     optimize = true;
   } else if (arg === '--verbose') {
@@ -59,10 +61,10 @@ for (let i = 2; i < process.argv.length; i++) {
     for (const opt of arg.slice(1)) {
       if (opt === 'r') {
         setMode('run');
+      } else if (opt === 'w') {
+        setMode('ws');
       } else if (opt === 'a') {
-        setMode('asm');
-      } else if (opt === 'd') {
-        setMode('disasm');
+        setMode('wsa');
       } else if (opt === 'o') {
         optimize = true;
       } else if (opt === 'v') {
@@ -228,9 +230,9 @@ const run = function (program) {
 
 if (mode === 'run') {
   run(program);
-} else if (mode === 'asm') {
+} else if (mode === 'ws') {
   process.stdout.write(program.getWsSrc());
-} else if (mode === 'disasm') {
+} else if (mode === 'wsa') {
   for (const instr of program.getAsmSrc()) {
     let str = instr.str;
     // Do not indent labels
