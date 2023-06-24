@@ -455,7 +455,7 @@ globalThis.ws = {
   WsPrintChar: function() {
     this.run = function(env) {
       const ch = env.stackPop();
-      env.print(String.fromCharCode(Number(ch & 0xffffffffn)));
+      env.print(String.fromCodePoint(Number(ch & 0xffffffffn)));
       env.register.IP++;
     };
     this.getAsm = asmWithNoParam;
@@ -549,7 +549,7 @@ globalThis.ws = {
       if (typeof ch === "number") {
         val = ch;
       } else if (typeof ch === "string") {
-        val = ch.charCodeAt(0);
+        val = ch.codePointAt(0);
       }
       if (typeof val !== "undefined") {
         env.heap.store(addr, BigInt(val));

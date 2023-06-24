@@ -197,12 +197,10 @@ globalThis.ws_asm  = (function() {
   };
 
   const getStringArray = function (str) {
-    const arr = str.split('');
     const result = [];
     let escape = false;
     let chCode = "";
-    for (let i = 1; i < arr.length - 1; i++) {
-      const ch = arr[i];
+    for (const ch of str.slice(1, -1)) {
       if (chCode) {
         if (/[0-9]/.test(ch)) {
           chCode += ch;
@@ -220,19 +218,19 @@ globalThis.ws_asm  = (function() {
         } else if (/[0-9]/.test(ch)) {
           chCode += ch;
         } else {
-          result.push(BigInt(ch.charCodeAt(0)));
+          result.push(BigInt(ch.codePointAt(0)));
         }
         escape = false;
       } else if (ch === '\\') {
         escape = true;
       } else {
-        result.push(BigInt(ch.charCodeAt(0)));
+        result.push(BigInt(ch.codePointAt(0)));
       }
     }
     if (chCode) {
       result.push(BigInt(chCode));
     }
-    if (arr[0] === '"') {
+    if (str[0] === '"') {
       result.push(0n);
     }
     return result;

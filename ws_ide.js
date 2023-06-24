@@ -563,9 +563,9 @@ globalThis.ws_ide = (function () {
         }
 
         for (let i = 1; i < execPath.length; i++) {
-          ws_ide.inputStream = ws_fs.openFile(ws_fs.getFile(execPath[i])).split('').concat([null]);
+          ws_ide.inputStream = [...ws_fs.openFile(ws_fs.getFile(execPath[i])), null];
         }
-        ws_ide.inputStream = ws_ide.openFile.src.split('').concat([null]);
+        ws_ide.inputStream = [...ws_ide.openFile.src, null];
 
         ws_ide.initEnv();
         ws_ide.env.running = true;
@@ -672,7 +672,7 @@ globalThis.ws_ide = (function () {
     handleUserInput: function (selector, code) {
       if (typeof code === 'undefined') code = '\n';
 
-      ws_ide.inputStream = ws_ide.inputStream.concat(code.split(''));
+      ws_ide.inputStream = ws_ide.inputStream.concat([...code]);
       this.continueRun();
       return false;
     },
@@ -816,9 +816,9 @@ globalThis.ws_ide = (function () {
 
         ws_ide.inputStream = [];
         for (let i = 1; i < compilePath.length; i++) {
-          ws_ide.inputStream = ws_ide.inputStream.concat(ws_fs.openFile(ws_fs.getFile(compilePath[i].file)).split('').concat([null]));
+          ws_ide.inputStream = ws_ide.inputStream.concat([...ws_fs.openFile(ws_fs.getFile(compilePath[i].file)), null]);
         }
-        ws_ide.inputStream = ws_ide.inputStream.concat(ws_ide.openFile.src.split('').concat([null]));
+        ws_ide.inputStream = ws_ide.inputStream.concat([...ws_ide.openFile.src, null]);
         ws_ide.initEnv();
         ws_ide.env.running = true;
         let output = '';
