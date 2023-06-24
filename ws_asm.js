@@ -195,14 +195,20 @@ globalThis.ws_asm  = (function() {
       numStr += strArr.getNext();
     }
 
-    if (strArr.hasNext() && !/\s|\n|;/.test(strArr.peek())) {
+    if (strArr.hasNext() && !/\s|\n|:|;/.test(strArr.peek())) {
       throw "Invalid character in number format";
+    }
+
+    let type = "NUMBER";
+    if (strArr.peek() === ":") {
+      strArr.getNext();
+      type = "LABEL";
     }
 
     try {
       const data = BigInt(numStr);
       return {
-        type: "NUMBER",
+        type: type,
         token: numStr,
         data: data
       };
@@ -431,11 +437,8 @@ globalThis.ws_asm  = (function() {
             } else {
               // Mnemonic-style label
               const arg = builder.tokens.shift();
-              if (!arg) {
-                throw "Missing label";
-              }
-              if (arg.type !== "TOKEN" && arg.type !== "MACRO" && arg.type !== "KEYWORD") {
-                throw "Invalid label";
+              if (!arg || arg.type !== "TOKEN" && arg.type !== "MACRO" && arg.type !== "KEYWORD" && arg.type !== "NUMBER") {
+                throw "Expected label argument";
               }
               labelAsm = arg.token;
             }
@@ -494,7 +497,7 @@ globalThis.ws_asm  = (function() {
                   throw "Unexpected token " + arg.token;
                 }
               } else if (op.param === "LABEL") {
-                if (arg.type === "TOKEN" || arg.type === "MACRO" || arg.type === "KEYWORD") {
+                if (arg.type === "TOKEN" || arg.type === "MACRO" || arg.type === "KEYWORD" || arg.type === "NUMBER") {
                   instruction = new op.constr();
                   let label = arg.token;
                   if (ws_util.isLocalLabel(label)) label = parentLabel + label;
