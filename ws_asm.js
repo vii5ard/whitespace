@@ -164,10 +164,25 @@ globalThis.ws_asm  = (function() {
   };
 
   const parseMultiLineComment = function (strArr) {
+    let depth = 0;
     let comment = "";
-    do {
-      comment += strArr.getNext();
-    } while (strArr.hasNext() && !/{-[\s\S]*-}/.test(comment));
+    while (true) {
+      if (!strArr.hasNext()) {
+        throw "Unterminated multiline comment";
+      }
+      const ch = strArr.getNext();
+      comment += ch;
+      if (ch === "{" && strArr.peek() === "-") {
+        depth += 1;
+        comment += strArr.getNext();
+      } else if (ch === "-" && strArr.peek() === "}") {
+        depth -= 1;
+        comment += strArr.getNext();
+        if (depth === 0) {
+          break;
+        }
+      }
+    }
     return {
       type: "COMMENT",
       token: comment
