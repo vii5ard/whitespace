@@ -423,36 +423,36 @@ globalThis.ws_asm  = (function() {
         const token = builder.tokens.shift();
         const meta = token.meta;
         try {
-          if (token.type === "LABEL") {
-            let label = token.token;
-            if (ws_util.isLocalLabel(label)) {
-              label = parentLabel + label;
+          if (token.type === "LABEL" || (token.op && token.op.constr === ws.WsLabel)) {
+            let labelAsm;
+            if (token.type === "LABEL") {
+              // Colon-style label
+              labelAsm = token.token;
             } else {
-              parentLabel = label;
+              // Mnemonic-style label
+              const arg = builder.tokens.shift();
+              if (!arg) {
+                throw "Missing label";
+              }
+              if (arg.type !== "TOKEN" && arg.type !== "MACRO" && arg.type !== "KEYWORD") {
+                throw "Invalid label";
+              }
+              labelAsm = arg.token;
             }
 
-            if (typeof builder.labels[labeler.getLabel(label)] === "number") {
-              throw "Multiple definitions of label " + label;
+            if (ws_util.isLocalLabel(labelAsm)) {
+              labelAsm = parentLabel + labelAsm;
+            } else {
+              parentLabel = labelAsm;
             }
 
-            builder.labels[labeler.getLabel(label)] = builder.programStack.length;
-            builder.asmLabels[labeler.getLabel(label)] = label;
-          } else if (token.op && token.op.constr === ws.WsLabel) {
-            const arg = builder.tokens.shift();
-            if (!arg) {
-              throw "Missing label";
-            }
-            if (arg.type !== "TOKEN") {
-              throw "Invalid label";
+            const label = labeler.getLabel(labelAsm);
+            if (typeof builder.labels[label] === "number") {
+              throw "Multiple definitions of label " + labelAsm;
             }
 
-            const label = arg.token;
-            if (builder.labels[labeler.getLabel(label)]) {
-              throw "Multiple definitions of label " + label;
-            }
-
-            builder.labels[labeler.getLabel(label)] = builder.programStack.length;
-            builder.asmLabels[labeler.getLabel(label)] = label;
+            builder.labels[label] = builder.programStack.length;
+            builder.asmLabels[label] = labelAsm;
           } else if (token.token in builder.macros && checkMacroArgs(token.token, builder)) {
             token.type = "MACRO"; // can be label in some cases
             const macro = builder.macros[token.token];
@@ -494,14 +494,18 @@ globalThis.ws_asm  = (function() {
                   throw "Unexpected token " + arg.token;
                 }
               } else if (op.param === "LABEL") {
-                instruction = new op.constr();
-                let label = arg.token;
-                if (ws_util.isLocalLabel(label)) label = parentLabel + label;
+                if (arg.type === "TOKEN" || arg.type === "MACRO" || arg.type === "KEYWORD") {
+                  instruction = new op.constr();
+                  let label = arg.token;
+                  if (ws_util.isLocalLabel(label)) label = parentLabel + label;
 
-                instruction.arg = {
-                  token: labeler.getLabel(label), value: null, label: label
-                };
-                builder.pushInstruction(instruction);
+                  instruction.arg = {
+                    token: labeler.getLabel(label), value: null, label: label
+                  };
+                  builder.pushInstruction(instruction);
+                } else {
+                  throw "Expected label argument";
+                }
               } else {
                 throw "Unsupported argument type " + op.param + " (should never happen)."
               }
