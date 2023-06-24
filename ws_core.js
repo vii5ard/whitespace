@@ -32,14 +32,14 @@
     return sourceTokens[token];
   };
 
-  const parseParam = function (tokenizer) {
+  const parseArg = function (tokenizer) {
     let sign = 0;
     let value = 0;
-    let paramStr = '';
+    let argStr = '';
     while (tokenizer.hasNext()) {
       const token = tokenizer.getNext();
       if (!isSource(token)) continue;
-      paramStr += token;
+      argStr += token;
       if (token === '\n') break;
       if (!sign) {
         sign = {' ': 1, '\t': -1}[token];
@@ -47,9 +47,9 @@
         value = (value << 1) + {' ': 0, '\t': 1}[token];
       }
     }
-    return {token: paramStr, value: BigInt(sign * value)};
+    return {token: argStr, value: BigInt(sign * value)};
   };
-  const asmObject = function (labels, mnemo, paramVal, paramLabel) {
+  const asmObject = function (labels, mnemo, valArg, labelArg) {
     let replaceLabels = [];
     if (labels != null) {
       replaceLabels = labels.slice(0);
@@ -57,26 +57,26 @@
     return {
       labels: replaceLabels,
       mnemo: mnemo,
-      param: {val: paramVal, label: paramLabel}
+      arg: {val: valArg, label: labelArg}
     };
   };
 
   const asmWithValueParam = function () {
     return asmObject(this.labels,
-        this.mnemoCode,
-        this.param.value,
+        this.mnemo,
+        this.arg.value,
         null);
   };
 
   const asmWithLabelParam = function () {
     return asmObject(this.labels,
-        this.mnemoCode,
+        this.mnemo,
         null,
-        this.param.token);
+        this.arg.token);
   };
 
   const asmWithNoParam = function () {
-    return asmObject(this.labels, this.mnemoCode, null);
+    return asmObject(this.labels, this.mnemo, null);
   };
 
   /*
@@ -168,9 +168,9 @@ globalThis.ws = {
       }
       if (parser.instFn) {
         const instruction = new parser.instFn();
-        if (instruction.paramType != null) {
-          instruction.param = parseParam(tokenizer);
-          if (!instruction.param.token) {
+        if (instruction.argType != null) {
+          instruction.arg = parseArg(tokenizer);
+          if (!instruction.arg.token) {
             throw {
               program: builder.postProcess(),
               message: 'Unexpected EOF'
@@ -238,7 +238,7 @@ globalThis.ws = {
           // Label to void
           const labelInst = new ws.WsLabel();
           labelInst.address = this.programStack.length;
-          labelInst.param = {token: label};
+          labelInst.arg = {token: label};
           labelInst.labels = [];
           this.programStack.push(labelInst);
         }
@@ -261,11 +261,11 @@ globalThis.ws = {
         }
 
         let instrStr = ln.mnemo;
-        if (ln.param.label != null) {
-          instrStr += " " + (this.asmLabels[ln.param.label] || labeler.getLabel(ln.param.label));
+        if (ln.arg.label != null) {
+          instrStr += " " + (this.asmLabels[ln.arg.label] || labeler.getLabel(ln.arg.label));
         }
-        if (ln.param.val != null) {
-          instrStr += " " + ln.param.val;
+        if (ln.arg.val != null) {
+          instrStr += " " + ln.arg.val;
         }
         src.push({IP:i, str: instrStr});
       }
@@ -280,9 +280,9 @@ globalThis.ws = {
           src += '\n  ' + label;
         }
         src += inst.wsToken;
-        const par = inst.param;
-        if (par) {
-          src += par.token;
+        const arg = inst.arg;
+        if (arg) {
+          src += arg.token;
         }
       }
       return src;
@@ -297,7 +297,7 @@ globalThis.ws = {
 
   WsPush: function() {
     this.run = function (env) {
-      env.stackPush(this.param.value);
+      env.stackPush(this.arg.value);
       env.register.IP++;
     };
     this.getAsm = asmWithValueParam;
@@ -313,7 +313,7 @@ globalThis.ws = {
 
   WsCopyNth: function() {
     this.run = function (env) {
-      const actualPos = env.register.SP - Number(this.param.value) - 1;
+      const actualPos = env.register.SP - Number(this.arg.value) - 1;
       env.stackPush(env.stack[actualPos]);
       env.register.IP++;
     }
@@ -343,7 +343,7 @@ globalThis.ws = {
   WsSlide: function() {
     this.run = function(env) {
       const top = env.stackPop();
-      env.register.SP -= Number(this.param.value);
+      env.register.SP -= Number(this.arg.value);
       env.stackPush(top);
       env.register.IP++;
     }
@@ -431,7 +431,7 @@ globalThis.ws = {
    */
   WsLabel: function() {
     this.apply = function(compiler) {
-      compiler.labels[this.param.token] = compiler.programStack.length;
+      compiler.labels[this.arg.token] = compiler.programStack.length;
     };
     this.getAsm = asmWithLabelParam;
   },
@@ -467,10 +467,10 @@ globalThis.ws = {
       env.register.IP = this.callableI;
     };
     this.postProcess = function(compiler) {
-      if (!(this.param.token in compiler.labels)) {
-        throw "Missing label " + this.param.label;
+      if (!(this.arg.token in compiler.labels)) {
+        throw "Missing label " + this.arg.label;
       }
-      this.callableI = compiler.labels[this.param.token];
+      this.callableI = compiler.labels[this.arg.token];
     };
     this.getAsm = asmWithLabelParam;
   },
@@ -480,10 +480,10 @@ globalThis.ws = {
       env.register.IP = this.nextI;
     };
     this.postProcess = function(compiler) {
-      if (!(this.param.token in compiler.labels)) {
-        throw "Missing label " + this.param.label;
+      if (!(this.arg.token in compiler.labels)) {
+        throw "Missing label " + this.arg.label;
       }
-      this.nextI = compiler.labels[this.param.token];
+      this.nextI = compiler.labels[this.arg.token];
     };
     this.getAsm = asmWithLabelParam;
   },
@@ -498,10 +498,10 @@ globalThis.ws = {
       }
     };
     this.postProcess = function(compiler) {
-      if (!(this.param.token in compiler.labels)) {
-        throw "Missing label " + this.param.label;
+      if (!(this.arg.token in compiler.labels)) {
+        throw "Missing label " + this.arg.label;
       }
-      this.successI = compiler.labels[this.param.token];
+      this.successI = compiler.labels[this.arg.token];
     };
     this.getAsm = asmWithLabelParam;
   },
@@ -516,10 +516,10 @@ globalThis.ws = {
       }
     }
     this.postProcess = function(compiler) {
-      if (!(this.param.token in compiler.labels)) {
-        throw "Missing label " + this.param.label;
+      if (!(this.arg.token in compiler.labels)) {
+        throw "Missing label " + this.arg.label;
       }
-      this.successI = compiler.labels[this.param.token];
+      this.successI = compiler.labels[this.arg.token];
     }
     this.getAsm = asmWithLabelParam;
   },
@@ -567,13 +567,13 @@ globalThis.ws = {
     { ws: ' \n\t',    mnemo: 'swap',     constr: ws.WsSwapTop,        param: null },
     { ws: ' \n\n',    mnemo: 'drop',     constr: ws.WsDropTop,        param: null },
     { ws: ' \t\n',    mnemo: 'slide',    constr: ws.WsSlide,          param: "NUMBER" },
-    { ws: '\t   ',    mnemo: 'add',      constr: ws.WsAddition,       param: null,    optparam: 'NUMBER' },
-    { ws: '\t  \t',   mnemo: 'sub',      constr: ws.WsSubtraction,    param: null,    optparam: 'NUMBER' },
-    { ws: '\t  \n',   mnemo: 'mul',      constr: ws.WsMultiplication, param: null,    optparam: 'NUMBER' },
-    { ws: '\t \t ',   mnemo: 'div',      constr: ws.WsIntDivision,    param: null,    optparam: 'NUMBER' },
-    { ws: '\t \t\t',  mnemo: 'mod',      constr: ws.WsModulo,         param: null,    optparam: 'NUMBER' },
+    { ws: '\t   ',    mnemo: 'add',      constr: ws.WsAddition,       param: null,    optParam: 'NUMBER' },
+    { ws: '\t  \t',   mnemo: 'sub',      constr: ws.WsSubtraction,    param: null,    optParam: 'NUMBER' },
+    { ws: '\t  \n',   mnemo: 'mul',      constr: ws.WsMultiplication, param: null,    optParam: 'NUMBER' },
+    { ws: '\t \t ',   mnemo: 'div',      constr: ws.WsIntDivision,    param: null,    optParam: 'NUMBER' },
+    { ws: '\t \t\t',  mnemo: 'mod',      constr: ws.WsModulo,         param: null,    optParam: 'NUMBER' },
     { ws: '\t\t ',    mnemo: 'store',    constr: ws.WsHeapStore,      param: null },
-    { ws: '\t\t\t',   mnemo: 'retrieve', constr: ws.WsHeapRetrieve,   param: null,    optparam: 'NUMBER' },
+    { ws: '\t\t\t',   mnemo: 'retrieve', constr: ws.WsHeapRetrieve,   param: null,    optParam: 'NUMBER' },
     { ws: '\n  ',     mnemo: 'label',    constr: ws.WsLabel,          param: "LABEL" },
     { ws: '\n \t',    mnemo: 'call',     constr: ws.WsCall,           param: "LABEL" },
     { ws: '\n \n',    mnemo: 'jmp',      constr: ws.WsJump,           param: "LABEL" },
@@ -583,14 +583,14 @@ globalThis.ws = {
     { ws: '\n\n\n',   mnemo: 'end',      constr: ws.WsEndProgram,     param: null },
     { ws: '\t\n  ',   mnemo: 'printc',   constr: ws.WsPrintChar,      param: null },
     { ws: '\t\n \t',  mnemo: 'printi',   constr: ws.WsPrintNum,       param: null },
-    { ws: '\t\n\t ',  mnemo: 'readc',    constr: ws.WsReadChar,       param: null,    optparam: 'NUMBER' },
-    { ws: '\t\n\t\t', mnemo: 'readi',    constr: ws.WsReadNum,        param: null,    optparam: 'NUMBER' }
+    { ws: '\t\n\t ',  mnemo: 'readc',    constr: ws.WsReadChar,       param: null,    optParam: 'NUMBER' },
+    { ws: '\t\n\t\t', mnemo: 'readi',    constr: ws.WsReadNum,        param: null,    optParam: 'NUMBER' }
   ];
 
   for (const keyword of ws.keywords) {
     const constr = keyword.constr;
-    constr.prototype.mnemoCode = keyword.mnemo;
-    constr.prototype.paramType = keyword.param;
+    constr.prototype.mnemo = keyword.mnemo;
+    constr.prototype.argType = keyword.param;
   }
 
 

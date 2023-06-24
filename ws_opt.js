@@ -59,7 +59,7 @@ globalThis.ws_opt = (function() {
       const piece = shred.pieces[pieceNr];
       for (const inst of piece.stack) {
         if (inst instanceof ws.WsJump || inst instanceof ws.WsJumpZ || inst instanceof ws.WsJumpNeg || inst instanceof ws.WsCall) {
-          const target = shred.labelMap[inst.param.token];
+          const target = shred.labelMap[inst.arg.token];
           if (typeof target === "undefined") {
             throw "Undefined target in piece " + pieceNr;
           }
@@ -152,7 +152,7 @@ globalThis.ws_opt = (function() {
   };
 
   const getTarget = function (inst, shred) {
-    return shred.pieces[shred.labelMap[inst.param.token]];
+    return shred.pieces[shred.labelMap[inst.arg.token]];
   };
 
   const inlinePiece = function (piece, shred) {
@@ -207,7 +207,7 @@ globalThis.ws_opt = (function() {
                 }
               }
               const jmpInst = new ws.WsJump();
-              jmpInst.param = {token: retLabel};
+              jmpInst.arg = {token: retLabel};
               newStack.push(jmpInst);
             }
           }
@@ -240,7 +240,7 @@ globalThis.ws_opt = (function() {
           inst instanceof ws.WsJumpZ ||
           inst instanceof ws.WsJumpNeg
       ) {
-        const ref = prog.labels[inst.param.token];
+        const ref = prog.labels[inst.arg.token];
         refCount[ref] = (refCount[ref] || 0n) + 1n
       }
     }
@@ -267,7 +267,7 @@ globalThis.ws_opt = (function() {
       }
 
       if (inst instanceof ws.WsCall || inst instanceof ws.WsJump || inst instanceof ws.WsJumpZ || inst instanceof ws.WsJumpNeg) {
-        inst.param.token = refLabel[prog.labels[inst.param.token]];
+        inst.arg.token = refLabel[prog.labels[inst.arg.token]];
       }
     }
 
