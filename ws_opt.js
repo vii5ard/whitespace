@@ -4,8 +4,8 @@ globalThis.ws_opt = (function() {
   };
 
   const labelRef = function (labelMap, labels, ref) {
-    for (const l in labels) {
-      labelMap[labels[l]] = ref;
+    for (const label of labels) {
+      labelMap[label] = ref;
     }
   };
 
@@ -29,8 +29,7 @@ globalThis.ws_opt = (function() {
     const pieces = [];
     let currentStack = [];
     let ignorePieceEnd = false;
-    for (const pp in prog.programStack) {
-      const inst = prog.programStack[pp];
+    for (const inst of prog.programStack) {
       if (inst.labels) {
         if (currentStack.length > 0) {
           pieces.push(makePiece(currentStack, !ignorePieceEnd));
@@ -58,8 +57,7 @@ globalThis.ws_opt = (function() {
     for (let pieceNr in shred.pieces) {
       pieceNr = parseInt(pieceNr);
       const piece = shred.pieces[pieceNr];
-      for (const ip in piece.stack) {
-        const inst = piece.stack[ip];
+      for (const inst of piece.stack) {
         if (inst instanceof ws.WsJump || inst instanceof ws.WsJumpZ || inst instanceof ws.WsJumpNeg || inst instanceof ws.WsCall) {
           const target = shred.labelMap[inst.param.token];
           if (typeof target === "undefined") {
@@ -110,8 +108,8 @@ globalThis.ws_opt = (function() {
       }
 
       const targets = Object.keys(piece.callsTo).concat(Object.keys(piece.jumpsTo));
-      for (const t in targets) {
-        reachables.push(targets[t]);
+      for (const target of targets) {
+        reachables.push(target);
       }
     }
   };
@@ -119,8 +117,7 @@ globalThis.ws_opt = (function() {
   const pushPiece = function (builder, piece) {
     if (piece.done) return; // inlining
     if (!piece.reachable) return; // unreachable code
-    for (const iNr in piece.stack) {
-      const inst = piece.stack[iNr];
+    for (const inst of piece.stack) {
       if (inst instanceof LabelPlaceholder) {
         builder.pendingLabels = builder.pendingLabels.concat(inst.labels);
         continue;
@@ -131,7 +128,7 @@ globalThis.ws_opt = (function() {
         inst.labels = inst.labels.concat(builder.pendingLabels);
         builder.pendingLabels = [];
       }
-      builder.pushInstruction(piece.stack[iNr]);
+      builder.pushInstruction(inst);
     }
   };
 
@@ -230,16 +227,14 @@ globalThis.ws_opt = (function() {
   };
 
   const inlineShred = function (shred) {
-    for (const pieceNr in shred.pieces) {
-      const piece = shred.pieces[pieceNr];
+    for (const piece of shred.pieces) {
       inlinePiece(piece, shred);
     }
   };
 
   const reduceLabels = function (prog) {
     const refCount = {};
-    for (const iNr in prog.programStack) {
-      const inst = prog.programStack[iNr];
+    for (const inst of prog.programStack) {
       if (inst instanceof ws.WsCall ||
           inst instanceof ws.WsJump ||
           inst instanceof ws.WsJumpZ ||

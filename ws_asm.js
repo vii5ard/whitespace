@@ -54,8 +54,8 @@ globalThis.ws_asm  = (function() {
 
               const toks = [];
               let pp = 1;
-              for (const t in this.tokens) {
-                const token = Object.assign({}, this.tokens[t]);
+              for (const t of this.tokens) {
+                const token = Object.assign({}, t);
                 if (token.token in metaTypes) {
                   toks.push(params[pp++]);
                 } else {
@@ -134,8 +134,7 @@ globalThis.ws_asm  = (function() {
   const mnemo = (function () {
     const mnemoCodes = {};
     // Collect keywords
-    for (const i in ws.keywords) {
-      const keyword = ws.keywords[i];
+    for (const keyword of ws.keywords) {
       mnemoCodes[keyword.mnemo] = keyword;
     }
 
@@ -360,8 +359,7 @@ globalThis.ws_asm  = (function() {
   const postProcess = function (builder) {
     while (builder.externals.length > 0) {
       const ext = builder.externals.shift();
-      for (const i in ext.programStack) {
-        const inst = ext.programStack[i];
+      for (const inst of ext.programStack) {
         builder.pushInstruction(inst);
       }
     }
@@ -372,8 +370,7 @@ globalThis.ws_asm  = (function() {
     const macro = builder.macros[token];
     if (typeof macro.action == "function") {
       let n = 0;
-      for (const p in macro.param) {
-        const paramType = macro.param[p];
+      for (const paramType of macro.param) {
         const parToken = builder.tokens[n++];
         if (!parToken || parToken.type != paramType) {
           return false;
@@ -448,8 +445,7 @@ globalThis.ws_asm  = (function() {
             const macro = builder.macros[token.token];
             if (typeof macro.action == "function") {
               const params = [token];
-              for (const p in macro.param) {
-                const paramType = macro.param[p];
+              for (const paramType of macro.param) {
                 const parToken = builder.tokens.shift();
                 if (!parToken || parToken.type != paramType) {
                   throw "Expected " + paramType;

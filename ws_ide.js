@@ -125,8 +125,7 @@ globalThis.ws_ide = (function () {
 
     if (/^wsa?$/i.test(ext)) {
       const disasmSrc = ws_ide.program.getAsmSrc();
-      for (const i in disasmSrc) {
-        const ln = disasmSrc[i];
+      for (const ln of disasmSrc) {
         const div = $('<div class="asmLine"></div>');
         div.text(ln.str);
 
@@ -266,9 +265,8 @@ globalThis.ws_ide = (function () {
     const sortedFileNames = ws_fs.getFileNames();
 
     let id = 0;
-    for (const i in sortedFileNames) {
+    for (const fileName of sortedFileNames) {
       ++id;
-      const fileName = sortedFileNames[i];
       const file = ws_fs.getFile(fileName);
       const line = $('<div id="file_' + id + '" title="' + fileName + '"></div>');
       line.addClass('fileEntry');
