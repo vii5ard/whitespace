@@ -9,29 +9,42 @@ const abort = function (err, code) {
 
 const usage = `Usage: ws_cli.js [options] [--] <file>
 
-  --run, -r      Interpret the program
+Modes:
+  --run, -r      Interpret the program (default)
   --asm, -a      Assemble the program to Whitespace
   --disasm, -d   Disassemble the program to Whitespace assembly
+
+Options:
+  --opt, -o      Optimize the program
   --verbose, -v  Use verbose output
   --help, -h     Print help`;
 
 let filename = null;
 let mode = null;
+let optimize = false;
 let verbose = false;
+
+const setMode = function (newMode) {
+  if (mode != null && newMode !== mode) {
+    abort(`Usage error: Mode '${mode}' is mutually exclusive with '${newMode}'`, 2);
+  }
+  mode = newMode;
+};
 
 for (let i = 2; i < process.argv.length; i++) {
   const arg = process.argv[i];
-  let newMode = null;
-  if (arg === '--run' || arg === '-r') {
-    newMode = 'run';
-  } else if (arg === '--asm' || arg === '-a') {
-    newMode = 'asm';
-  } else if (arg === '--disasm' || arg === '-d') {
-    newMode = 'disasm';
-  } else if (arg === '--verbose' || arg === '-v') {
+  // Long options
+  if (arg === '--run') {
+    setMode('run');
+  } else if (arg === '--asm') {
+    setMode('asm');
+  } else if (arg === '--disasm') {
+    setMode('disasm');
+  } else if (arg === '--opt') {
+    optimize = true;
+  } else if (arg === '--verbose') {
     verbose = true;
-    continue;
-  } else if (arg === '--help' || arg === '-h') {
+  } else if (arg === '--help') {
     abort(usage);
   } else if (arg === '--') {
     if (filename != null) {
@@ -39,20 +52,33 @@ for (let i = 2; i < process.argv.length; i++) {
     }
     filename = process.argv[i + 1];
     break;
-  } else if (arg.startsWith('-')) {
+  } else if (arg.startsWith('--')) {
     abort(`Usage error: Unknown option: '${arg}'`, 2);
+  } else if (arg.startsWith('-')) {
+    // Short options
+    for (const opt of arg.slice(1)) {
+      if (opt === 'r') {
+        setMode('run');
+      } else if (opt === 'a') {
+        setMode('asm');
+      } else if (opt === 'd') {
+        setMode('disasm');
+      } else if (opt === 'o') {
+        optimize = true;
+      } else if (opt === 'v') {
+        verbose = true;
+      } else if (opt === 'h') {
+        abort(usage);
+      } else {
+        abort(`Usage error: Unknown option: '-${opt}'`, 2);
+      }
+    }
   } else {
-    if (filename == null) {
-      filename = arg;
-      continue;
-    } else {
+    if (filename != null) {
       abort('Usage error: Too many arguments', 2);
     }
+    filename = arg;
   }
-  if (mode != null && newMode !== mode) {
-    abort(`Usage error: Mode '${mode}' is mutually exclusive with '${newMode}'`, 2);
-  }
-  mode = newMode;
 }
 
 if (filename == null) {
@@ -104,6 +130,7 @@ globalThis.ws_fs = (function () {
 require('./ws_util.js');
 require('./ws_core.js');
 require('./ws_asm.js');
+require('./ws_opt.js');
 
 let compile;
 if (/\.ws$/i.test(filename)) {
@@ -126,6 +153,9 @@ try {
   program = compile(src);
 } catch (err) {
   abort(`Compile error: ${err.message || err}`, 1);
+}
+if (optimize) {
+  program = ws_opt.optimize(program);
 }
 
 if (mode === 'run') {
