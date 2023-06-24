@@ -38,7 +38,7 @@ globalThis.ws_asm  = (function() {
         params: ["LABEL"],
         action: function (args, builder) {
           const metaTypes = {"$number": "NUMBER", "$label": "TOKEN", "$string": "STRING"};
-          const macroLabel = args[1].token.replace(/:$/, "");
+          const macroLabel = args[1].token;
           let closed = false;
 
           const newMacro = {
@@ -195,14 +195,10 @@ globalThis.ws_asm  = (function() {
       numStr += strArr.getNext();
     }
 
-    if (strArr.hasNext() && !/\s|\n|:|;/.test(strArr.peek())) {
-      throw "Invalid character in number format";
-    }
-
     let type = "NUMBER";
     if (strArr.peek() === ":") {
-      strArr.getNext();
       type = "LABEL";
+      strArr.getNext();
     }
 
     try {
@@ -258,28 +254,26 @@ globalThis.ws_asm  = (function() {
   };
 
   const parseString = function (strArr) {
-    const strEnd = strArr.peek();
-    let str = strArr.getNext();
-    let escape = false;
-    while (strArr.hasNext() && (escape || strArr.peek() != strEnd)) {
-      if (strArr.peek() == '\\') {
-        escape = true;
-      } else {
-        escape = false;
+    const strEnd = strArr.getNext();
+    let str = strEnd;
+    while (true) {
+      if (!strArr.hasNext()) {
+        throw "Unterminated string";
       }
-      if (strArr.peek() == '\n' && !escape) {
+      const ch = strArr.getNext();
+      str += ch;
+      if (ch === strEnd) {
+        break;
+      } else if (ch === '\n') {
         throw "Unexpected end of line";
+      } else if (ch === '\\' && strArr.hasNext()) {
+        str += strArr.getNext();
       }
-      str += strArr.getNext();
-    }
-    if (!strArr.hasNext || strArr.peek() != strEnd) {
-      throw "Unterminated string";
-    } else {
-      str += strArr.getNext();
     }
     return {
       type: "STRING",
-      token: str
+      token: str,
+      data: getStringArray(str)
     };
   };
 
@@ -290,24 +284,15 @@ globalThis.ws_asm  = (function() {
     }
 
     let type = "TOKEN";
-    if (strArr.hasNext()) {
-      const next = strArr.peek();
-      if (!/\s|\n|:|;/.test(next)) {
-        throw "Illegal character";
-      } else if (next === ':') {
-        strArr.getNext();
-        type = "LABEL";
-      }
-    }
-
     let op = null;
-    if (type === "TOKEN") {
-      if (label in mnemo) {
-        type = "KEYWORD";
-        op = mnemo[label];
-      } else if (label in builder.macros) {
-        type = "MACRO";
-      }
+    if (strArr.peek() === ':') {
+      type = "LABEL";
+      strArr.getNext();
+    } else if (label in mnemo) {
+      type = "KEYWORD";
+      op = mnemo[label];
+    } else if (label in builder.macros) {
+      type = "MACRO";
     }
 
     return {
@@ -319,8 +304,10 @@ globalThis.ws_asm  = (function() {
 
   const getTokens = function (strArr, builder) {
     const tokens = [];
+    let prevSpace = true;
     while (strArr.hasNext()) {
       if (parseWhitespace(strArr).token) {
+        prevSpace = true;
         continue;
       }
       const meta = {
@@ -339,30 +326,45 @@ globalThis.ws_asm  = (function() {
           token = parseString(strArr);
         } else if (/[-+\d]/.test(next)) {
           token = parseNumber(strArr);
-        } else {
+        } else if (/[a-zA-Z_$.]/.test(next)) {
           token = parseLabel(strArr, builder);
+        } else {
+          throw "Illegal character: '" + next + "'";
         }
       } catch (err) {
         if (typeof err === "string") {
           throw {
             tokens: tokens,
             meta: meta,
-            message: err + " at line " + meta.line,
-            line: meta.line
-          }
+            message: err + " on line " + meta.line,
+            line: meta.line,
+            col: meta.col
+          };
         } else {
           throw err;
         }
       }
-
       token.meta = meta;
 
-      if (token.type === "STRING") {
-        token.data = getStringArray(token.token);
+      if (token.type === "COMMENT") {
+        prevSpace = true;
+        continue;
       }
-      if (token.type !== "COMMENT") {
-        tokens.push(token);
+
+      if (!prevSpace) {
+        const err = "Missing space between " + tokens[tokens.length-1].token + " and " + token.token;
+        throw {
+          tokens: tokens,
+          meta: meta,
+          message: err + " on line " + meta.line,
+          line: meta.line,
+          col: meta.col
+        };
       }
+      // Implicit space after :
+      prevSpace = token.type === "LABEL";
+
+      tokens.push(token);
     }
     return tokens;
   };
