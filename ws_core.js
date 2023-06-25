@@ -23,7 +23,7 @@
       toArray: function () {
         return heapSpace;
       }
-    }
+    };
   };
 
   const sourceTokens = {' ': true, '\n': true, '\t': true};
@@ -164,7 +164,7 @@ globalThis.ws = {
         throw {
           program: builder.postProcess(),
           message: 'Unexpected token at line ' + tokenizer.line + ':' + tokenizer.col + ' - ' + debugToken
-        }
+        };
       }
       if (parser.instFn) {
         const instruction = new parser.instFn();
@@ -286,7 +286,7 @@ globalThis.ws = {
         }
       }
       return src;
-    }
+    };
     return builder;
   },
 
@@ -307,7 +307,7 @@ globalThis.ws = {
     this.run = function(env) {
       env.stackPush(env.stackPeek());
       env.register.IP++;
-    }
+    };
     this.getAsm = asmWithNoParam;
   },
 
@@ -316,7 +316,7 @@ globalThis.ws = {
       const actualPos = env.register.SP - Number(this.arg.value) - 1;
       env.stackPush(env.stack[actualPos]);
       env.register.IP++;
-    }
+    };
     this.getAsm = asmWithValueParam;
   },
 
@@ -328,7 +328,7 @@ globalThis.ws = {
       env.stackPush(tmp1);
       env.stackPush(tmp2);
       env.register.IP++;
-    }
+    };
     this.getAsm = asmWithNoParam;
   },
 
@@ -336,7 +336,7 @@ globalThis.ws = {
     this.run = function (env) {
       env.stackPop();
       env.register.IP++;
-    }
+    };
     this.getAsm = asmWithNoParam;
   },
 
@@ -346,7 +346,7 @@ globalThis.ws = {
       env.register.SP -= Number(this.arg.value);
       env.stackPush(top);
       env.register.IP++;
-    }
+    };
     this.getAsm = asmWithValueParam;
   },
 
@@ -360,7 +360,7 @@ globalThis.ws = {
       const a = env.stackPop();
       env.stackPush(a+b);
       env.register.IP++;
-    }
+    };
     this.getAsm = asmWithNoParam;
   },
 
@@ -514,20 +514,20 @@ globalThis.ws = {
       } else {
         env.register.IP++;
       }
-    }
+    };
     this.postProcess = function(compiler) {
       if (!(this.arg.token in compiler.labels)) {
         throw "Missing label " + this.arg.label;
       }
       this.successI = compiler.labels[this.arg.token];
-    }
+    };
     this.getAsm = asmWithLabelParam;
   },
 
   WsReturn: function() {
     this.run = function(env) {
       env.closeFrame();
-    }
+    };
     this.getAsm = asmWithNoParam;
   },
 
@@ -537,7 +537,7 @@ globalThis.ws = {
       const addr = env.stackPop();
       env.heap.store(addr, num);
       env.register.IP++;
-    }
+    };
     this.getAsm = asmWithNoParam;
   },
 
@@ -558,7 +558,7 @@ globalThis.ws = {
     };
     this.getAsm = asmWithNoParam;
   }
-}
+};
 
   globalThis.ws.keywords = [
     { ws: '  ',       mnemo: 'push',     constr: ws.WsPush,           param: "NUMBER" },
@@ -607,7 +607,7 @@ globalThis.ws = {
       }
       instFn.prototype.wsToken = keySeq;
       instP.instFn = instFn;
-    }
+    };
   };
 
   const instParser = new InstParser();

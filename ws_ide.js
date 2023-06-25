@@ -67,7 +67,7 @@ globalThis.ws_ide = (function () {
       }
     }
     return [];
-  }
+  };
 
   getCompilePath = function(fn, wcs) {
     if (typeof wcs === 'undefined') {
@@ -92,7 +92,7 @@ globalThis.ws_ide = (function () {
       if (subPath.length > 0) return subPath.concat([e]);
     }
     return [];
-  }
+  };
 
   const compileProgram = function (showPath) {
     const disasm = $('#disasm');
@@ -311,18 +311,18 @@ globalThis.ws_ide = (function () {
     const ext = getExtension(ws_ide.openFile.name);
     if (/^wsa?$/i.test(ext)) return true;
     return ws_ide.getExecPath(ws_ide.openFile.name).length > 0;
-  }
+  };
 
   const programCompilable = function() {
     const ext = getExtension(ws_ide.openFile.name);
     if (/^wsa$/i.test(ext)) return true;
     return getCompilePath(ext).length > 0;
-  }
+  };
 
   const programOptimizable = function() {
     const ext = getExtension(ws_ide.openFile.name);
     return /^ws$/i.test(ext);
-  }
+  };
 
   const showLang = function() {
     if (programRunnable()) {

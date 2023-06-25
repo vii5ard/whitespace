@@ -127,7 +127,7 @@ globalThis.ws_asm  = (function() {
         action: function (args, builder) {
           throw "Can't redefine macro outside of a macro"
         }
-      },
+      }
     };
   };
 
@@ -190,7 +190,7 @@ globalThis.ws_asm  = (function() {
         type: "NUMBER",
         token: numStr,
         data: data
-      }
+      };
     } catch (err) {
       throw "Illegal number";
     }
@@ -517,7 +517,7 @@ globalThis.ws_asm  = (function() {
           program: null,
           line: tokenError.meta.line,
           message: tokenError.message
-        }
+        };
       }
 
       try {
@@ -526,11 +526,11 @@ globalThis.ws_asm  = (function() {
         if (typeof err === "string") {
           throw {
             message: err
-          }
+          };
         } else {
           throw err;
         }
       }
-    },
+    }
   };
 })();
