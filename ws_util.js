@@ -64,7 +64,7 @@ globalThis.ws_util = (function () {
           }
           return this.arr[pos];
         }
-      }
+      };
     }
   };
 })();
