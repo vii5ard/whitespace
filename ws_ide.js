@@ -382,16 +382,6 @@ globalThis.ws_ide = (function () {
     return fileName;
   };
 
-  const getProgramStat = function (src) {
-    const size = src.length;
-    const prog = ws.compile(src);
-    const instCount = prog.programStack.length;
-    return {
-      size: size,
-      instCount: instCount
-    };
-  };
-
   const self = {
     files: {},
     inputStream: [],
@@ -637,16 +627,20 @@ globalThis.ws_ide = (function () {
 
     optimizeProgram: function () {
       const src = programSource();
-      const currentStat = getProgramStat(src);
       const prog = ws.compile(src);
-      const optSrc = ws_opt.optimize(prog).getWsSrc();
-      const optStat = getProgramStat(optSrc);
+      const currentSize = src.length;
+      const currentInstCount = prog.programStack.length;
 
-      logger.log("Optimized " + ws_ide.openFile.name + ":\n" +
-          "  Size:         " + currentStat.size + " bytes -> " + optStat.size + " bytes (" + Math.round((currentStat.size - optStat.size) / (currentStat.size || 1) * 100) + "%)\n" +
-          "  Instructions: " + currentStat.instCount + " -> " + optStat.instCount + " (" + Math.round((currentStat.instCount - optStat.instCount) / (currentStat.instCount || 1) * 100) + "%)");
+      const optProg = ws_opt.optimize(prog);
+      const optSrc = optProg.getWsSrc();
+      const optSize = optSrc.length;
+      const optInstCount = optProg.programStack.length;
 
-      programSource(optSrc);
+      logger.log(`Optimized ${ws_ide.openFile.name}:\n` +
+          `  Size:         ${currentSize} bytes -> ${optSize} bytes (${Math.round((currentSize - optSize) / (currentSize || 1) * 100)}%)\n` +
+          `  Instructions: ${currentInstCount} -> ${optInstCount} (${Math.round((currentInstCount - optInstCount) / (currentInstCount || 1) * 100)}%)`);
+
+      ws_ide.loadSource(optSrc);
     },
 
     switchTab: function (selector) {
