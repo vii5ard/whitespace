@@ -169,15 +169,8 @@ globalThis.ws_ide = (function () {
     updateEditorFileName();
   };
 
-  const programSource = function (src) {
-    const srcInput = $('#srcInput');
-    if (typeof src === "undefined") {
-      return srcInput.val();
-    } else {
-      const ret = ws_ide.loadSource(src);
-      updateEditor();
-      return ret;
-    }
+  const programSource = function () {
+    return $('#srcInput').val();
   };
 
   const printOutput = function(str) {
@@ -505,7 +498,6 @@ globalThis.ws_ide = (function () {
 
       ws_ide.openFile = file;
       ws_ide.loadSource(ws_fs.openFile(file));
-      updateEditor();
 
       showLang();
 
