@@ -87,7 +87,7 @@ globalThis.ws = {
     return {
       register: {IP: 0, SP: 0},
       stack: [],
-      heap: new Heap(),
+      heap: Heap(),
       callStack: [],
       running: false,
       paused: true,
@@ -149,7 +149,7 @@ globalThis.ws = {
 
   compile: function (fullSource) {
     const builder = ws.programBuilder(fullSource);
-    const tokenizer = new ws_util.StrArr(fullSource);
+    const tokenizer = ws_util.StrArr(fullSource);
     let parser = instParser;
 
     let debugToken = '';
@@ -249,7 +249,7 @@ globalThis.ws = {
     builder.getAsmSrc = function () {
       const src = [];
       const asm = this.getAsm();
-      const labeler = new ws_util.labelTransformer(function (n, label) {
+      const labeler = ws_util.labelTransformer(function (n, label) {
         return "label_" + n;
       });
       for (const i in asm) {

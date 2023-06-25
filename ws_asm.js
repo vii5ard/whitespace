@@ -17,7 +17,7 @@ globalThis.ws_asm  = (function() {
             builder.includes[fileName] = ws_fs.openFile(file);
 
             if (builder.includes[fileName]) {
-              const srcArr = new ws_util.StrArr(builder.includes[fileName]);
+              const srcArr = ws_util.StrArr(builder.includes[fileName]);
               try {
                 const ext = ws_asm.compile(builder.includes[fileName], builder);
                 builder.externals.push(ext);
@@ -382,7 +382,7 @@ globalThis.ws_asm  = (function() {
 
   return {
     compile: function (str, master) {
-      const strArr = new ws_util.StrArr(str);
+      const strArr = ws_util.StrArr(str);
       const builder = ws.programBuilder(str, master);
       let tokenError;
       builder.macros = builder.macros || builtinMacros();
@@ -398,7 +398,7 @@ globalThis.ws_asm  = (function() {
           throw err;
         }
       }
-      builder.asmLabeler = builder.asmLabeler || new ws_util.labelTransformer(function(counter, label) {
+      builder.asmLabeler = builder.asmLabeler || ws_util.labelTransformer(function(counter, label) {
         return ws_util.getWsUnsignedNumber(counter);
       });
 
