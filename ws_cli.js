@@ -177,10 +177,9 @@ const run = function (program) {
     }
   };
 
-  let buffer = '';
+  let buffer = Buffer.from([]);
   let atEof = false;
 
-  process.stdin.setEncoding('utf8');
   process.stdin.once('close', function (hadError) {
     atEof = true;
     continueRun();
@@ -192,11 +191,14 @@ const run = function (program) {
 
   const read = function () {
     if (atEof) {
+      if (buffer.length !== 0) {
+        throw 'Invalid UTF-8 sequence';
+      }
       throw 'Read at EOF';
     }
     process.stdin.once('data', function (data) {
       if (env.running) {
-        buffer += data.toString('utf8');
+        buffer = Buffer.concat([buffer, data]);
         continueRun();
       }
     });
@@ -204,17 +206,24 @@ const run = function (program) {
   };
 
   env.readChar = function () {
-    if (buffer !== '') {
-      const ch = Array.from(buffer)[0];
-      const codepoint = buffer.codePointAt(0);
-      if (codepoint == null || 0xd800 <= codepoint && codepoint <= 0xdfff) {
-        if (buffer.length > ch.length) {
-          throw 'Invalid UTF-8 byte sequence';
+    if (buffer.length !== 0) {
+      // Decode the first UTF-8 codepoint from the buffer (at most 4 bytes)
+      const utf8Prefix = buffer.toString('utf8', 0, 4);
+      const codepoint = utf8Prefix.codePointAt(0);
+      const charBuffer = Buffer.from([...utf8Prefix][0], 'utf8');
+
+      // Any invalid sequences are replaced with � U+FFFD. Check that the buffer
+      // doesn't have a literal �.
+      const errBuffer = Buffer.from('�', 'utf8');
+      if (codepoint === 0xfffd &&
+          Buffer.compare(buffer.subarray(0, errBuffer.length), errBuffer) !== 0) {
+        if (buffer.length > charBuffer.length) {
+          throw 'Invalid UTF-8 sequence';
         }
-        // Read other surrogate half
+        // More bytes need to be read for a valid codepoint
       } else {
-        buffer = buffer.slice(ch.length);
-        return ch;
+        buffer = buffer.subarray(charBuffer.length);
+        return codepoint;
       }
     }
     read();
@@ -223,8 +232,8 @@ const run = function (program) {
   env.readNum = function () {
     const i = buffer.indexOf('\n');
     if (i >= 0) {
-      const line = buffer.slice(0, i);
-      buffer = buffer.slice(i + 1);
+      const line = buffer.subarray(0, i).toString('utf8');
+      buffer = buffer.subarray(i + 1);
       try {
         return BigInt(line);
       } catch (err) {
