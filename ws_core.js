@@ -602,14 +602,20 @@ globalThis.ws = {
 
   const InstParser = function () {
     this.instFn = null;
-    this.cont = [];
+    this.cont = {};
     this.addInstruction = function (keySeq, instFn) {
       let instP = this;
       for (const key of keySeq.split('')) {
+        if (instP.instFn) {
+          break;
+        }
         if (!(key in instP.cont)) {
           instP.cont[key] = new InstParser();
         }
         instP = instP.cont[key];
+      }
+      if (instP.instFn || Object.keys(instP.cont).length !== 0) {
+        throw "Conflicting opcode sequences in parser";
       }
       instFn.prototype.wsToken = keySeq;
       instP.instFn = instFn;
