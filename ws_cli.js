@@ -163,9 +163,6 @@ if (optimize) {
 const run = function (program) {
   const env = ws.env();
 
-  let buffer = '';
-  process.stdin.setEncoding('utf8');
-
   const continueRun = function () {
     try {
       env.runProgram(program);
@@ -180,11 +177,23 @@ const run = function (program) {
     }
   };
 
+  let buffer = '';
+  let atEof = false;
+
+  process.stdin.setEncoding('utf8');
+  process.stdin.once('close', function (hadError) {
+    atEof = true;
+    continueRun();
+  });
+
   env.print = function (val) {
     process.stdout.write(val.toString());
   };
 
   const read = function () {
+    if (atEof) {
+      throw 'Read at EOF';
+    }
     process.stdin.once('data', function (data) {
       if (env.running) {
         buffer += data.toString('utf8');
