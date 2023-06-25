@@ -9,7 +9,7 @@ const abort = function (err, code) {
   process.exit(code);
 };
 
-const usage = `Usage: ws_cli.js [options] [--] <file>
+const usage = `Usage: ${path.basename(process.argv[1])} [options] [--] <file>
 
 Modes:
   --run, -r      Interpret the program (default)
