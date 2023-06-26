@@ -367,7 +367,8 @@ globalThis.ws_asm  = (function() {
       let n = 0;
       for (const paramType of macro.params) {
         const arg = builder.tokens[n++];
-        if (!arg || arg.type !== paramType) {
+        if (!arg || (arg.type !== paramType &&
+            !(paramType === "NUMBER" && arg.type === "STRING" && arg.data.length === 1))) {
           return false;
         }
       }
@@ -442,7 +443,8 @@ globalThis.ws_asm  = (function() {
               const args = [token];
               for (const paramType of macro.params) {
                 const arg = builder.tokens.shift();
-                if (!arg || arg.type !== paramType) {
+                if (!arg || (arg.type !== paramType &&
+                    !(paramType === "NUMBER" && arg.type === "STRING" && arg.data.length === 1))) {
                   throw `Expected ${paramType} argument`;
                 } else {
                   args.push(arg);
