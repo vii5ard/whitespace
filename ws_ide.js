@@ -446,8 +446,8 @@ globalThis.ws_ide = (function () {
           userInput += e.key;
         } else if (e.key == 'Backspace') {
           if (txt && txt.length > 0 && txt.slice(-1) != '\n') {
-            printArea.text(txt.slice(0, -1));
-            userInput.slice(0, -1);
+            printArea.text([...txt].slice(0, -1).join(''));
+            userInput = [...userInput].slice(0, -1).join('');
           }
         } else if (e.key == 'Enter') {
           printArea.text(txt + '\n');
