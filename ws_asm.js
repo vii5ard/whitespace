@@ -44,22 +44,23 @@ globalThis.ws_asm  = (function() {
             tokens: [],
             params: [],
             action: function (args, builder) {
-              builder.macroCallCounter = (builder.macroCallCounter || 0) + 1;
-              const macroId = builder.macroCallCounter;
+              const name = args[0].token;
+              builder.macroCallCounts[name] = (builder.macroCallCounts[name] || 0) + 1;
+              const macroId = builder.macroCallCounts[name];
               args[0].called = (args[0].called || 0) + 1
               if (args[0].called > 16) {
                 throw "Circular reference of macros";
               }
 
               const toks = [];
-              let pp = 1;
+              let n = 1;
               for (const t of this.tokens) {
                 const token = Object.assign({}, t);
                 if (token.token in metaTypes) {
-                  toks.push(args[pp++]);
+                  toks.push(args[n++]);
                 } else {
                   if (/^\$\d+$/.test(token.token)) {
-                    token.token = ".__" + macroId + "__" + token.token + "__";
+                    token.token = ".__" + name + token.token + "_" + macroId;
                   }
                   toks.push(token);
                 }
@@ -384,6 +385,7 @@ globalThis.ws_asm  = (function() {
       builder.macros = builder.macros || builtinMacros();
       builder.includes = builder.includes || {};
       builder.externals = builder.externals || [];
+      builder.macroCallCounts = builder.macroCallCounts || {};
       builder.tokens = [];
       builder.pos = strArr.pos();
       try {
