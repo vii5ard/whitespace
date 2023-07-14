@@ -46,7 +46,7 @@ globalThis.ws_ide = (function () {
     return fn.replace(/.*\.([^.]+)$/, '$1');
   };
 
-  getExecPath = function(fn, vms) {
+  const getExecPath = function(fn, vms) {
     if (typeof vms === 'undefined') {
       vms = ws_fs.getFileNames(/^vm\//);
     }
@@ -69,7 +69,7 @@ globalThis.ws_ide = (function () {
     return [];
   };
 
-  getCompilePath = function(fn, wcs) {
+  const getCompilePath = function(fn, wcs) {
     if (typeof wcs === 'undefined') {
       wcs = ws_fs.getFileNames(/^wc\/.*\.wsa?$/);
     }
@@ -562,10 +562,11 @@ globalThis.ws_ide = (function () {
           }
         }
 
+        ws_ide.inputStream = [];
         for (let i = 1; i < execPath.length; i++) {
-          ws_ide.inputStream = [...ws_fs.openFile(ws_fs.getFile(execPath[i])), null];
+          ws_ide.inputStream = ws_ide.inputStream.concat([...ws_fs.openFile(ws_fs.getFile(execPath[i])), null]);
         }
-        ws_ide.inputStream = [...ws_ide.openFile.src, null];
+        ws_ide.inputStream = ws_ide.inputStream.concat([...ws_ide.openFile.src, null]);
 
         ws_ide.initEnv();
         ws_ide.env.running = true;
