@@ -456,7 +456,11 @@ globalThis.ws_asm  = (function() {
             } else {
               throw `Unimplemented macro type ${typeof macro.action}`;
             }
-          } else if (token.type === "KEYWORD") {
+          } else if (token.token in mnemo) {
+            if (token.type !== 'KEYWORD') { // A mnemonic overloaded as a macro
+              token.type = 'KEYWORD';
+              token.op = mnemo[token.token];
+            }
             const op = token.op;
             let instruction = new op.constr();
 
