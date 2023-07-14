@@ -40,7 +40,7 @@ globalThis.ws_util = (function () {
 
     StrArr: function(str) {
       return {
-        arr: str.split(''),
+        arr: [...str],
         pos: 0,
         line: 1,
         col: 1,

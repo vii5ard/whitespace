@@ -138,7 +138,13 @@ globalThis.ws = {
         this.register.IP = this.callStack.pop() + 1;
       },
       print: function (s) {
-        console.error('Print unimplemented: ' + s);
+        throw 'Print unimplemented';
+      },
+      readChar: function () {
+        throw 'Read char unimplemented';
+      },
+      readNum: function () {
+        throw 'Read num unimplemented';
       },
       beforeInstructionRun: function (env) {
       },
@@ -231,7 +237,7 @@ globalThis.ws = {
       for (const label in this.labels) {
         const inst = this.programStack[this.labels[label]];
         if (inst) {
-          if ($.inArray(label, inst.labels) < 0) {
+          if (inst.labels.indexOf(label) < 0) {
             inst.labels.push(label);
           }
         } else {
@@ -455,7 +461,7 @@ globalThis.ws = {
   WsPrintChar: function() {
     this.run = function(env) {
       const ch = env.stackPop();
-      env.print(String.fromCharCode(Number(ch & 0xffffffffn)));
+      env.print(String.fromCodePoint(Number(ch & 0xffffffffn)));
       env.register.IP++;
     };
     this.getAsm = asmWithNoParam;
@@ -549,7 +555,7 @@ globalThis.ws = {
       if (typeof ch === "number") {
         val = ch;
       } else if (typeof ch === "string") {
-        val = ch.charCodeAt(0);
+        val = ch.codePointAt(0);
       }
       if (typeof val !== "undefined") {
         env.heap.store(addr, BigInt(val));
