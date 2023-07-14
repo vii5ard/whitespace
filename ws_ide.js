@@ -395,6 +395,7 @@ globalThis.ws_ide = (function () {
   const self = {
     files: {},
     inputStream: [],
+    userInput: '',
     animator: 0,
     animation: ['.oO0 ', ' .oO0', '  .o0', '   .0', '    0', '   0O', '  00o', ' 0Oo.', '0Oo. ', '0o.  ', '0.   ', '0    ', 'O0   ', 'oO0  ',],
     defaultFile: [],
@@ -406,7 +407,6 @@ globalThis.ws_ide = (function () {
     },
 
     init: function () {
-      let userInput = '';
       const input = $('#srcInput');
       const printArea = $('#printArea');
       input.bind("input paste keyup", function () {
@@ -422,17 +422,12 @@ globalThis.ws_ide = (function () {
 
       printArea.bind("paste", (e) => {
         const pastedData = e.originalEvent.clipboardData.getData('text');
-        let lines = (userInput + pastedData).split('\n').map(x => x + '\n');
-        userInput = '';
-
-        if (lines[lines.length - 1] == '\n') lines.pop()
-        else lines[lines.length -1] = lines[lines.length - 1].slice(0, -1);
-
-        for (let i = 0; i < lines.length; i++) {
-          let line = lines[i];
-          printArea.text(printArea.text() + line);
-          if (line.slice(-1) == '\n') ws_ide.handleUserInput(null, line);
-          else userInput = line;
+        printArea.text(printArea.text() + pastedData);
+        ws_ide.userInput += pastedData;
+        const lastLine = ws_ide.userInput.lastIndexOf('\n');
+        if (lastLine >= 0) {
+          ws_ide.handleUserInput(ws_ide.userInput.slice(0, lastLine + 1));
+          ws_ide.userInput = ws_ide.userInput.slice(lastLine + 1);
         }
       });
 
@@ -443,16 +438,16 @@ globalThis.ws_ide = (function () {
 
         if (e.key && e.key.length == 1) {
           printArea.text(txt + e.key);
-          userInput += e.key;
+          ws_ide.userInput += e.key;
         } else if (e.key == 'Backspace') {
           if (txt && txt.length > 0 && txt.slice(-1) != '\n') {
             printArea.text([...txt].slice(0, -1).join(''));
-            userInput = [...userInput].slice(0, -1).join('');
+            ws_ide.userInput = [...ws_ide.userInput].slice(0, -1).join('');
           }
         } else if (e.key == 'Enter') {
           printArea.text(txt + '\n');
-          ws_ide.handleUserInput(null, userInput + '\n');
-          userInput = '';
+          ws_ide.handleUserInput(ws_ide.userInput + '\n');
+          ws_ide.userInput = '';
         }
 
         // Scroll to view
@@ -528,7 +523,7 @@ globalThis.ws_ide = (function () {
     },
 
     runProgram: function (debugMode, stepMode) {
-      userInput = '';
+      ws_ide.userInput = '';
       $('#btnRun').hide();
       $('#btnStop').show();
 
@@ -670,7 +665,7 @@ globalThis.ws_ide = (function () {
       return false;
     },
 
-    handleUserInput: function (selector, code) {
+    handleUserInput: function (code) {
       if (typeof code === 'undefined') code = '\n';
 
       ws_ide.inputStream = ws_ide.inputStream.concat([...code]);
