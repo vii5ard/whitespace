@@ -169,7 +169,7 @@ globalThis.ws = {
       if (!parser) {
         throw {
           program: builder.postProcess(),
-          message: 'Unexpected token at line ' + tokenizer.line + ':' + tokenizer.col + ' - ' + debugToken
+          message: `Unexpected token ${debugToken} at ${tokenizer.line}:${tokenizer.col}`
         };
       }
       if (parser.instFn) {
@@ -474,7 +474,7 @@ globalThis.ws = {
     };
     this.postProcess = function(compiler) {
       if (!(this.arg.token in compiler.labels)) {
-        throw "Missing label " + this.arg.label;
+        throw `Missing label: ${this.arg.label}`;
       }
       this.callableI = compiler.labels[this.arg.token];
     };
@@ -487,7 +487,7 @@ globalThis.ws = {
     };
     this.postProcess = function(compiler) {
       if (!(this.arg.token in compiler.labels)) {
-        throw "Missing label " + this.arg.label;
+        throw `Missing label: ${this.arg.label}`;
       }
       this.nextI = compiler.labels[this.arg.token];
     };
@@ -505,7 +505,7 @@ globalThis.ws = {
     };
     this.postProcess = function(compiler) {
       if (!(this.arg.token in compiler.labels)) {
-        throw "Missing label " + this.arg.label;
+        throw `Missing label: ${this.arg.label}`;
       }
       this.successI = compiler.labels[this.arg.token];
     };
@@ -523,7 +523,7 @@ globalThis.ws = {
     };
     this.postProcess = function(compiler) {
       if (!(this.arg.token in compiler.labels)) {
-        throw "Missing label " + this.arg.label;
+        throw `Missing label: ${this.arg.label}`;
       }
       this.successI = compiler.labels[this.arg.token];
     };
@@ -602,14 +602,20 @@ globalThis.ws = {
 
   const InstParser = function () {
     this.instFn = null;
-    this.cont = [];
+    this.cont = {};
     this.addInstruction = function (keySeq, instFn) {
       let instP = this;
       for (const key of keySeq.split('')) {
+        if (instP.instFn) {
+          break;
+        }
         if (!(key in instP.cont)) {
           instP.cont[key] = new InstParser();
         }
         instP = instP.cont[key];
+      }
+      if (instP.instFn || Object.keys(instP.cont).length !== 0) {
+        throw "Conflicting opcode sequences in parser";
       }
       instFn.prototype.wsToken = keySeq;
       instP.instFn = instFn;

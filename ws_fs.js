@@ -75,7 +75,7 @@ globalThis.ws_fs = function(metaFile) {
         return;
       }
       if (!isValidFileName(newName)) {
-        console.log("Not a valid file name: '" + newName + "'.");
+        console.log("Not a valid file name: '" + newName + "'");
         return;
       }
       delete self.fileNames; // Empty cache
@@ -107,7 +107,7 @@ globalThis.ws_fs = function(metaFile) {
             file.src = data;
           },
           error: function () {
-            console.log("Unable to load file: '" + file.file + "'.");
+            console.log("Unable to load file: '" + file.file + "'");
           }
         });
         return file.src;

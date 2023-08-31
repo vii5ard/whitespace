@@ -112,7 +112,7 @@ globalThis.ws_ide = (function () {
       } else if (/^wsa$/i.test(ext)) {
         ws_ide.program = ws_asm.compile(src);
       } else {
-        errorDiv.text("Unable to compile file with the extension.");
+        errorDiv.text("Unable to compile file with extension '" + ext + "'");
       }
       delete ws_ide.program.compileError;
     } catch (err) {
@@ -169,15 +169,8 @@ globalThis.ws_ide = (function () {
     updateEditorFileName();
   };
 
-  const programSource = function (src) {
-    const srcInput = $('#srcInput');
-    if (typeof src === "undefined") {
-      return srcInput.val();
-    } else {
-      const ret = ws_ide.loadSource(src);
-      updateEditor();
-      return ret;
-    }
+  const programSource = function () {
+    return $('#srcInput').val();
   };
 
   const printOutput = function(str) {
@@ -214,8 +207,8 @@ globalThis.ws_ide = (function () {
     }
     try {
       return BigInt(numStr);
-    } catch (e) {
-      throw "Invalid number format: " + numStr.trim();
+    } catch (err) {
+      throw `Invalid number format: ${numStr.trim()}`;
     }
   };
 
@@ -382,16 +375,6 @@ globalThis.ws_ide = (function () {
     return fileName;
   };
 
-  const getProgramStat = function (src) {
-    const size = src.length;
-    const prog = ws.compile(src);
-    const instCount = prog.programStack.length;
-    return {
-      size: size,
-      instCount: instCount
-    };
-  };
-
   const self = {
     files: {},
     inputStream: [],
@@ -515,7 +498,6 @@ globalThis.ws_ide = (function () {
 
       ws_ide.openFile = file;
       ws_ide.loadSource(ws_fs.openFile(file));
-      updateEditor();
 
       showLang();
 
@@ -637,16 +619,20 @@ globalThis.ws_ide = (function () {
 
     optimizeProgram: function () {
       const src = programSource();
-      const currentStat = getProgramStat(src);
       const prog = ws.compile(src);
-      const optSrc = ws_opt.optimize(prog).getWsSrc();
-      const optStat = getProgramStat(optSrc);
+      const currentSize = src.length;
+      const currentInstCount = prog.programStack.length;
 
-      logger.log("Optimized " + ws_ide.openFile.name + ":\n" +
-          "  Size:         " + currentStat.size + " bytes -> " + optStat.size + " bytes (" + Math.round((currentStat.size - optStat.size) / (currentStat.size || 1) * 100) + "%)\n" +
-          "  Instructions: " + currentStat.instCount + " -> " + optStat.instCount + " (" + Math.round((currentStat.instCount - optStat.instCount) / (currentStat.instCount || 1) * 100) + "%)");
+      const optProg = ws_opt.optimize(prog);
+      const optSrc = optProg.getWsSrc();
+      const optSize = optSrc.length;
+      const optInstCount = optProg.programStack.length;
 
-      programSource(optSrc);
+      logger.log(`Optimized ${ws_ide.openFile.name}:\n` +
+          `  Size:         ${currentSize} bytes -> ${optSize} bytes (${Math.round((currentSize - optSize) / (currentSize || 1) * 100)}%)\n` +
+          `  Instructions: ${currentInstCount} -> ${optInstCount} (${Math.round((currentInstCount - optInstCount) / (currentInstCount || 1) * 100)}%)`);
+
+      ws_ide.loadSource(optSrc);
     },
 
     switchTab: function (selector) {
@@ -831,7 +817,7 @@ globalThis.ws_ide = (function () {
         } else if (compilePath[0].to === 'wsa') {
           wsSrc = ws_asm.compile(output).getWsSrc();
         } else {
-          throw "Invalid compile result.";
+          throw "Invalid compile result";
         }
       } else {
         wsSrc = ws_ide.program.getWsSrc();

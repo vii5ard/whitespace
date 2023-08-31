@@ -40,10 +40,6 @@
     "file":"example/quine-2.ws",
     "about": "This quine is written by Benjamin Lerman and was downloaded from <a target=\"_blank\" href=\"http://compsoc.dur.ac.uk/whitespace/quine-2.ws\">http://compsoc.dur.ac.uk/whitespace/quine-2.ws</a>."
   },
-  "bf.wsa": {
-    "file": "example/bf.wsa",
-    "about": "A Brainfuck interpreter written in Whitespace."
-  },
   "collatz.wsa": {
     "file": "example/collatz.wsa",
     "about": "Will output a Collaz sequence starting from a user provided number."
