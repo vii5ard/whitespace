@@ -45,6 +45,10 @@ globalThis.ws_asm  = (function() {
             params: [],
             action: function (args, builder) {
               const name = args[0].token;
+              if (typeof args[0].data === "bigint") {
+                throw `Defining a macro with a numeric identifier: ${name}`;
+              }
+
               builder.macroCallCounts[name] = (builder.macroCallCounts[name] || 0) + 1;
               const macroId = builder.macroCallCounts[name];
               args[0].called = (args[0].called || 0) + 1
